@@ -1,17 +1,14 @@
 # Thai_SA_Journal
 Sentimental Analysis in Thai language journal:  
-version 0.1a  (4/20/2022)  
-* added count and tfidf vectorizer for both unigram and bigrams.  
-* added word2vec model for wisesight+thwiki 
-* added word2vec model for wisesight+thwiki+kt4.0  
-* added pos tagging from orchid tagging schemes
-* added new features including dictionary-based with positive and negative words, along with word count  
 
-TODO:  
-- test on well-known classifers  
-- concat text fit and features fit and dump as pickle (since they were peformed with differnt fitting modules) 
-- apply scikit.learn.pipeline with different vectorizers on logistic regression?   
 
+Dependencies
+* pythainlp >= 3.06dev
+* python >= 3.8.8
+* gensim >= 4.1.2
+* scikit-learn >= 1.0.2
+* joblib >= 1.1.0
+* dill >= 0.31
 
 # KT4.0 SA corpus  (UTF-8-Sig)
 
