@@ -4,3 +4,5 @@ data/
 pretrained/
 /src/*.bin
 /src/__pycache__/
+/model/*.npy
+*.npy

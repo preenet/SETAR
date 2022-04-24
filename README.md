@@ -1,21 +1,23 @@
 # Thai_SA_Journal
 Sentimental Analysis in Thai language journal:  
-
-For both datasets, random stratify hold-out was performed with 80:20 ratio for train and test set. Next, several feature extraction methods were applied and output as a joblib objects as follows:  
+Several feature extraction methods were applied and output as a joblib objects as follows:  
 
 * Bag of words for unigram and bigrams
-* TF-IDF for unigram and bigrams
-* Word2Vec pretrained from Thai wiki. (100 dimension)
+* TF-IDF for unigram and bigrams 
+* Word2Vec pretrained from Thai wiki. (300 dimension)
 * POS_tagging with flatten dataframe for unigram and bigrams
-* Dictionary-based with Thai positive and negative words for unigram and bigrams
+* Dictionary-based with custom Thai positive and negative words for unigram and bigrams
+
+The extracted feature can be downloaded here
+https://www.dropbox.com/sh/aixue7zglczjrci/AAAeQ2Ew89L8JFj7K5tIRAYDa?dl=0
+
 
 Dependencies
 * pythainlp >= 3.06dev
 * python >= 3.8.8
 * gensim >= 4.1.2
 * scikit-learn >= 1.0.2
-* joblib >= 1.1.0
-* dill >= 0.31
+
 
 # KT4.0 SA corpus  (UTF-8-Sig)
 
