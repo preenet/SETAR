@@ -1,6 +1,6 @@
 # Thai_SA_Journal
 Sentimental Analysis in Thai language journal:  
-Several feature extraction methods were applied and output as a joblib objects as follows:  
+Several feature extraction methods were applied follows:  
 
 * Bag of words for unigram and bigrams
 * TF-IDF for unigram and bigrams 
@@ -8,9 +8,8 @@ Several feature extraction methods were applied and output as a joblib objects a
 * POS_tagging with flatten dataframe for unigram and bigrams
 * Dictionary-based with custom Thai positive and negative words for unigram and bigrams
 
-The extracted feature can be downloaded here
-https://www.dropbox.com/sh/aixue7zglczjrci/AAAeQ2Ew89L8JFj7K5tIRAYDa?dl=0
-
+The extracted feature as numpy array can be downloaded here:  
+https://www.dropbox.com/scl/fo/h4c5fo4bewmu5sh1s9mg7/h?dl=0&rlkey=xvv1gm7o0ke0jw1g45545e193
 
 Dependencies
 * pythainlp >= 3.06dev
