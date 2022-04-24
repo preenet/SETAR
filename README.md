@@ -1,12 +1,19 @@
 # Thai_SA_Journal
 Sentimental Analysis in Thai language journal:  
-Several feature extraction methods were applied follows:  
+This script extracted features from two sentimental corpora, kt4.0 (ours) and wisesight. By training from kt4.0 corpus, we expect to see an improvement in the wisesight corpus' classification performance.
+
+Several feature extraction methods were applied on text feature to both corpuses as follows:  
 
 * Bag of words for unigram and bigrams
-* TF-IDF for unigram and bigrams 
-* Word2Vec pretrained from Thai wiki. (300 dimension)
+* TF-IDF for unigram and bigrams
+* Word2Vec with TF-IDF vector (300 dimension)
 * POS_tagging with flatten dataframe for unigram and bigrams
-* Dictionary-based with custom Thai positive and negative words for unigram and bigrams
+* Dictionary-based with list of Thai positive and negative words for unigram and bigrams
+
+Output:  
+Joblib objects on text feature for all the feature extraction methods above.  
+
+Todo: add thaitale corpuse  
 
 The extracted feature as numpy array can be downloaded here:  
 https://www.dropbox.com/scl/fo/h4c5fo4bewmu5sh1s9mg7/h?dl=0&rlkey=xvv1gm7o0ke0jw1g45545e193
@@ -16,6 +23,7 @@ Dependencies
 * python >= 3.8.8
 * gensim >= 4.1.2
 * scikit-learn >= 1.0.2
+* joblib => 1.1.0
 
 
 # KT4.0 SA corpus  (UTF-8-Sig)

@@ -6,3 +6,5 @@ pretrained/
 /src/__pycache__/
 /model/*.npy
 *.npy
+/model/*.joblib
+*.joblib
