@@ -11,11 +11,11 @@ Several feature extraction methods were applied on text feature to both corpuses
 * Dictionary-based with list of Thai positive and negative words for unigram and bigrams
 
 Output:  
-Joblib objects on text feature for all the feature extraction methods above.  
+for all the feature extraction methods above, Joblib objects as numpy array and sparse matrix on text feature were dumped.     
 
 Todo: add thaitale corpuse  
-
-The extracted feature as numpy array can be downloaded here:  
+The extracted data in sparse matrix (*.pkl) are located in the model folder.  
+The extracted data in numpy array (*.joblib) can be from the drobox link belows:   
 https://www.dropbox.com/scl/fo/h4c5fo4bewmu5sh1s9mg7/h?dl=0&rlkey=xvv1gm7o0ke0jw1g45545e193
 
 Dependencies
