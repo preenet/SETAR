@@ -71,3 +71,6 @@ Pre-processed stage 2 (used process_thai from pythainlp for now)
 # Wisesight corpus
 For wisesight sentiment, we will use diffent split from the kaggle compitition (see source code).  
 Information regarding the corpus can be found from https://github.com/PyThaiNLP/wisesight-sentiment  
+
+# Thaitale corpus   
+Information regarding the corpus can be found from https://github.com/dsmlr/40-Thai-Children-Stories  
