@@ -1,17 +1,19 @@
 import numpy as np
 import pandas as pd
 
+import os
 import joblib
-feat1, yall = joblib.load("./text_bow1_kt.pkl")
-feat2 = joblib.load("./text_bow2_kt.pkl")[0]
-feat3 = joblib.load("./text_tfidf1_kt.pkl")[0]
-feat4 = joblib.load("./text_tfidf2_kt.pkl")[0]
-feat5 = joblib.load("./text_dict_bow1_kt.pkl")[0]
-feat6 = joblib.load("./text_dict_bow2_kt.pkl")[0]
-feat7 = joblib.load("./text_dict_tfidf1_kt.pkl")[0]
-feat8 = joblib.load("./text_dict_tfidf2_kt.pkl")[0]
-feat9 = joblib.load("./text_w2v_tfidf_kt.pkl")[0]
-feat10 = joblib.load("./text_pos_bow1_kt.pkl")[0]
+model_path = os.path.dirname(os.getcwd()) + '\\model\\'
+feat1, yall = joblib.load(model_path+"text_bow1_ws.pkl")
+feat2 = joblib.load(model_path+"text_bow2_ws.pkl")[0]
+feat3 = joblib.load(model_path+"text_tfidf1_ws.pkl")[0]
+feat4 = joblib.load(model_path+"text_tfidf2_ws.pkl")[0]
+feat5 = joblib.load(model_path+"text_dict_bow1_ws.pkl")[0]
+feat6 = joblib.load(model_path+"text_dict_bow2_ws.pkl")[0]
+feat7 = joblib.load(model_path+"text_dict_tfidf1_ws.pkl")[0]
+feat8 = joblib.load(model_path+"text_dict_tfidf2_ws.pkl")[0]
+feat9 = joblib.load(model_path+"text_w2v_tfidf_ws.pkl")[0]
+feat10 = joblib.load(model_path+"text_pos_bow1_ws.pkl")[0]
 
 fname = ["BOW1","BOW2", "TFIDF1", "TFIDF2", "DICTBOW1", "DICTBOW2", "DICTTFIDF1", "DICTTFIDF2", "W2V", "POSTAG"]
 stackfname = "KNN,LR,NB,SVM,RF,ET".split()
@@ -34,7 +36,7 @@ for i in range(0, 9):
     
 #Save Scaler
 from joblib import dump
-dump(scaler, "scalekt_raw.sav")
+dump(scaler, "scalews_raw.sav")
 
 # KNN, LR, NB, SVM, RF, ET
 from sklearn.neighbors import KNeighborsClassifier
@@ -214,11 +216,11 @@ X_train_norm =  scaler.transform(X_final)
 
 #Save Scaler
 from joblib import dump
-dump(scaler, "scalekt_stack.sav")
+dump(scaler, "scalews_stack.sav")
 
 from sklearn.datasets import dump_svmlight_file
 from sklearn.datasets import load_svmlight_file
-dump_svmlight_file(X_train_norm,y,'traindata.scl',zero_based=False)
+dump_svmlight_file(X_train_norm,y,'traindata_ws.scl',zero_based=False)
 
 allclf = []  
 for i in range(0,len(Xalls)):
@@ -338,8 +340,8 @@ for i in range(0,len(Xalls)):
 
 Xt_final = np.hstack((featx,featx1,featx2))
 X_test_norm =  scaler.transform(Xt_final)
-dump_svmlight_file(X_test_norm,yt,'testdata.scl',zero_based=False)
+dump_svmlight_file(X_test_norm,yt,'testdata_ws.scl',zero_based=False)
 
 # Save Prob Model
 from joblib import dump
-dump(allclf, "allmodelkt.sav")
+dump(allclf, "allmodelws.sav")
