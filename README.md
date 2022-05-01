@@ -1,6 +1,6 @@
 # Thai_SA_Journal
-Sentimental Analysis in Thai language journal:  
-This script extracted features from two sentimental corpora, kt4.0 (ours) and wisesight. By training from kt4.0 corpus, we expect to see an improvement in the wisesight corpus' classification performance.
+**State of the art in Thai Sentimental Analysis**  
+This script extracted features from two sentimental corpora, kt4.0 (ours) and wisesight. By training from kt4.0 corpus, we expect to see an improvement in the wisesight and thaitale corpus in terms of classification performance.
 
 Several feature extraction methods were applied on text feature to both corpuses as follows:  
 
@@ -11,12 +11,16 @@ Several feature extraction methods were applied on text feature to both corpuses
 * Dictionary-based with list of Thai positive and negative words for unigram and bigrams
 
 Output:  
-for all the feature extraction methods above, Joblib objects as numpy array and sparse matrix on text feature were dumped.     
+for all the feature extraction methods above, Joblib objects as sparse matrix on text feature were dumped.     
 
 Todo: add thaitale corpuse  
-The extracted data in sparse matrix \*.pkl) are located in the model folder.  
-The extracted data in numpy array (\*.joblib) can be from the drobox link belows:   
-https://www.dropbox.com/scl/fo/h4c5fo4bewmu5sh1s9mg7/h?dl=0&rlkey=xvv1gm7o0ke0jw1g45545e193
+
+**Exisiting models (published)**
+
+| Authors                                 | Method                                            | Results                             |
+|-----------------------------------------|---------------------------------------------------|-------------------------------------|
+| (Pasupa & Seneewong Na Ayutthaya, 2022) | Combine feature from (w2v, pose,sentic), fused DL | 0.561 F1-score                      |
+| (Lowphansirikul et al., 2021)           | RoBERTa, attention spam                           | 76.19 / 67.05 micro and macro avg.  |
 
 Dependencies
 * pythainlp >= 3.06dev
@@ -25,27 +29,9 @@ Dependencies
 * scikit-learn >= 1.0.2
 * joblib => 1.1.0
 
-
 # KT4.0 SA corpus  (UTF-8-Sig)
 
 The corpus was scraped from pantip.com's online products domain during the late 2019 to middle of 2020. The online product contains a variety of cosmetic, food, supplementary food, and skin-care products. It contains 60,081 samples following sentence tokenization with CRF on four distinct datasets.     
-
-
-Attributes:  
-post_id
-post_date  
-user_id  
-user_name 
-text  
-tag  
-emotion
-length
-num_sent
-sent_length  
-label_1  
-label_2  
-label_3  
-vote  
 
 Preprocessed stage 1:  
 * Samples that contain empty text were removed.
@@ -57,16 +43,16 @@ Preprocessed stage 1:
 * Sentence tokenzation was performed.  
 
 Sentiment annotation:  
-* Three Thai ligustic experts performed the annotation task. Next, majority vote was used to calculated the class target.  
+* Three Thai ligustic experts performed the annotation task. Majority vote was used to calculated the class target.  
 
-Pre-processed stage 2 (used process_thai from pythainlp for now)
+Pre-processed stage 2:  
 * Clean text that has white space and occurences
 * Remove thai stop words and puncuations 
 * Replace URL with special tag
 * Replace emoticon with special tag
+* Removed word that has length less than 2  
 * lower cap for English words
-* Word tokenize task performed with default pythainlp engine  
-
+* Word tokenize task performed with newmm  
 
 # Wisesight corpus
 For wisesight sentiment, we will use diffent split from the kaggle compitition (see source code).  
