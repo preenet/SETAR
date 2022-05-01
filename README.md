@@ -1,8 +1,8 @@
 # Thai_SA_Journal
-**State of the art in Thai Sentimental Analysis**  
-This script extracted features from two sentimental corpora, kt4.0 (ours) and wisesight. By training from kt4.0 corpus, we expect to see an improvement in the wisesight and thaitale corpus in terms of classification performance.
+**State of the arts in Thai Sentimental Analysis**  
+This script extracted features from two sentimental corpora, kt4.0 (ours collected data), thaitale, and wisesight. By training from the kt4.0 corpus, we expect to see an improvement in the wisesight and thaitale corpus in terms of classification performance.
 
-Several feature extraction methods were applied on text feature to both corpuses as follows:  
+Several feature extraction methods were applied on text feature to both corpuses as follows:  s
 
 * Bag of words for unigram and bigrams
 * TF-IDF for unigram and bigrams
@@ -11,9 +11,11 @@ Several feature extraction methods were applied on text feature to both corpuses
 * Dictionary-based with list of Thai positive and negative words for unigram and bigrams
 
 Output:  
-for all the feature extraction methods above, Joblib objects as sparse matrix on text feature were dumped.     
+for all the feature extraction methods above, Joblib objects as sparse matrix on text feature were dumped.   
+Related output files can be downloaded from [Dropbox](https://www.dropbox.com/scl/fo/h4c5fo4bewmu5sh1s9mg7/h?dl=0&rlkey=xvv1gm7o0ke0jw1g45545e193)
 
-Todo: add thaitale corpuse  
+
+Todo: add thaitale corpus    
 
 **Exisiting models (published)**
 
@@ -29,7 +31,7 @@ Dependencies
 * scikit-learn >= 1.0.2
 * joblib => 1.1.0
 
-# KT4.0 SA corpus  (UTF-8-Sig)
+# KT4.0 SA corpus  
 
 The corpus was scraped from pantip.com's online products domain during the late 2019 to middle of 2020. The online product contains a variety of cosmetic, food, supplementary food, and skin-care products. It contains 60,081 samples following sentence tokenization with CRF on four distinct datasets.     
 
