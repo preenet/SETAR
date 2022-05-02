@@ -4,16 +4,16 @@ import pandas as pd
 import os
 import joblib
 model_path = os.path.dirname(os.getcwd()) + '\\model\\'
-feat1, yall = joblib.load(model_path+"text_bow1_ws_fs.pkl")
-feat2 = joblib.load(model_path+"text_bow2_ws_fs.pkl")[0]
-feat3 = joblib.load(model_path+"text_tfidf1_ws_fs.pkl")[0]
-feat4 = joblib.load(model_path+"text_tfidf2_ws_fs.pkl")[0]
-feat5 = joblib.load(model_path+"text_dict_bow1_ws.pkl")[0]
-feat6 = joblib.load(model_path+"text_dict_bow2_ws.pkl")[0]
-feat7 = joblib.load(model_path+"text_dict_tfidf1_ws.pkl")[0]
-feat8 = joblib.load(model_path+"text_dict_tfidf2_ws.pkl")[0]
-feat9 = joblib.load(model_path+"text_w2v_tfidf_ws.pkl")[0]
-feat10 = joblib.load(model_path+"text_pos_bow1_ws.pkl")[0]
+feat1, yall = joblib.load(model_path+"text_bow1_kt_fs.pkl")
+feat2 = joblib.load(model_path+"text_bow2_kt_fs.pkl")[0]
+feat3 = joblib.load(model_path+"text_tfidf1_kt_fs.pkl")[0]
+feat4 = joblib.load(model_path+"text_tfidf2_kt_fs.pkl")[0]
+feat5 = joblib.load(model_path+"text_dict_bow1_kt.pkl")[0]
+feat6 = joblib.load(model_path+"text_dict_bow2_kt.pkl")[0]
+feat7 = joblib.load(model_path+"text_dict_tfidf1_kt.pkl")[0]
+feat8 = joblib.load(model_path+"text_dict_tfidf2_kt.pkl")[0]
+feat9 = joblib.load(model_path+"text_w2v_tfidf_kt.pkl")[0]
+feat10 = joblib.load(model_path+"text_pos_bow1_kt.pkl")[0]
 
 fname = ["BOW1","BOW2", "TFIDF1", "TFIDF2", "DICTBOW1", "DICTBOW2", "DICTTFIDF1", "DICTTFIDF2", "W2V", "POSTAG"]
 stackfname = "KNN,LR,NB,SVM,RF,ET".split()
