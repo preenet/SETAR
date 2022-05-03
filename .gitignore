@@ -1,14 +1,9 @@
-.ipynb_checkpoints
-*/.ipynb_checkpoints/*
-*.npy
+__pycache__/
+.ipynb_checkpoints/
+.vscode/
 
-data/
-lexicon/
-pretrained/
+data/lexicon/
+data/raw/kt4.0/
+data/raw/dict/
 
-
-/src/*.bin
-/src/__pycache__/
-/model/*.npy
-/model/*.pkl
-/.vscode
+models/pretrained/

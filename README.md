@@ -13,10 +13,10 @@ Several feature extraction methods were applied on text feature to both corpuses
 Total of 8 text representations were exctracted for each corpus.  
 
 Output:  
-For all the feature extraction methods above, Joblib objects as sparse matrix on text feature were dumped (see /model).  
+For all the feature extraction methods above, Joblib objects as sparse matrix on text feature were dumped (see /data/processed/).  
 
 **Baseline model**
-11 baseline ML models were evaluated with the KT4.0 dataset. (see /model)  
+11 baseline ML models were evaluated with the KT4.0 dataset. 
  
 
 **Exisiting models (published)**
@@ -25,6 +25,7 @@ For all the feature extraction methods above, Joblib objects as sparse matrix on
 |-----------------------------------------|---------------------------------------------------|-------------------------------------|
 | (Pasupa & Seneewong Na Ayutthaya, 2022) | Combine feature from (w2v, pose,sentic), fused DL | 0.561 F1-score                      |
 | (Lowphansirikul et al., 2021)           | RoBERTa, attention spam                           | 76.19 / 67.05 micro and macro avg.  |
+
 
 Dependencies
 * pythainlp >= 3.06dev
