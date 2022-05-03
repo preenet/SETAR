@@ -49,14 +49,6 @@ Preprocessed stage 1:
 Sentiment annotation:  
 * Three Thai ligustic experts performed the annotation task. Majority vote was used to calculated the class target.  
 
-Pre-processed stage 2:  
-* Clean text that has white space and occurences
-* Remove thai stop words and puncuations 
-* Replace URL with special tag
-* Replace emoticon with special tag
-* Removed word that has length less than 2  
-* lower cap for English words
-* Word tokenize task performed with newmm  
 
 # Wisesight corpus
 For wisesight sentiment, we will use diffent split from the kaggle compitition (see source code).  
