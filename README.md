@@ -1,21 +1,23 @@
 # Thai_SA_Journal
 **State of the arts in Thai Sentimental Analysis**  
-This script extracted features from two sentimental corpora, kt4.0 (ours collected data), thaitale, and wisesight. By training from the kt4.0 corpus, we expect to see an improvement in the wisesight and thaitale corpus in terms of classification performance.
+This script extracted features from three sentimental corpora: kt4.0 (data from our acquisition), thaitale, and wisesight. By training with our proposed SoTA classifiers on the kt4.0 dataset, we expect to see an improvement in the classification performance of the wisesight as well as thaitale dataset.
 
-Several feature extraction methods were applied on text feature to both corpuses as follows:  s
+Several feature extraction methods were applied on text feature to both corpuses as follows:  
 
 * Bag of words for unigram and bigrams
 * TF-IDF for unigram and bigrams
 * Word2Vec with TF-IDF vector (300 dimension)
-* POS_tagging with flatten dataframe for unigram and bigrams
+* POS_tagging using 17 Orchid tags
 * Dictionary-based with list of Thai positive and negative words for unigram and bigrams
+  
+Total of 8 text representations were exctracted for each corpus.  
 
 Output:  
-for all the feature extraction methods above, Joblib objects as sparse matrix on text feature were dumped.   
-Related output files can be downloaded from [Dropbox](https://www.dropbox.com/scl/fo/h4c5fo4bewmu5sh1s9mg7/h?dl=0&rlkey=xvv1gm7o0ke0jw1g45545e193)
+For all the feature extraction methods above, Joblib objects as sparse matrix on text feature were dumped (see /model).  
 
-
-Todo: add thaitale corpus    
+**Baseline model**
+11 baseline ML models were evaluated with the KT4.0 dataset. (see /model)  
+ 
 
 **Exisiting models (published)**
 

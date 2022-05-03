@@ -1,10 +1,14 @@
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
+*.npy
+
 data/
 lexicon/
 pretrained/
+
+
 /src/*.bin
 /src/__pycache__/
 /model/*.npy
+/model/*.pkl
 /.vscode
-*.npy
