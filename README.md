@@ -1,6 +1,7 @@
 # Thai_SA_Journal
+=======================
 **State of the arts in Thai Sentimental Analysis**  
-This script extracted features from three sentimental corpora: kt4.0 (data from our acquisition), thaitale, and wisesight. By training with our proposed SoTA classifiers on the kt4.0 dataset, we expect to see an improvement in the classification performance of the wisesight as well as thaitale dataset.
+We extracted features from three sentimental corpora: kt4.0 (data from our acquisition), thaitale, and wisesight. By training with our proposed SoTA classifiers on the kt4.0 dataset, we expect to see an improvement in the classification performance of the wisesight as well as thaitale dataset.
 
 Several feature extraction methods were applied on text feature to both corpuses as follows:  
 

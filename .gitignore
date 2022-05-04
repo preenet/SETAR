@@ -1,9 +1,8 @@
-__pycache__/
+**/__pycache__/
 .ipynb_checkpoints/
 .vscode/
 
 data/lexicon/
 data/raw/kt4.0/
 data/raw/dict/
-
-models/pretrained/
+data/raw/pretrained/
