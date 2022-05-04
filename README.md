@@ -1,5 +1,5 @@
-# Thai_SA_Journal
-=======================
+# Thai_SA_Journal Dev.
+=======================  
 **State of the arts in Thai Sentimental Analysis**  
 We extracted features from three sentimental corpora: kt4.0 (data from our acquisition), thaitale, and wisesight. By training with our proposed SoTA classifiers on the kt4.0 dataset, we expect to see an improvement in the classification performance of the wisesight as well as thaitale dataset.
 
@@ -16,8 +16,11 @@ Total of 8 text representations were exctracted for each corpus.
 Output:  
 For all the feature extraction methods above, Joblib objects as sparse matrix on text feature were dumped (see /data/processed/).  
 
-**Baseline model**
-11 baseline ML models were evaluated with the KT4.0 dataset. 
+#Todo
+- [ ] Baseline for KT for all text reps.  
+- [ ] Manage configuration files 
+- [ ] Wanchang_KT_Notune
+- [ ] Add Thaitale corpuse
  
 
 **Exisiting models (published)**
