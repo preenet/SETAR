@@ -80,9 +80,8 @@ from lightgbm import LGBMClassifier
 from sklearn.datasets import load_svmlight_file
 import joblib
 def get_data():
-    # data = load_svmlight_file("./traindata.scl", zero_based=False)
-    # data1 = load_svmlight_file("./testdata.scl", zero_based=False)
-    data = joblib.load("./kt.pkl")
+    data = load_svmlight_file("./traindata.scl", zero_based=False)
+    data1 = load_svmlight_file("./testdata.scl", zero_based=False)
     return data[0].toarray(), data[1], data1[0].toarray(), data1[1]
 X, y, Xt, yt = get_data()
     
