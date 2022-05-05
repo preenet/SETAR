@@ -1,4 +1,4 @@
-# File paths
+# fle paths
 - data:
     raw_kt: data/raw/kt4.0/pantip_cleaned_1.csv
     raw_ws: data/raw/wisesight/wisesight.csv
@@ -6,4 +6,8 @@
     raw_dict: data/raw/dict/
 
     processed: data/processed/
+
+
+# output folders
 - output: output/
+

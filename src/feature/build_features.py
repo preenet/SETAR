@@ -14,15 +14,28 @@ Several feature extraction methods were applied on text feature to both corpuses
 Total of 8 text representations were exctracted for each corpus.  
 @Authors: pree.t@cmu.ac.th
 """
-
 import os, sys
 import pandas as pd
 import numpy as np
+import joblib
 import src.utilities as utils
+
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from gensim.models import Word2Vec
+
+from scipy import sparse # for converting w2v embbed vector to spare matrix and targets  
+
+from src.feature.TfidfEmbeddingVectorizer import TfidfEmbeddingVectorizer
+
 from matplotlib import pyplot as plt
 from src.feature.process_thai_text import process_text
-plt.rcParams['font.family'] = 'tahoma'
+from src.feature.pos_rule import word_tag, tag, tag_emoj
+from pythainlp.tag import pos_tag_sents
+from src.visualization.visualize import top_feats_all, plot_top_feats
 
+plt.rcParams['font.family'] = 'tahoma'
+plt.rcParams.update(plt.rcParamsDefault)  # VS Code plots not black
+sys.path.append(os.pardir) # for vs_code debugging
 
 # get config file
 config = utils.read_config()
@@ -31,60 +44,332 @@ config = utils.read_config()
 out_path = os.path.join(config['output'])
 
 
-def extract(data_name):
-    print("Extracting:", data_name)
-    data_path_dict = os.path.join(config['data']['raw_dict'])
+def extract():
+    df_kt = pd.read_csv(config['data']['raw_kt'])
+    df_ws = pd.read_csv(config['data']['raw_ws'])
 
-    print("Pre-processing text...")
-    if data_name == 'kt':
-        data_path = os.path.join(config['data']['raw_kt'])
-        df = pd.read_csv(data_path)
-        df = df.rename(columns={'text': 'texts'})
-    elif data_name == 'ws':
-        data_path = os.path.join(config['data']['raw_ws'])
-        df = pd.read_csv(data_path)
-    else:
-        sys.exit("No such data name.")
+    y_kt = df_kt['vote'].astype('category').cat.codes
+    y_ws = df_ws['targets'].astype('category').cat.codes
+    print("label kt:", y_kt.unique(), ", label ws", y_ws.unique())
+
+    df_kt['processed'] = df_kt['text'].apply(str).apply(process_text)
+    df_ws['processed'] = df_ws['texts'].apply(str).apply(process_text)
+
+    print(df_ws[0:10])
+    print(df_kt.head(10))
+    print(df_kt.describe())
+    print(df_ws.tail(10))
+    print(df_ws.describe())
+
+    # class distribution
+    print(df_kt.vote.value_counts() / df_kt.shape[0])
+
+    # class distribution
+    print(df_ws.targets.value_counts() / df_ws.shape[0])
+
+    y_t_kt = y_kt.to_numpy().reshape(-1, 1)
+    y_t_ws = y_ws.to_numpy().reshape(-1, 1)
+
+    y_t_kt = sparse.csr_matrix(y_t_kt)
+    y_t_ws = sparse.csr_matrix(y_t_ws)
+
+    print("Extracting BOW")            
+    bow(df_kt, y_t_kt, df_ws, y_t_ws)
+
+    print("Extracting TFI-IDF")  
+    tfidf(df_kt, y_t_kt, df_ws, y_t_ws)
+
+    print("Extracting W2V-TFIDF")  
+    w2v_tfidf(df_kt, y_t_kt, df_ws, y_t_ws)
+
+    print("Extracting POS_BOW")   
+
+
+    pos = pos_tag_sents(df_kt['processed'].tolist(), corpus='orchid_ud')
+    pos = tag_emoj(pos)
+    df_kt['post_tag1'] = pd.DataFrame(tag(pos))
+    df_kt['post_tag2'] = pd.DataFrame(word_tag(pos))
+
+    pos = pos_tag_sents(df_ws['processed'].tolist(), corpus='orchid_ud')
+    pos = tag_emoj(pos)
+    df_ws['post_tag1'] = pd.DataFrame(tag(pos))
+    df_ws['post_tag2'] = pd.DataFrame(word_tag(pos))
+
+    print(df_ws[['processed', 'post_tag1']].iloc[1000:1010])
+    print("\n")
+    print(df_ws['post_tag2'].iloc[1000:1010])
+    pos_bow(df_kt, y_t_kt, df_ws, y_t_ws)
+
+
+    dict_bow(df_kt, y_t_kt, df_ws, y_t_ws)
+    # print("Extracting POS_TF-IDF")  
+    # pos_tfidf(df_kt, df_ws)
+
+
+    my_vocabs = get_dict_vocab()
+    print("Extracting DICT_BOW")  
+    dict_bow(df_kt, df_ws, my_vocabs)
+
+    print("Extracting DICT_TF-IDF")  
+    dict_tfidf(df_kt, df_ws, my_vocabs)
+
+    return
+
+def plot_feats(vectorizer, X, y):
+    features = vectorizer.get_feature_names()
+    tf = top_feats_all(X.toarray(), y, features)
+    plot_top_feats(tf)
+    return
     
-    df['processed'] = df['texts'].apply(str).apply(process_text)
-    print(df[0:10])
-    print(df.head(10))
-    print(df.describe())
-    return df
-    
-def bow1(df):
+def bow(df_kt, y_t_kt, df_ws, y_t_ws):
+   # BOW with unigram and bigrams
+    bow1 = CountVectorizer(tokenizer=process_text, ngram_range=(1, 1), min_df=5)
+    bow2 = CountVectorizer(tokenizer=process_text, ngram_range=(2, 2), min_df=5)
+
+    # fit kt and transform to both datasets
+    bow1_fit_kt = bow1.fit(df_kt['text'].apply(str))
+    text_bow1_kt = bow1_fit_kt.transform(df_kt['text'].apply(str))
+    lex_bow1_kt = bow1_fit_kt.get_feature_names()
+    text_bow1_ws = bow1_fit_kt.transform(df_ws['texts'].apply(str))
+    lex_bow1_ws = bow1_fit_kt.get_feature_names()
+
+    bow2_fit_kt = bow2.fit(df_kt['text'].apply(str))
+    text_bow2_kt = bow2_fit_kt.transform(df_kt['text'].apply(str))
+    lex_bow2_kt = bow2_fit_kt.get_feature_names()
+    text_bow2_ws = bow2_fit_kt.transform(df_ws['texts'].apply(str))
+    lex_bow2_ws = bow2_fit_kt.get_feature_names()
+
+    print(text_bow1_kt.toarray().shape,  text_bow1_kt.toarray().shape)
+    print(text_bow2_kt.toarray().shape,  text_bow2_kt.toarray().shape)
+    print("\n")
+    print(text_bow1_ws.toarray().shape,  text_bow1_ws.toarray().shape)
+    print(text_bow2_ws.toarray().shape,  text_bow2_ws.toarray().shape)
+    print("\n")
+    print(len(lex_bow1_kt), len(lex_bow1_ws))
+    print(len(lex_bow2_kt), len(lex_bow2_ws))
+
+    # visualize 
+    y = y_t_kt.todense()
+    y = np.array(y.reshape(y.shape[0],))[0]
+    plot_feats(bow1_fit_kt, text_bow1_kt, y)
+
+    # write to disk
+    arr_bow1_kt = np.hstack((text_bow1_kt, y_t_kt))
+    arr_bow2_kt = np.hstack((text_bow2_kt, y_t_kt))
+    joblib.dump(arr_bow1_kt, config['data']['out_path']+'text_bow1_kt.pkl')
+    joblib.dump(arr_bow2_kt, config['data']['out_path']+'text_bow2_kt.pkl')
+
+    joblib.dump(lex_bow1_kt, config['data']['out_path']+'lex_bow1_kt.pkl')
+    joblib.dump(lex_bow2_kt, config['data']['out_path']+'lex_bow2_kt.pkl')
+
+    arr_bow1_ws = np.hstack((text_bow1_ws, y_t_ws))
+    arr_bow2_ws = np.hstack((text_bow2_ws, y_t_ws))
+    joblib.dump(arr_bow1_ws, config['data']['out_path']+'text_bow1_ws.pkl')
+    joblib.dump(arr_bow2_ws, config['data']['out_path']+'text_bow2_ws.pkl')
+
+    joblib.dump(lex_bow1_ws, config['data']['out_path']+'lex_bow1_ws.pkl')
+    joblib.dump(lex_bow2_ws, config['data']['out_path']+'lex_bow2_ws.pkl')
+    return 
+
+
+def tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
+    # TF-IDF with unigram and bigrams
+    tfidf1 = TfidfVectorizer(tokenizer=process_text, ngram_range=(1, 1), min_df=5)
+    tfidf2 = TfidfVectorizer(tokenizer=process_text, ngram_range=(2, 2), min_df=5)
+
+    # fit kt and transform to both datasets
+    tfidf1_fit_kt = tfidf1.fit(df_kt['text'].apply(str))
+    text_tfidf1_kt = tfidf1_fit_kt.transform(df_kt['text'].apply(str))
+    lex_tfidf1_kt = tfidf1_fit_kt.get_feature_names()
+    text_tfidf1_ws = tfidf1_fit_kt.transform(df_ws['texts'].apply(str))
+    lex_tfidf1_ws = tfidf1_fit_kt.get_feature_names()
+
+    tfidf2_fit_kt = tfidf2.fit(df_kt['text'].apply(str))
+    text_tfidf2_kt = tfidf2_fit_kt.transform(df_kt['text'].apply(str))
+    lex_tfidf2_kt = tfidf2_fit_kt.get_feature_names()
+    text_tfidf2_ws = tfidf2_fit_kt.transform(df_ws['texts'].apply(str))
+    lex_tfidf2_ws = tfidf2_fit_kt.get_feature_names()
+
+    print(text_tfidf1_kt.toarray().shape,  text_tfidf1_kt.toarray().shape)
+    print(text_tfidf2_kt.toarray().shape,  text_tfidf2_kt.toarray().shape)
+    print("\n")
+    print(text_tfidf1_ws.toarray().shape,  text_tfidf1_ws.toarray().shape)
+    print(text_tfidf2_ws.toarray().shape,  text_tfidf2_ws.toarray().shape)
+
+    print("\n")
+    print(len(lex_tfidf1_kt), len(lex_tfidf1_ws))
+    print(len(lex_tfidf2_kt), len(lex_tfidf2_ws))
+
+    arr_tfidf1_kt = np.hstack((text_tfidf1_kt, y_t_kt))
+    arr_tfidf2_kt = np.hstack((text_tfidf2_kt, y_t_kt))
+    joblib.dump(arr_tfidf1_kt, config['data']['out_path']+'text_tfidf1_kt.pkl')
+    joblib.dump(arr_tfidf2_kt, config['data']['out_path']+'text_tfidf2_kt.pkl')
+
+    joblib.dump(lex_tfidf1_kt, config['data']['out_path']+'lex_tfidf1_kt.pkl')
+    joblib.dump(lex_tfidf2_kt, config['data']['out_path']+'lex_tfidf2_kt.pkl')
     return
 
-def bow2(df):
+
+def w2v_tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
+    # create word2vec for kt corpus
+    w2v_kt = Word2Vec(vector_size=300, min_count=1, window=4, workers=4)
+    w2v_kt.build_vocab(df_kt['processed'])
+    w2v_kt.train(df_kt['processed'], total_examples=w2v_kt.corpus_count, epochs=100)
+    print(w2v_kt.wv.most_similar("บะหมี่"))
+
+    w2v_tfidf_emb_kt = TfidfEmbeddingVectorizer(w2v_kt)
+    w2v_tifdf_fit_kt = w2v_tfidf_emb_kt.fit(df_kt['text'].apply(str))
+
+    # transfrom on both corpuses
+    text_w2v_tfidf_kt = w2v_tifdf_fit_kt.transform(df_kt['text'].apply(str))
+    text_w2v_tfidf_ws = w2v_tifdf_fit_kt.transform(df_ws['texts'].apply(str))
+
+    arr_w2v_tfidf_kt = np.hstack(( sparse.csr_matrix(text_w2v_tfidf_kt), y_t_kt))
+    arr_w2v_tfidf_ws = np.hstack(( sparse.csr_matrix(text_w2v_tfidf_ws), y_t_ws))
+    joblib.dump(arr_w2v_tfidf_kt, config['data']['out_path']+'text_w2v_tfidf_kt.pkl')
+    joblib.dump(arr_w2v_tfidf_ws, config['data']['out_path']+'text_w2v_tfidf_ws.pkl')
     return
 
-def tfidf1(df):
+def pos_bow(df_kt, y_t_kt, df_ws, y_t_ws):
+    # create bow vectors
+
+    bow1 = CountVectorizer(ngram_range=(1, 1))
+    #bow2 = CountVectorizer(ngram_range=(2, 2))
+
+    text_pos_bow1_fit_kt = bow1.fit(df_kt['post_tag1'])
+    text_pos_bow1_kt = text_pos_bow1_fit_kt.transform(df_kt['post_tag1'])
+    text_pos_bow1_ws = text_pos_bow1_fit_kt.transform(df_ws['post_tag1'])
+
+    # text_pos_bow2_fit_kt = bow2.fit(df_kt['post_tag1'])
+    # text_pos_bow2_kt = text_pos_bow2_fit_kt.transform(df_kt['post_tag2'])
+    # text_pos_bow2_ws = text_pos_bow2_fit_kt.transform(df_ws['post_tag2'])
+
+    print(text_pos_bow1_kt.toarray().shape,  text_pos_bow1_kt.toarray().shape)
+    print(text_pos_bow1_ws.toarray().shape,  text_pos_bow1_ws.toarray().shape)
+
+    # print(text_pos_bow2_kt.toarray().shape,  text_pos_bow2_kt.toarray().shape)
+    # print(text_pos_bow2_ws.toarray().shape,  text_pos_bow2_ws.toarray().shape)
+
+    arr_pos_bow1_kt = np.hstack((text_pos_bow1_kt, y_t_kt))
+    #arr_pos_bow2_kt = np.hstack((text_pos_bow2_kt, y_t_kt))
+    joblib.dump(arr_pos_bow1_kt, config['data']['out_path']+'text_pos_bow1_kt.pkl')
+    #joblib.dump(arr_pos_bow2_kt, data_processed_path+'text_pos_bow2_kt.pkl')
+
+    arr_pos_bow1_ws = np.hstack((text_pos_bow1_ws, y_t_ws))
+    #arr_pos_bow2_ws = np.hstack((text_pos_bow2_ws, y_t_ws))
+    joblib.dump(arr_pos_bow1_ws, config['data']['out_path']+'text_pos_bow1_ws.pkl')
+    #joblib.dump(arr_pos_bow2_ws, data_processed_path+'text_pos_bow2_ws.pkl')
     return
 
-def tfidf2(df):
+def pos_tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
+    # create tfidf vectors
+    tfidf1 = TfidfVectorizer(ngram_range=(1, 1))
+    tfidf2 = TfidfVectorizer(ngram_range=(2, 2))
+
+    text_pos_tfidf1_fit_kt = tfidf1.fit(df_kt['post_tag1'])
+    text_pos_tfidf1_kt = text_pos_tfidf1_fit_kt.transform(df_kt['post_tag1'])
+    text_pos_tfidf1_ws = text_pos_tfidf1_fit_kt.transform(df_ws['post_tag1'])
+
+    text_pos_tfidf2_fit_kt = tfidf2.fit(df_kt['post_tag1'])
+    text_pos_tfidf2_kt = text_pos_tfidf2_fit_kt.transform(df_kt['post_tag2'])
+    text_pos_tfidf2_ws = text_pos_tfidf2_fit_kt.transform(df_ws['post_tag2'])
+
+    print(text_pos_tfidf1_kt.toarray().shape,  text_pos_tfidf1_kt.toarray().shape)
+    print(text_pos_tfidf1_ws.toarray().shape,  text_pos_tfidf1_ws.toarray().shape)
+
+    print(text_pos_tfidf2_kt.toarray().shape,  text_pos_tfidf2_kt.toarray().shape)
+    print(text_pos_tfidf2_ws.toarray().shape,  text_pos_tfidf2_ws.toarray().shape)
+
+    # arr_pos_tfidf1_kt = np.hstack((text_pos_tfidf1_kt, y_t_kt))
+    # arr_pos_tfidf2_kt = np.hstack((text_pos_tfidf2_kt, y_t_kt))
+    # joblib.dump(arr_pos_tfidf1_kt, config['data']['out_path']+'text_pos_tfidf1_kt.pkl')
+    # joblib.dump(arr_pos_tfidf2_kt, config['data']['out_path']+'text_pos_tfidf2_kt.pkl')
+
+    # arr_pos_tfidf1_ws = np.hstack((text_pos_tfidf1_ws, y_t_ws))
+    # arr_pos_tfidf2_ws = np.hstack((text_pos_tfidf2_ws, y_t_ws))
+    # joblib.dump(arr_pos_tfidf1_ws, config['data']['out_path']+'text_pos_tfidf1_ws.pkl')
+    # joblib.dump(arr_pos_tfidf2_ws, config['data']['out_path']+'text_pos_tfidf2_ws.pkl')
     return
 
-def w2v(df):
+
+def get_dict_vocab():
+    # load list of our custom positive and negative words
+    data_path_dict = config['data']['raw_dict']
+    with open(data_path_dict + 'pos_words.txt', encoding='utf-8') as f:
+        pos_words = [line.rstrip('\n') for line in f]
+
+    with open(data_path_dict + 'neg_words.txt', encoding='utf-8') as f:
+        neg_words = [line.rstrip('\n') for line in f]
+        pos_words = list(set(pos_words))
+        neg_words = list(set(neg_words))
+
+    my_vocabs = pos_words + neg_words
+    print('dict size: ', len(my_vocabs))
+
+    return my_vocabs
+
+def dict_bow(df_kt, y_t_kt, df_ws, y_t_ws):
+    my_vocabs = get_dict_vocab()
+    bow1 = CountVectorizer(tokenizer=process_text, ngram_range=(1, 1))
+    bow2 = CountVectorizer(tokenizer=process_text, ngram_range=(2, 2))
+
+    text_dict_bow1_fit = bow1.fit(my_vocabs)
+    text_dict_bow1_kt = text_dict_bow1_fit.transform(df_kt['text'].apply(str))
+    text_dict_bow1_ws = text_dict_bow1_fit.transform(df_ws['texts'].apply(str))
+
+    text_dict_bow2_fit = bow2.fit(my_vocabs)
+    text_dict_bow2_kt = text_dict_bow2_fit.transform(df_kt['text'].apply(str))
+    text_dict_bow2_ws = text_dict_bow2_fit.transform(df_ws['texts'].apply(str))
+
+    print(text_dict_bow1_kt.toarray().shape,  text_dict_bow1_kt.toarray().shape)
+    print(text_dict_bow1_ws.toarray().shape,  text_dict_bow1_ws.toarray().shape)
+
+    print(text_dict_bow2_kt.toarray().shape,  text_dict_bow2_kt.toarray().shape)
+    print(text_dict_bow2_ws.toarray().shape,  text_dict_bow2_ws.toarray().shape)
+
+    arr_dict_bow1_kt = np.hstack((text_dict_bow1_kt, y_t_kt))
+    arr_dict_bow2_kt = np.hstack((text_dict_bow2_kt, y_t_kt))
+    joblib.dump(arr_dict_bow1_kt, config['data']['out_path']+'text_dict_bow1_kt.pkl')
+    joblib.dump(arr_dict_bow2_kt, config['data']['out_path']+'text_dict_bow2_kt.pkl')
+
+    arr_dict_bow1_ws = np.hstack((text_dict_bow1_ws, y_t_ws))
+    arr_dict_bow2_ws = np.hstack((text_dict_bow2_ws, y_t_ws))
+    joblib.dump(arr_dict_bow1_ws, config['data']['out_path']+'text_dict_bow1_ws.pkl')
+    joblib.dump(arr_dict_bow2_ws, config['data']['out_path']+'text_dict_bow2_ws.pkl')
     return
 
-def pos_bow1():
+def dict_tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
+    my_vocabs = get_dict_vocab()
+    tfidf1 = TfidfVectorizer(tokenizer=process_text, ngram_range=(1, 1))
+    tfidf2 = TfidfVectorizer(tokenizer=process_text, ngram_range=(2, 2))
+
+    text_dict_tfidf1_fit = tfidf1.fit(my_vocabs)
+    text_dict_tfidf1_kt = text_dict_tfidf1_fit.transform(df_kt['text'].apply(str))
+    text_dict_tfidf1_ws = text_dict_tfidf1_fit.transform(df_ws['texts'].apply(str))
+
+    text_dict_tfidf2_fit = tfidf2.fit(my_vocabs)
+    text_dict_tfidf2_kt = text_dict_tfidf2_fit.transform(df_kt['text'].apply(str))
+    text_dict_tfidf2_ws = text_dict_tfidf2_fit.transform(df_ws['texts'].apply(str))
+
+    print(text_dict_tfidf1_kt.toarray().shape,  text_dict_tfidf1_kt.toarray().shape)
+    print(text_dict_tfidf1_ws.toarray().shape,  text_dict_tfidf1_ws.toarray().shape)
+
+    print(text_dict_tfidf2_kt.toarray().shape,  text_dict_tfidf2_kt.toarray().shape)
+    print(text_dict_tfidf2_ws.toarray().shape,  text_dict_tfidf2_ws.toarray().shape)
+
+    arr_dict_tfidf1_kt = np.hstack((text_dict_tfidf1_kt, y_t_kt))
+    arr_dict_tfidf2_kt = np.hstack((text_dict_tfidf2_kt, y_t_kt))
+    joblib.dump(arr_dict_tfidf1_kt, config['data']['out_path']+'text_dict_tfidf1_kt.pkl')
+    joblib.dump(arr_dict_tfidf2_kt, config['data']['out_path']+'text_dict_tfidf2_kt.pkl')
+
+    arr_dict_tfidf1_ws = np.hstack((text_dict_tfidf1_ws, y_t_ws))
+    arr_dict_tfidf2_ws = np.hstack((text_dict_tfidf2_ws, y_t_ws))
+    joblib.dump(arr_dict_tfidf1_ws, config['data']['out_path']+'text_dict_tfidf1_ws.pkl')
+    joblib.dump(arr_dict_tfidf2_ws, config['data']['out_path']+'text_dict_tfidf2_ws.pkl')
     return
 
-def dict_bow1():
-    return
-
-def dict_bow2():
-    return
-
-def dict_tfidf1():
-    return
-
-def dict_tfidf2():
-    return
-        
 
 if __name__ == "__main__":
-    print("Building features...")
-    df = extract('kt')
-    
+    print("Building text representations...")
+    extract()
     print("Finished building features!")
