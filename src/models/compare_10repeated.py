@@ -251,11 +251,11 @@ for item in SEED:
     file.write(str(item)+"LR,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(param[choose])+"\n")   
 
     #PLS
-    print("Running PLS")
-    clf = OneVsRestClassifier(PLS())
-    acc, sens, spec, mcc, roc = testPLS(clf,X,y,Xv,yv)
-    allclf.append(clf)
-    file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str("N/A")+"\n") 
+    # print("Running PLS")
+    # clf = OneVsRestClassifier(PLS())
+    # acc, sens, spec, mcc, roc = testPLS(clf,X,y,Xv,yv)
+    # allclf.append(clf)
+    # file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str("N/A")+"\n") 
 
     file.close()
 

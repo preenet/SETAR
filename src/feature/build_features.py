@@ -69,45 +69,45 @@ def extract():
     y_t_kt = sparse.csr_matrix(y_t_kt)
     y_t_ws = sparse.csr_matrix(y_t_ws)
 
-    print("Extracting BOW")            
-    bow(df_kt, y_t_kt, df_ws, y_t_ws)
+    # print("Extracting BOW")            
+    # bow(df_kt, y_t_kt, df_ws, y_t_ws)
 
-    print("Extracting TFI-IDF")  
-    tfidf(df_kt, y_t_kt, df_ws, y_t_ws)
+    # print("Extracting TFI-IDF")  
+    # tfidf(df_kt, y_t_kt, df_ws, y_t_ws)
 
     print("Extracting W2V-TFIDF")  
     w2v_tfidf(df_kt, y_t_kt, df_ws, y_t_ws)
 
-    print("Extracting POS_BOW")   
+    # print("Extracting POS_BOW")   
 
 
-    pos = pos_tag_sents(df_kt['processed'].tolist(), corpus='orchid_ud')
-    pos = tag_emoj(pos)
-    df_kt['post_tag1'] = pd.DataFrame(tag(pos))
-    df_kt['post_tag2'] = pd.DataFrame(word_tag(pos))
+    # pos = pos_tag_sents(df_kt['processed'].tolist(), corpus='orchid_ud')
+    # pos = tag_emoj(pos)
+    # df_kt['post_tag1'] = pd.DataFrame(tag(pos))
+    # df_kt['post_tag2'] = pd.DataFrame(word_tag(pos))
 
-    pos = pos_tag_sents(df_ws['processed'].tolist(), corpus='orchid_ud')
-    pos = tag_emoj(pos)
-    df_ws['post_tag1'] = pd.DataFrame(tag(pos))
-    df_ws['post_tag2'] = pd.DataFrame(word_tag(pos))
+    # pos = pos_tag_sents(df_ws['processed'].tolist(), corpus='orchid_ud')
+    # pos = tag_emoj(pos)
+    # df_ws['post_tag1'] = pd.DataFrame(tag(pos))
+    # df_ws['post_tag2'] = pd.DataFrame(word_tag(pos))
 
-    print(df_ws[['processed', 'post_tag1']].iloc[1000:1010])
-    print("\n")
-    print(df_ws['post_tag2'].iloc[1000:1010])
-    pos_bow(df_kt, y_t_kt, df_ws, y_t_ws)
-
-
-    dict_bow(df_kt, y_t_kt, df_ws, y_t_ws)
-    # print("Extracting POS_TF-IDF")  
-    # pos_tfidf(df_kt, df_ws)
+    # print(df_ws[['processed', 'post_tag1']].iloc[1000:1010])
+    # print("\n")
+    # print(df_ws['post_tag2'].iloc[1000:1010])
+    # pos_bow(df_kt, y_t_kt, df_ws, y_t_ws)
 
 
-    my_vocabs = get_dict_vocab()
-    print("Extracting DICT_BOW")  
-    dict_bow(df_kt, y_t_kt, df_ws, y_t_ws, my_vocabs)
+    # dict_bow(df_kt, y_t_kt, df_ws, y_t_ws)
+    # # print("Extracting POS_TF-IDF")  
+    # # pos_tfidf(df_kt, df_ws)
 
-    print("Extracting DICT_TF-IDF")  
-    dict_tfidf(df_kt, df_ws, my_vocabs)
+
+    # my_vocabs = get_dict_vocab()
+    # print("Extracting DICT_BOW")  
+    # dict_bow(df_kt, y_t_kt, df_ws, y_t_ws, my_vocabs)
+
+    # print("Extracting DICT_TF-IDF")  
+    # dict_tfidf(df_kt, df_ws, my_vocabs)
 
     return
 
@@ -214,17 +214,17 @@ def w2v_tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
     print(w2v_kt.wv.most_similar("บะหมี่"))
 
     w2v_tfidf_emb_kt = TfidfEmbeddingVectorizer(w2v_kt)
-    w2v_tifdf_fit_kt = w2v_tfidf_emb_kt.fit(df_kt['text'].apply(str))
+    w2v_tifdf_fit_kt = w2v_tfidf_emb_kt.fit(df_kt['processed'].apply(str))
 
     # transfrom on both corpuses
-    text_w2v_tfidf_kt = w2v_tifdf_fit_kt.transform(df_kt['text'].apply(str))
-    text_w2v_tfidf_ws = w2v_tifdf_fit_kt.transform(df_ws['texts'].apply(str))
+    text_w2v_tfidf_kt = w2v_tifdf_fit_kt.transform(df_kt['processed'])
+    text_w2v_tfidf_ws = w2v_tifdf_fit_kt.transform(df_ws['processed'])
 
     arr_w2v_tfidf_kt = np.hstack(( sparse.csr_matrix(text_w2v_tfidf_kt), y_t_kt))
     arr_w2v_tfidf_ws = np.hstack(( sparse.csr_matrix(text_w2v_tfidf_ws), y_t_ws))
     joblib.dump(arr_w2v_tfidf_kt, config['output']+'text_w2v_tfidf_kt.pkl')
     joblib.dump(arr_w2v_tfidf_ws, config['output']+'text_w2v_tfidf_ws.pkl')
-    return
+    return 
 
 def pos_bow(df_kt, y_t_kt, df_ws, y_t_ws):
     # create bow vectors
