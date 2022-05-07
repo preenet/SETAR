@@ -3,13 +3,11 @@ import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import sys
 import joblib
 import datetime
-
 import src.utilities as utils
 config = utils.read_config()
 
 
 PATH = config['data']['final_original']
-
 feat1, yall = joblib.load(PATH+"/text_bow1_kt.pkl")
 feat2 = joblib.load(PATH+"/text_bow2_kt.pkl")[0]
 feat3 = joblib.load(PATH+"/text_tfidf1_kt.pkl")[0]
@@ -46,20 +44,20 @@ file.write('        p_all.append([np.abs(item[0]) for item in self.clf.predict(X
 file.write('        return np.transpose(np.array(p_all))'+"\n")
 file.close()
 
-from src.models import PLS
+from PLS import PLS
 from sklearn.svm import SVC
 from sklearn.svm import LinearSVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import ExtraTreesClassifier
 from xgboost import XGBClassifier
 from sklearn.neural_network import MLPClassifier
-from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from lightgbm import LGBMClassifier
 from sklearn.multiclass import OneVsRestClassifier
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MaxAbsScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
@@ -68,6 +66,7 @@ from sklearn.metrics import matthews_corrcoef # average == 'macro'.
 from sklearn.metrics import roc_auc_score # multiclas 'ovo' average == 'macro'.
 
 def test(clf, X, y, Xt, yt):
+
     train_X, test_X = X, Xt
     train_y, test_y = y, yt
     clf.fit(train_X, train_y)        
@@ -80,20 +79,18 @@ def test(clf, X, y, Xt, yt):
     AUC = roc_auc_score(test_y,pr,multi_class='ovo',average='macro')
     return ACC, SENS, SPEC, MCC, AUC
 
-
-Xo = eval('feat%d.toarray()' % (fi))
 yo = yall.toarray().reshape(1,-1)[0]
+begin_script_time = datetime.datetime.now()
+print("start at: ", begin_script_time)
 
 for item in SEED:
-    X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
+    
+    print("SEED:", item)
+
+    X_train, X_tmp, y, y_tmp = train_test_split(eval('feat%d' % (fi)), yo, test_size=0.99, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
-
-    print("Running:", fname[item])
-    print("Xo ", Xo.shape, "X_train:", X_train.shape, "X_val", X_val.shape, "X_test", X_test.shape)
-    begin_script_time = datetime.datetime.now()
-    print("start at: ", begin_script_time)
-
-    scaler = MinMaxScaler()
+   
+    scaler = MaxAbsScaler()
     scaler.fit(X_train)
     X = scaler.transform(X_train)
     Xv = scaler.transform(X_val)
@@ -209,7 +206,7 @@ for item in SEED:
 
     #NB
     print("Running NB")
-    clf = GaussianNB()
+    clf = MultinomialNB()
     acc, sens, spec, mcc, roc = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str("N/A")+"\n") 
@@ -243,14 +240,13 @@ for item in SEED:
     allclf.append(LogisticRegression(C=param[choose], random_state=0, max_iter=10000).fit(X,y))
     file.write(str(item)+"LR,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(param[choose])+"\n")   
 
-    #PLS
-    print("Running PLS")
-    clf = OneVsRestClassifier(PLS())
-    acc, sens, spec, mcc, roc = test(clf,X,y,Xv,yv)
-    allclf.append(clf)
-    file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str("N/A")+"\n") 
+    # PLS
+    # clf = OneVsRestClassifier(PLS())
+    # acc, sens, spec, mcc, roc = test(clf,X,y,Xv,yv)
+    # allclf.append(clf)
+    # file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str("N/A")+"\n") 
 
-    file.close()
+    # file.close()
 
     ########## Test ############################
     file = open(config['output']+"12classifier_"+iname+"_test.csv", "a")
@@ -258,4 +254,5 @@ for item in SEED:
         acc, sens, spec, mcc, roc = test(allclf[i], X, y, Xt, yt) 
         file.write(str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+"\n") 
     file.close()
-    print(print("Total time: ", datetime.datetime.now() - begin_script_time))
+    print(print("Seed time: ", datetime.datetime.now() - begin_script_time))
+print(print("Total time: ", datetime.datetime.now() - begin_script_time))
