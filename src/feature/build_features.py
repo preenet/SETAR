@@ -22,20 +22,16 @@ import src.utilities as utils
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from gensim.models import Word2Vec
-
 from scipy import sparse # for converting w2v embbed vector to spare matrix and targets  
 
-from src.feature.TfidfEmbeddingVectorizer import TfidfEmbeddingVectorizer
-
-from matplotlib import pyplot as plt
+from src.feature.tfidf_embedding_vectorizer import TfidfEmbeddingVectorizer
 from src.feature.process_thai_text import process_text
 from src.feature.pos_rule import word_tag, tag, tag_emoj
-from pythainlp.tag import pos_tag_sents
 from src.visualization.visualize import top_feats_all, plot_top_feats
-
+from pythainlp.tag import pos_tag_sents
+from matplotlib import pyplot as plt
 plt.rcParams['font.family'] = 'tahoma'
-plt.rcParams.update(plt.rcParamsDefault)  # VS Code plots not black
-sys.path.append(os.pardir) # for vs_code debugging
+
 
 # get config file
 config = utils.read_config()
@@ -108,7 +104,7 @@ def extract():
 
     my_vocabs = get_dict_vocab()
     print("Extracting DICT_BOW")  
-    dict_bow(df_kt, df_ws, my_vocabs)
+    dict_bow(df_kt, y_t_kt, df_ws, y_t_ws, my_vocabs)
 
     print("Extracting DICT_TF-IDF")  
     dict_tfidf(df_kt, df_ws, my_vocabs)
@@ -156,19 +152,19 @@ def bow(df_kt, y_t_kt, df_ws, y_t_ws):
     # write to disk
     arr_bow1_kt = np.hstack((text_bow1_kt, y_t_kt))
     arr_bow2_kt = np.hstack((text_bow2_kt, y_t_kt))
-    joblib.dump(arr_bow1_kt, config['data']['out_path']+'text_bow1_kt.pkl')
-    joblib.dump(arr_bow2_kt, config['data']['out_path']+'text_bow2_kt.pkl')
+    joblib.dump(arr_bow1_kt, config['output']+'text_bow1_kt.pkl')
+    joblib.dump(arr_bow2_kt, config['output']+'text_bow2_kt.pkl')
 
-    joblib.dump(lex_bow1_kt, config['data']['out_path']+'lex_bow1_kt.pkl')
-    joblib.dump(lex_bow2_kt, config['data']['out_path']+'lex_bow2_kt.pkl')
+    joblib.dump(lex_bow1_kt, config['output']+'lex_bow1_kt.pkl')
+    joblib.dump(lex_bow2_kt, config['output']+'lex_bow2_kt.pkl')
 
     arr_bow1_ws = np.hstack((text_bow1_ws, y_t_ws))
     arr_bow2_ws = np.hstack((text_bow2_ws, y_t_ws))
-    joblib.dump(arr_bow1_ws, config['data']['out_path']+'text_bow1_ws.pkl')
-    joblib.dump(arr_bow2_ws, config['data']['out_path']+'text_bow2_ws.pkl')
+    joblib.dump(arr_bow1_ws, config['output']+'text_bow1_ws.pkl')
+    joblib.dump(arr_bow2_ws, config['output']+'text_bow2_ws.pkl')
 
-    joblib.dump(lex_bow1_ws, config['data']['out_path']+'lex_bow1_ws.pkl')
-    joblib.dump(lex_bow2_ws, config['data']['out_path']+'lex_bow2_ws.pkl')
+    joblib.dump(lex_bow1_ws, config['output']+'lex_bow1_ws.pkl')
+    joblib.dump(lex_bow2_ws, config['output']+'lex_bow2_ws.pkl')
     return 
 
 
@@ -202,11 +198,11 @@ def tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
 
     arr_tfidf1_kt = np.hstack((text_tfidf1_kt, y_t_kt))
     arr_tfidf2_kt = np.hstack((text_tfidf2_kt, y_t_kt))
-    joblib.dump(arr_tfidf1_kt, config['data']['out_path']+'text_tfidf1_kt.pkl')
-    joblib.dump(arr_tfidf2_kt, config['data']['out_path']+'text_tfidf2_kt.pkl')
+    joblib.dump(arr_tfidf1_kt, config['output']+'text_tfidf1_kt.pkl')
+    joblib.dump(arr_tfidf2_kt, config['output']+'text_tfidf2_kt.pkl')
 
-    joblib.dump(lex_tfidf1_kt, config['data']['out_path']+'lex_tfidf1_kt.pkl')
-    joblib.dump(lex_tfidf2_kt, config['data']['out_path']+'lex_tfidf2_kt.pkl')
+    joblib.dump(lex_tfidf1_kt, config['output']+'lex_tfidf1_kt.pkl')
+    joblib.dump(lex_tfidf2_kt, config['output']+'lex_tfidf2_kt.pkl')
     return
 
 
@@ -226,8 +222,8 @@ def w2v_tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
 
     arr_w2v_tfidf_kt = np.hstack(( sparse.csr_matrix(text_w2v_tfidf_kt), y_t_kt))
     arr_w2v_tfidf_ws = np.hstack(( sparse.csr_matrix(text_w2v_tfidf_ws), y_t_ws))
-    joblib.dump(arr_w2v_tfidf_kt, config['data']['out_path']+'text_w2v_tfidf_kt.pkl')
-    joblib.dump(arr_w2v_tfidf_ws, config['data']['out_path']+'text_w2v_tfidf_ws.pkl')
+    joblib.dump(arr_w2v_tfidf_kt, config['output']+'text_w2v_tfidf_kt.pkl')
+    joblib.dump(arr_w2v_tfidf_ws, config['output']+'text_w2v_tfidf_ws.pkl')
     return
 
 def pos_bow(df_kt, y_t_kt, df_ws, y_t_ws):
@@ -252,13 +248,13 @@ def pos_bow(df_kt, y_t_kt, df_ws, y_t_ws):
 
     arr_pos_bow1_kt = np.hstack((text_pos_bow1_kt, y_t_kt))
     #arr_pos_bow2_kt = np.hstack((text_pos_bow2_kt, y_t_kt))
-    joblib.dump(arr_pos_bow1_kt, config['data']['out_path']+'text_pos_bow1_kt.pkl')
-    #joblib.dump(arr_pos_bow2_kt, data_processed_path+'text_pos_bow2_kt.pkl')
+    joblib.dump(arr_pos_bow1_kt, config['output']+'text_pos_bow1_kt.pkl')
+    #joblib.dump(arr_pos_bow2_kt, config['output']+'text_pos_bow2_kt.pkl')
 
     arr_pos_bow1_ws = np.hstack((text_pos_bow1_ws, y_t_ws))
     #arr_pos_bow2_ws = np.hstack((text_pos_bow2_ws, y_t_ws))
-    joblib.dump(arr_pos_bow1_ws, config['data']['out_path']+'text_pos_bow1_ws.pkl')
-    #joblib.dump(arr_pos_bow2_ws, data_processed_path+'text_pos_bow2_ws.pkl')
+    joblib.dump(arr_pos_bow1_ws, config['output']+'text_pos_bow1_ws.pkl')
+    #joblib.dump(arr_pos_bow2_ws, config['output']+'text_pos_bow2_ws.pkl')
     return
 
 def pos_tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
@@ -282,13 +278,13 @@ def pos_tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
 
     # arr_pos_tfidf1_kt = np.hstack((text_pos_tfidf1_kt, y_t_kt))
     # arr_pos_tfidf2_kt = np.hstack((text_pos_tfidf2_kt, y_t_kt))
-    # joblib.dump(arr_pos_tfidf1_kt, config['data']['out_path']+'text_pos_tfidf1_kt.pkl')
-    # joblib.dump(arr_pos_tfidf2_kt, config['data']['out_path']+'text_pos_tfidf2_kt.pkl')
+    # joblib.dump(arr_pos_tfidf1_kt, config['output']+'text_pos_tfidf1_kt.pkl')
+    # joblib.dump(arr_pos_tfidf2_kt, config['output']+'text_pos_tfidf2_kt.pkl')
 
     # arr_pos_tfidf1_ws = np.hstack((text_pos_tfidf1_ws, y_t_ws))
     # arr_pos_tfidf2_ws = np.hstack((text_pos_tfidf2_ws, y_t_ws))
-    # joblib.dump(arr_pos_tfidf1_ws, config['data']['out_path']+'text_pos_tfidf1_ws.pkl')
-    # joblib.dump(arr_pos_tfidf2_ws, config['data']['out_path']+'text_pos_tfidf2_ws.pkl')
+    # joblib.dump(arr_pos_tfidf1_ws, config['output']+'text_pos_tfidf1_ws.pkl')
+    # joblib.dump(arr_pos_tfidf2_ws, config['output']+'text_pos_tfidf2_ws.pkl')
     return
 
 
@@ -329,13 +325,13 @@ def dict_bow(df_kt, y_t_kt, df_ws, y_t_ws):
 
     arr_dict_bow1_kt = np.hstack((text_dict_bow1_kt, y_t_kt))
     arr_dict_bow2_kt = np.hstack((text_dict_bow2_kt, y_t_kt))
-    joblib.dump(arr_dict_bow1_kt, config['data']['out_path']+'text_dict_bow1_kt.pkl')
-    joblib.dump(arr_dict_bow2_kt, config['data']['out_path']+'text_dict_bow2_kt.pkl')
+    joblib.dump(arr_dict_bow1_kt, config['output']+'text_dict_bow1_kt.pkl')
+    joblib.dump(arr_dict_bow2_kt, config['output']+'text_dict_bow2_kt.pkl')
 
     arr_dict_bow1_ws = np.hstack((text_dict_bow1_ws, y_t_ws))
     arr_dict_bow2_ws = np.hstack((text_dict_bow2_ws, y_t_ws))
-    joblib.dump(arr_dict_bow1_ws, config['data']['out_path']+'text_dict_bow1_ws.pkl')
-    joblib.dump(arr_dict_bow2_ws, config['data']['out_path']+'text_dict_bow2_ws.pkl')
+    joblib.dump(arr_dict_bow1_ws, config['output']+'text_dict_bow1_ws.pkl')
+    joblib.dump(arr_dict_bow2_ws, config['output']+'text_dict_bow2_ws.pkl')
     return
 
 def dict_tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
@@ -359,13 +355,13 @@ def dict_tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
 
     arr_dict_tfidf1_kt = np.hstack((text_dict_tfidf1_kt, y_t_kt))
     arr_dict_tfidf2_kt = np.hstack((text_dict_tfidf2_kt, y_t_kt))
-    joblib.dump(arr_dict_tfidf1_kt, config['data']['out_path']+'text_dict_tfidf1_kt.pkl')
-    joblib.dump(arr_dict_tfidf2_kt, config['data']['out_path']+'text_dict_tfidf2_kt.pkl')
+    joblib.dump(arr_dict_tfidf1_kt, config['output']+'text_dict_tfidf1_kt.pkl')
+    joblib.dump(arr_dict_tfidf2_kt, config['output']+'text_dict_tfidf2_kt.pkl')
 
     arr_dict_tfidf1_ws = np.hstack((text_dict_tfidf1_ws, y_t_ws))
     arr_dict_tfidf2_ws = np.hstack((text_dict_tfidf2_ws, y_t_ws))
-    joblib.dump(arr_dict_tfidf1_ws, config['data']['out_path']+'text_dict_tfidf1_ws.pkl')
-    joblib.dump(arr_dict_tfidf2_ws, config['data']['out_path']+'text_dict_tfidf2_ws.pkl')
+    joblib.dump(arr_dict_tfidf1_ws, config['output']+'text_dict_tfidf1_ws.pkl')
+    joblib.dump(arr_dict_tfidf2_ws, config['output']+'text_dict_tfidf2_ws.pkl')
     return
 
 
