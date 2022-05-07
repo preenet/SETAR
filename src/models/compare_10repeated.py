@@ -43,7 +43,7 @@ file.write('        p_all.append([np.abs(item[0]) for item in self.clf.predict(X
 file.write('        return np.transpose(np.nan_to_num(np.array(p_all)))'+"\n")
 file.close()
 
-from PLS import PLS
+from src.models.PLS import PLS
 from sklearn.svm import SVC
 from sklearn.svm import LinearSVC
 from sklearn.ensemble import RandomForestClassifier
