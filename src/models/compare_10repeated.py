@@ -4,10 +4,10 @@ import sys
 import joblib
 import datetime
 import src.utilities as utils
+
 config = utils.read_config()
-
-
 PATH = config['data']['final_original']
+
 feat1, yall = joblib.load(PATH+"/text_bow1_kt.pkl")
 feat2 = joblib.load(PATH+"/text_bow2_kt.pkl")[0]
 feat3 = joblib.load(PATH+"/text_tfidf1_kt.pkl")[0]
@@ -66,7 +66,6 @@ from sklearn.metrics import matthews_corrcoef # average == 'macro'.
 from sklearn.metrics import roc_auc_score # multiclas 'ovo' average == 'macro'.
 
 def test(clf, X, y, Xt, yt):
-
     train_X, test_X = X, Xt
     train_y, test_y = y, yt
     clf.fit(train_X, train_y)        
@@ -78,9 +77,9 @@ def test(clf, X, y, Xt, yt):
     MCC = matthews_corrcoef(test_y,p)
     AUC = roc_auc_score(test_y,pr,multi_class='ovo',average='macro')
     return ACC, SENS, SPEC, MCC, AUC
-
+    
 def testPLS(clf, X, y, Xt, yt):
-    train_X, test_X = X.todense(), Xt.todense()
+    train_X, test_X = X.toarray(), Xt.toarray()
     train_y, test_y = y, yt
     clf.fit(train_X, train_y)        
     p = clf.predict(test_X)
@@ -97,12 +96,10 @@ begin_script_time = datetime.datetime.now()
 print("start at: ", begin_script_time)
 
 for item in SEED:
-    
     print("SEED:", item)
-
-    X_train, X_tmp, y, y_tmp = train_test_split(eval('feat%d' % (fi)), yo, test_size=0.4, random_state=item, stratify=yo)
+    X_train, X_tmp, y, y_tmp = train_test_split(eval('feat%d' % (fi)), yo, test_size=0.99, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
-   
+
     scaler = MaxAbsScaler()
     scaler.fit(X_train)
     X = scaler.transform(X_train)
@@ -263,10 +260,13 @@ for item in SEED:
     file.close()
 
     ########## Test ############################
+
     file = open(config['output']+"12classifier_"+iname+"_test.csv", "a")
-    for i in range(0,len(allclf)):
+    for i in range(0,len(allclf)-1):
         acc, sens, spec, mcc, roc = test(allclf[i], X, y, Xt, yt) 
         file.write(str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+"\n") 
+    acc, sens, spec, mcc, roc = testPLS(allclf[i], X, y, Xt, yt) 
+    file.write(str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+"\n") 
     file.close()
     print(print("Seed time: ", datetime.datetime.now() - begin_script_time))
 print(print("Total time: ", datetime.datetime.now() - begin_script_time))
