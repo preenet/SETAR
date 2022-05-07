@@ -154,7 +154,7 @@ for item in SEED:
     file.write(str(item)+"RF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(param[choose])+"\n")  
 
     #E-Tree
-    print("Running Etree...")
+    print("Running E-tree...")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
