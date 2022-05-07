@@ -1,9 +1,8 @@
 import numpy as np # linear algebra
-import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import sys
-import joblib
 import datetime
 import src.utilities as utils
+import joblib
 
 config = utils.read_config()
 PATH = config['data']['final_original']
@@ -41,7 +40,7 @@ file.write('    def predict_proba(self, X):'+"\n")
 file.write('        p_all = []'+"\n")
 file.write('        p_all.append([1-np.abs(item[0]) for item in self.clf.predict(X)])'+"\n")
 file.write('        p_all.append([np.abs(item[0]) for item in self.clf.predict(X)])'+"\n")
-file.write('        return np.transpose(np.array(p_all))'+"\n")
+file.write('        return np.transpose(np.nan_to_num(np.array(p_all)))'+"\n")
 file.close()
 
 from PLS import PLS
@@ -110,7 +109,7 @@ for item in SEED:
     file = open(config['output']+"12classifier_"+iname+"_val.csv", "a")
 
     #SVM
-    print("Running SVM")
+    print("Running SVM...")
     param = [1,2,4,8,16,32]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -125,7 +124,7 @@ for item in SEED:
     file.write(str(item)+"SVM,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(param[choose])+"\n")  
 
     #LinearSVC
-    print("Running LinearSVC")
+    print("Running LinearSVC...")
     param = [1,2,4,8,16,32]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -140,7 +139,7 @@ for item in SEED:
     file.write(str(item)+"LN,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(param[choose])+"\n")  
 
     #RF
-    print("Running RF")
+    print("Running RF...")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -155,7 +154,7 @@ for item in SEED:
     file.write(str(item)+"RF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(param[choose])+"\n")  
 
     #E-Tree
-    print("Running Etree")
+    print("Running Etree...")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -170,7 +169,7 @@ for item in SEED:
     file.write(str(item)+"ET,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(param[choose])+"\n")  
 
     #XGBoost
-    print("Running XGBoost")
+    print("Running XGBoost...")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -185,7 +184,7 @@ for item in SEED:
     file.write(str(item)+"XGB,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(param[choose])+"\n")  
 
     #LightGBM
-    print("Running LightGBM")
+    print("Running LightGBM...")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -200,7 +199,7 @@ for item in SEED:
     file.write(str(item)+"LGBM,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(param[choose])+"\n")  
 
     #MLP
-    print("Running MLP")
+    print("Running MLP...")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -215,28 +214,28 @@ for item in SEED:
     file.write(str(item)+"MLP,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(param[choose])+"\n") 
 
     #NB
-    print("Running NB")
+    print("Running NB...")
     clf = MultinomialNB()
     acc, sens, spec, mcc, roc = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str("N/A")+"\n") 
 
     #1NN
-    print("Running 1NN")
+    print("Running 1NN...")
     clf = KNeighborsClassifier(n_neighbors=1)
     acc, sens, spec, mcc, roc = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"1NN,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str("N/A")+"\n")
 
     #DT
-    print("Running DT")
+    print("Running DT...")
     clf = DecisionTreeClassifier(random_state=0)
     acc, sens, spec, mcc, roc = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"DT,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str("N/A")+"\n") 
 
     #Logistic
-    print("Running Logistic")
+    print("Running Logistic...")
     param = [0.001,0.01,0.1,1,10,100]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -248,24 +247,23 @@ for item in SEED:
         acc[i], sens[i], spec[i], mcc[i], roc[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
     allclf.append(LogisticRegression(C=param[choose], random_state=0, max_iter=10000).fit(X,y))
-    file.write(str(item)+"LR,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(param[choose])+"\n")   
+    file.write(str(item)+"LR,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(param[choose])+"\n")
 
     #PLS
-    # print("Running PLS")
-    # clf = OneVsRestClassifier(PLS())
-    # acc, sens, spec, mcc, roc = testPLS(clf,X,y,Xv,yv)
-    # allclf.append(clf)
-    # file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str("N/A")+"\n") 
+    print("Running PLS...")
+    clf = OneVsRestClassifier(PLS())
+    acc, sens, spec, mcc, roc = testPLS(clf,X,y,Xv,yv)
+    allclf.append(clf)
+    file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str("N/A")+"\n") 
 
     file.close()
 
     ########## Test ############################
-
     file = open(config['output']+"12classifier_"+iname+"_test.csv", "a")
     for i in range(0,len(allclf)-1):
         acc, sens, spec, mcc, roc = test(allclf[i], X, y, Xt, yt) 
         file.write(str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+"\n") 
-    acc, sens, spec, mcc, roc = testPLS(allclf[i], X, y, Xt, yt) 
+    acc, sens, spec, mcc, roc = testPLS(allclf[-1], X, y, Xt, yt) 
     file.write(str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+"\n") 
     file.close()
     print(print("Seed time: ", datetime.datetime.now() - begin_script_time))
