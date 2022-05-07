@@ -24,7 +24,7 @@ iname = sys.argv[-1]
 SEED = [i for i in range(0,10)]
 fi = fname.index(iname) + 1
 
-file = open('PLS.py','w')
+file = open(config['output']+'PLS.py','w')
 file.write('import numpy as np'+"\n")
 file.write('from sklearn.cross_decomposition import PLSRegression'+"\n")
 file.write('from sklearn.base import BaseEstimator, ClassifierMixin'+"\n")
@@ -94,7 +94,7 @@ for item in SEED:
     Xt = scaler.transform(X_test)   
         
     allclf = []
-    file = open("12classifier_"+iname+"_val.csv", "a")
+    file = open(config['output']+"12classifier_"+iname+"_val.csv", "a")
 
     #SVM
     param = [1,2,4,8,16,32]
@@ -235,7 +235,7 @@ for item in SEED:
     file.close()
 
     ########## Test ############################
-    file = open("12classifier_"+iname+"_test.csv", "a")
+    file = open(config['output']+"12classifier_"+iname+"_test.csv", "a")
     for i in range(0,len(allclf)):
         acc, sens, spec, mcc, roc = test(allclf[i], X, y, Xt, yt) 
         file.write(str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+"\n") 
