@@ -9,6 +9,7 @@
 
     final_original: data/final/original/
 
+- models: src/models/
 
 # output folders
 - output: output/

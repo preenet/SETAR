@@ -8,6 +8,7 @@ import src.utilities as utils
 config = utils.read_config()
 
 PATH = config['data']['final_original']
+
 feat1, yall = joblib.load(PATH+"/text_bow1_kt.pkl")
 feat2 = joblib.load(PATH+"/text_bow2_kt.pkl")[0]
 feat3 = joblib.load(PATH+"/text_tfidf1_kt.pkl")[0]
@@ -24,7 +25,7 @@ iname = sys.argv[-1]
 SEED = [i for i in range(0,10)]
 fi = fname.index(iname) + 1
 
-file = open(config['output']+'PLS.py','w')
+file = open(config['models']+'PLS.py','w')
 file.write('import numpy as np'+"\n")
 file.write('from sklearn.cross_decomposition import PLSRegression'+"\n")
 file.write('from sklearn.base import BaseEstimator, ClassifierMixin'+"\n")
@@ -44,7 +45,7 @@ file.write('        p_all.append([np.abs(item[0]) for item in self.clf.predict(X
 file.write('        return np.transpose(np.array(p_all))'+"\n")
 file.close()
 
-from PLS import PLS
+from src.models import PLS
 from sklearn.svm import SVC
 from sklearn.svm import LinearSVC
 from sklearn.ensemble import RandomForestClassifier
@@ -86,7 +87,9 @@ for item in SEED:
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
 
+    print("Running:", item)
     print("Xo ", Xo.shape, "X_train:", X_train.shape, "X_val", X_val.shape, "X_test", X_test.shape)
+
     scaler = MinMaxScaler()
     scaler.fit(X_train)
     X = scaler.transform(X_train)
