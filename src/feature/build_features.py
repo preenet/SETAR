@@ -382,12 +382,17 @@ def dict_tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
 
 
 if __name__ == "__main__":
-    method = sys.argv[1]
-   
-    if method in config['feature']: 
-        print("Building text representations...")
-        extract(method)
+    
+    if (len(sys.argv) != 2):
+        print("ERROR: need argument")
+        print(config['feature']['build_method'])
+        sys.exit(1)
+
+    elif sys.argv[1] in config['feature']['build_method']: 
+        print(sys.argv[1], "Building text representations...")
+        extract(sys.argv[1])
         print("Finished building features!")
     else:
         print("ERROR: feature extraction method doesn't support.")
         sys.exit(1)
+    print('Program terminate sucessfully!')

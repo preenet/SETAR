@@ -12,7 +12,8 @@
 - models: src/models/
 
 # feature config
-- feature: ['BOW', 'TFIDF', 'W2V', 'POSBOW', 'POSTFIDF', 'DICTBOW']
+- feature:
+    build_method: ['BOW', 'TFIDF', 'W2V', 'POSBOW', 'POSTFIDF', 'DICTBOW', 'ALL']
 
 # output folders
 - output: output/
