@@ -31,12 +31,6 @@ For all the feature extraction methods above, Joblib objects as sparse matrix on
 | (Lowphansirikul et al., 2021)           | RoBERTa, attention spam                           | 76.19 / 67.05 micro and macro avg.  |
 
 
-Dependencies
-* pythainlp >= 3.06dev
-* python >= 3.8.8
-* gensim >= 4.1.2
-* scikit-learn >= 1.0.2
-* joblib => 1.1.0
 
 # KT4.0 SA corpus  
 
