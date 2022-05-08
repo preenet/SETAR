@@ -305,16 +305,23 @@ def pos_tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
 def get_dict_vocab():
     # load list of our custom positive and negative words
     data_path_dict = config['data']['raw_dict']
-    with open(data_path_dict + 'pos_words.txt', encoding='utf-8') as f:
-        pos_words = [line.rstrip('\n') for line in f]
-
-    with open(data_path_dict + 'neg_words.txt', encoding='utf-8') as f:
-        neg_words = [line.rstrip('\n') for line in f]
-        pos_words = list(set(pos_words))
-        neg_words = list(set(neg_words))
-
-    my_vocabs = pos_words + neg_words
-    logging.debug('dict size: ', len(my_vocabs))
+    try:
+        with open(data_path_dict + 'pos_words.txt', encoding='utf-8') as f:
+            pos_words = [line.rstrip('\n') for line in f]
+    except IOError as e:
+        logging.critical("can't open file to read", e)
+        sys.exit(1)
+    
+    try: 
+        with open(data_path_dict + 'neg_words.txt', encoding='utf-8') as f:
+            neg_words = [line.rstrip('\n') for line in f]
+            pos_words = list(set(pos_words))
+            neg_words = list(set(neg_words))
+            my_vocabs = pos_words + neg_words
+            logging.debug('dict size: ', len(my_vocabs))
+    except IOError as e:
+        logging.critical("can't open file to read", e)
+        sys.exit(1)
 
     return my_vocabs
 
