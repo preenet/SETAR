@@ -40,7 +40,7 @@ config = utils.read_config()
 out_path = os.path.join(config['output'])
 
 
-def extract():
+def extract(method):
     df_kt = pd.read_csv(config['data']['raw_kt'])
     df_ws = pd.read_csv(config['data']['raw_ws'])
 
@@ -69,45 +69,46 @@ def extract():
     y_t_kt = sparse.csr_matrix(y_t_kt)
     y_t_ws = sparse.csr_matrix(y_t_ws)
 
-    # print("Extracting BOW")            
-    # bow(df_kt, y_t_kt, df_ws, y_t_ws)
+    if(method == 'BOW'):
+        print("Extracting BOW")            
+        bow(df_kt, y_t_kt, df_ws, y_t_ws)
 
-    # print("Extracting TFI-IDF")  
-    # tfidf(df_kt, y_t_kt, df_ws, y_t_ws)
+    elif(method == 'TFIDF'):
+        print("Extracting TFI-IDF")  
+        tfidf(df_kt, y_t_kt, df_ws, y_t_ws)
 
-    print("Extracting W2V-TFIDF")  
-    w2v_tfidf(df_kt, y_t_kt, df_ws, y_t_ws)
+    elif(method == 'W2V'):
+        print("Extracting W2V-TFIDF")  
+        w2v_tfidf(df_kt, y_t_kt, df_ws, y_t_ws)
 
-    # print("Extracting POS_BOW")   
+    elif(method == 'POSBOW'):
+        print("Extracting POS_BOW")   
+        pos_bow(df_kt, y_t_kt, df_ws, y_t_ws)
 
+    elif(method == 'POSTFIDF'):
+        print("Extracting POS_TF-IDF")  
+        pos_tfidf(df_kt, df_ws)
 
-    # pos = pos_tag_sents(df_kt['processed'].tolist(), corpus='orchid_ud')
-    # pos = tag_emoj(pos)
-    # df_kt['post_tag1'] = pd.DataFrame(tag(pos))
-    # df_kt['post_tag2'] = pd.DataFrame(word_tag(pos))
+    elif(method == 'DICTBOW'):
+        my_vocabs = get_dict_vocab()
+        print("Extracting DICT_BOW")  
+        dict_bow(df_kt, y_t_kt, df_ws, y_t_ws)
 
-    # pos = pos_tag_sents(df_ws['processed'].tolist(), corpus='orchid_ud')
-    # pos = tag_emoj(pos)
-    # df_ws['post_tag1'] = pd.DataFrame(tag(pos))
-    # df_ws['post_tag2'] = pd.DataFrame(word_tag(pos))
+    elif(method == 'DICTTFIDF'):
+        print("Extracting DICT_TF-IDF")  
+        dict_tfidf(df_kt, df_ws, my_vocabs)
 
-    # print(df_ws[['processed', 'post_tag1']].iloc[1000:1010])
-    # print("\n")
-    # print(df_ws['post_tag2'].iloc[1000:1010])
-    # pos_bow(df_kt, y_t_kt, df_ws, y_t_ws)
-
-
-    # dict_bow(df_kt, y_t_kt, df_ws, y_t_ws)
-    # # print("Extracting POS_TF-IDF")  
-    # # pos_tfidf(df_kt, df_ws)
-
-
-    # my_vocabs = get_dict_vocab()
-    # print("Extracting DICT_BOW")  
-    # dict_bow(df_kt, y_t_kt, df_ws, y_t_ws, my_vocabs)
-
-    # print("Extracting DICT_TF-IDF")  
-    # dict_tfidf(df_kt, df_ws, my_vocabs)
+    elif(method == 'ALL'):
+        print("Extracted with all methods.")
+        bow(df_kt, y_t_kt, df_ws, y_t_ws)
+        tfidf(df_kt, y_t_kt, df_ws, y_t_ws)
+        w2v_tfidf(df_kt, y_t_kt, df_ws, y_t_ws)
+        pos_bow(df_kt, y_t_kt, df_ws, y_t_ws)
+        pos_tfidf(df_kt, df_ws)
+        dict_bow(df_kt, y_t_kt, df_ws, y_t_ws)
+        dict_tfidf(df_kt, df_ws, my_vocabs)
+    else:
+        sys.exit(1)
 
     return
 
@@ -227,6 +228,21 @@ def w2v_tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
     return 
 
 def pos_bow(df_kt, y_t_kt, df_ws, y_t_ws):
+
+    pos = pos_tag_sents(df_kt['processed'].tolist(), corpus='orchid_ud')
+    pos = tag_emoj(pos)
+    df_kt['post_tag1'] = pd.DataFrame(tag(pos))
+    df_kt['post_tag2'] = pd.DataFrame(word_tag(pos))
+
+    pos = pos_tag_sents(df_ws['processed'].tolist(), corpus='orchid_ud')
+    pos = tag_emoj(pos)
+    df_ws['post_tag1'] = pd.DataFrame(tag(pos))
+    df_ws['post_tag2'] = pd.DataFrame(word_tag(pos))
+
+    print(df_ws[['processed', 'post_tag1']].iloc[1000:1010])
+    print("\n")
+    print(df_ws['post_tag2'].iloc[1000:1010])
+
     # create bow vectors
 
     bow1 = CountVectorizer(ngram_range=(1, 1))
@@ -366,6 +382,12 @@ def dict_tfidf(df_kt, y_t_kt, df_ws, y_t_ws):
 
 
 if __name__ == "__main__":
-    print("Building text representations...")
-    extract()
-    print("Finished building features!")
+    method = sys.argv[1]
+   
+    if method in config['feature']: 
+        print("Building text representations...")
+        extract(method)
+        print("Finished building features!")
+    else:
+        print("ERROR: feature extraction method doesn't support.")
+        sys.exit(1)

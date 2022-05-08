@@ -11,6 +11,9 @@
 
 - models: src/models/
 
+# feature config
+- feature: ['BOW', 'TFIDF', 'W2V', 'POSBOW', 'POSTFIDF', 'DICTBOW']
+
 # output folders
 - output: output/
 
