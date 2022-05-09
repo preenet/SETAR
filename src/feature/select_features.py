@@ -6,10 +6,9 @@ filter 2 - Univariate Selection using SelectKBest
 
 pree.t@cmu.ac.th  
 """
-from distutils.command.config import config
 import numpy as np
-from sklearn.feature_selection import VarianceThreshold, mutual_info_classif
 import matplotlib.pyplot as plt
+from sklearn.feature_selection import VarianceThreshold, mutual_info_classif
 import src.utilities as utils
 
 class SelectFeatures:
