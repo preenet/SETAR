@@ -1,7 +1,7 @@
 import numpy as np
 from collections import defaultdict
 from sklearn.feature_extraction.text import TfidfVectorizer
-from src.feature.process_thai_text import process_text
+
 
 class TfidfEmbeddingVectorizer(object):
     def __init__(self, model):
@@ -18,7 +18,6 @@ class TfidfEmbeddingVectorizer(object):
 
         tfidf = TfidfVectorizer(analyzer=lambda x: x)
         tfidf.fit(word_list)
-        #tfidf.fit(X)
         max_idf = max(tfidf.idf_)
         self.word2weight = defaultdict(
             lambda: max_idf,

@@ -14,6 +14,8 @@
 # feature config
 - feature:
     build_method: ['BOW', 'TFIDF', 'W2V', 'POSBOW', 'POSTFIDF', 'DICTBOW', 'ALL']
-
+    selection:
+        vi_dim: 1500
+        mi_dim: 700
 # output folders
 - output: output/
