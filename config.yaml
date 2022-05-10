@@ -1,8 +1,12 @@
 # fle paths
 - data:
+    name: ['kt', 'ws', 'tt']
     raw_kt: data/raw/kt4.0/pantip_cleaned_1.csv
     raw_ws: data/raw/wisesight/wisesight.csv
     raw_ws_ori: data/raw/wisesight/
+    raw_tt: data/raw/thaitale/
+    raw_tt_ori: data/raw/thaitale/
+
     raw_dict: data/raw/dict/
 
     processed: data/processed/
@@ -17,5 +21,6 @@
     selection:
         vi_dim: 1500
         mi_dim: 700
+        
 # output folders
 - output: output/
