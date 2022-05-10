@@ -8,12 +8,18 @@ Todo:
 import sys
 import pandas as pd
 import src.utilities as utils
+from src.feature.process_thai_text import process_text
+
 
 def make_kt():
     print('Making khon-thai corpus...')
     df_kt = pd.read_csv(config['data']['raw_kt'])
     df_kt.rename(columns={'vote': 'target'}, inplace=True)
     print(df_kt.info)
+
+    print("Pre-processing stage 2 with word tokenizing...")
+    df_kt['processed'] = df_kt['text'].apply(str).apply(process_text)
+
     df_kt.to_csv(config['data']['processed_kt'])
     return
 
@@ -48,14 +54,22 @@ def make_ws():
     df_ws = pd.DataFrame({'texts': texts, 'targets': targets})
     df_ws.rename(columns={'texts': 'text', 'targets': 'target'}, inplace=True)
     print(df_ws.info)
+
+    print("Pre-processing stage 2 with word tokenizing...")
+    df_ws['processed'] = df_ws['text'].apply(process_text)
+
     df_ws.to_csv(config['data']['processed_ws'])
     return
 
 def make_tt():
     print('Making thaitale corpus...')
     df_tt = pd.read_csv(config['data']['raw_tt'])
-    df_tt.rename(columns={'consensus': 'target'}, inplace=True)
+    df_tt.rename(columns={'Y_vote': 'target'}, inplace=True)
     print(df_tt.info)
+
+    print("Pre-processing stage 2 with word tokenizing...")
+    df_tt['processed'] = df_tt['text'].apply(str).apply(process_text)
+
     df_tt.to_csv(config['data']['processed_tt'])
     return
 
@@ -64,7 +78,7 @@ if __name__ == "__main__":
     config = utils.read_config()
 
     if (len(sys.argv) != 2):
-        print("need argument")
+        print("*Error: incorrect number of argument")
         sys.exit(1)
 
     if sys.argv[1] in config['data']['name']: 
@@ -77,6 +91,6 @@ if __name__ == "__main__":
         elif data_name == 'tt':
             make_tt()
     else:
-        print("Error: no such data name.")
+        print("*Error: no such data name.")
         sys.exit(1)
-print('Program terminate successfully!')
+print('*Program terminate successfully!')

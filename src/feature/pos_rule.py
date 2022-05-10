@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-# Implementation of exisiting pos-tagging techniques.  
+# Implementation of existing pos-tagging techniques.  
 # TODO: 1. test performance of each
 @Authors: pree.t@cmu.ac.th
 """
@@ -12,7 +12,7 @@ __all__ = ['word_tag', 'tag', 'tag_emoj', 'flatten']
 def word_tag(pos):
     tag_list = []
     for item in pos:
-        tag = ['_'.join(map(str, tups)) for tups in item]
+        tag = ['_'.join(map(str, el)) for el in item]
         tag_list.append(' '.join(tag))
     return tag_list
 
@@ -25,7 +25,7 @@ def tag(pos):
         tag_list.append(tag)
     return tag_list
 
-# create custome tag for emoticon word
+# create custom tag for emoticon word
 def tag_emoj(pos):
     tag_list = []
     

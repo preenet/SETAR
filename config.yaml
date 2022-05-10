@@ -1,6 +1,7 @@
 # file paths
 - data:
     name: ['kt', 'ws', 'tt'] # available dataset for benchmarking
+
     # don't touch
     raw_kt: data/raw/kt4.0/pantip_cleaned_1.csv
     raw_ws: data/raw/wisesight/
@@ -13,7 +14,7 @@
     processed_tt: data/processed/thaitale.csv
 
     # datasets that already pre-processed and transformed includes:
-    # all data for each test representation.
+    # all data for each text representation.
     final_original: data/final/original/ 
 
     # with feature selection
@@ -30,7 +31,7 @@
 
 # feature config
 - feature:
-    build_method: ['BOW', 'TFIDF', 'W2V', 'POSBOW', 'POSTFIDF', 'DICTBOW', 'ALL']
+    build_method: ['BOW', 'TFIDF', 'W2V', 'POSBOW', 'POSTFIDF', 'DICTBOW', 'DICTTFIDF', 'ALL']
     selection:
         vi_dim: 1500
         mi_dim: 700
