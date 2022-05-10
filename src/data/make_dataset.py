@@ -9,11 +9,6 @@ import sys
 import pandas as pd
 import src.utilities as utils
 
-# get config file
-config = utils.read_config()
-config['data']['raw_ws_ori']
-config['data']['raw_ws']
-
 def make_kt():
     print('Making khon-thai corpus...')
     return
@@ -56,6 +51,8 @@ def make_tt():
     return
 
 if __name__ == "__main__":
+    # get config file
+    config = utils.read_config()
 
     if (len(sys.argv) != 2):
         print("need argument")
