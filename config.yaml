@@ -1,12 +1,15 @@
 # fle paths
 - data:
     name: ['kt', 'ws', 'tt']
-    raw_kt: data/raw/kt4.0/pantip_cleaned_1.csv
-    raw_ws: data/raw/wisesight/wisesight.csv
-    raw_ws_ori: data/raw/wisesight/
-    raw_tt: data/raw/thaitale/
-    raw_tt_ori: data/raw/thaitale/
+    raw_kt_ori: data/raw/kt4.0/pantip_cleaned_1.csv
+    raw_kt: data/raw/kt4.0/kt.csv
 
+    raw_ws_ori: data/raw/wisesight/
+    raw_ws: data/raw/wisesight/wisesight.csv
+    
+    raw_tt_ori: data/raw/thaitale/tale_data.csv
+    raw_tt: data/raw/thaitale/thaitale.csv
+    
     raw_dict: data/raw/dict/
 
     processed: data/processed/
