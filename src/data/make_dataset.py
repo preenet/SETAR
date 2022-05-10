@@ -1,6 +1,6 @@
 
 """
-Loading original corupus and making a standard experiment raw dataset.
+Loading original corpus and making as standard experiment dataset.
 @Authors: pree.t@cmu.ac.th
 Todo:
 * add google drive or one drive 
@@ -11,35 +11,35 @@ import src.utilities as utils
 
 def make_kt():
     print('Making khon-thai corpus...')
-    df_kt = pd.read_csv(config['data']['raw_kt_ori'])
+    df_kt = pd.read_csv(config['data']['raw_kt'])
     df_kt.rename(columns={'vote': 'target'}, inplace=True)
     print(df_kt.info)
-    df_kt.to_csv(config['data']['raw_kt'])
+    df_kt.to_csv(config['data']['processed_kt'])
     return
 
 def make_ws():
     print('Making wisesight corpus...')
     texts = []
     targets = []
-    with open(config['data']['raw_ws_ori'] + '/' + 'neg.txt', encoding='utf-8') as f:
+    with open(config['data']['raw_ws'] + '/' + 'neg.txt', encoding='utf-8') as f:
         for line in f:
             texts.append(line.strip())
             targets.append('neg')
     f.close()
 
-    with open(config['data']['raw_ws_ori'] + '/' + 'neu.txt', encoding='utf-8') as f:
+    with open(config['data']['raw_ws'] + '/' + 'neu.txt', encoding='utf-8') as f:
         for line in f:
             texts.append(line.strip())
             targets.append('neu')
     f.close()
 
-    with open(config['data']['raw_ws_ori'] + '/' + 'pos.txt', encoding='utf-8') as f:
+    with open(config['data']['raw_ws'] + '/' + 'pos.txt', encoding='utf-8') as f:
         for line in f:
             texts.append(line.strip())
             targets.append('pos')
     f.close()
 
-    with open(config['data']['raw_ws_ori'] + '/' + 'q.txt', encoding='utf-8') as f:
+    with open(config['data']['raw_ws'] + '/' + 'q.txt', encoding='utf-8') as f:
         for line in f:
             texts.append(line.strip())
             targets.append('q')
@@ -48,16 +48,15 @@ def make_ws():
     df_ws = pd.DataFrame({'texts': texts, 'targets': targets})
     df_ws.rename(columns={'texts': 'text', 'targets': 'target'}, inplace=True)
     print(df_ws.info)
-    df_ws.to_csv(config['data']['raw_ws'])
-   
+    df_ws.to_csv(config['data']['processed_ws'])
     return
 
 def make_tt():
     print('Making thaitale corpus...')
-    df_tt = pd.read_csv(config['data']['raw_tt_ori'])
+    df_tt = pd.read_csv(config['data']['raw_tt'])
     df_tt.rename(columns={'consensus': 'target'}, inplace=True)
     print(df_tt.info)
-    df_tt.to_csv(config['data']['raw_tt'])
+    df_tt.to_csv(config['data']['processed_tt'])
     return
 
 if __name__ == "__main__":
@@ -80,4 +79,4 @@ if __name__ == "__main__":
     else:
         print("Error: no such data name.")
         sys.exit(1)
-print('Program terminate sucessfully!')
+print('Program terminate successfully!')

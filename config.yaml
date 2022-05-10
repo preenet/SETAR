@@ -1,20 +1,30 @@
-# fle paths
+# file paths
 - data:
-    name: ['kt', 'ws', 'tt']
-    raw_kt_ori: data/raw/kt4.0/pantip_cleaned_1.csv
-    raw_kt: data/raw/kt4.0/kt.csv
-
-    raw_ws_ori: data/raw/wisesight/
-    raw_ws: data/raw/wisesight/wisesight.csv
-    
-    raw_tt_ori: data/raw/thaitale/tale_data.csv
-    raw_tt: data/raw/thaitale/thaitale.csv
-    
+    name: ['kt', 'ws', 'tt'] # available dataset for benchmarking
+    # don't touch
+    raw_kt: data/raw/kt4.0/pantip_cleaned_1.csv
+    raw_ws: data/raw/wisesight/
+    raw_tt: data/raw/thaitale/tale_data.csv
     raw_dict: data/raw/dict/
 
-    processed: data/processed/
+    # datasets that were executed by make_dataset.py
+    processed_kt: data/processed/kt.csv
+    processed_ws: data/processed/wisesight.csv
+    processed_tt: data/processed/thaitale.csv
 
-    final_original: data/final/original/
+    # datasets that already pre-processed and transformed includes:
+    # all data for each test representation.
+    final_original: data/final/original/ 
+
+    # with feature selection
+    final_feature_selection: data/final/feature-selection/
+
+    # train/test split 80/20
+    final_train_test: data/final/train-test/
+
+    # repeated 10 random for train/validation/test 60/20/20
+    final_repeat_random10: data/final/rep-rand10
+    
 
 - models: src/models/
 
@@ -27,3 +37,6 @@
         
 # output folders
 - output: output/
+
+# temp. output, for rapid testing
+- output_scratch: output-scratch/

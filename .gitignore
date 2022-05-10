@@ -6,6 +6,7 @@ data/lexicon/
 data/raw/kt4.0/
 data/raw/dict/
 data/raw/pretrained/
+data/processed/kt.csv
 
 # ignore w2v large files
 data/final/original/text_w2v_tfidf_kt.pkl
