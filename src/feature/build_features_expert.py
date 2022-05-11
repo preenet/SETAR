@@ -9,7 +9,7 @@ Several feature extraction methods were applied on text feature to both corpuses
 * TF-IDF suppots both unigram and bigrams
 * Word2Vec with TF-IDF embed vectorizer (300 dimension)
 * POS_tagging with three methods using 17 Orchid tags and emoji tag
-* Dictionary-based with a custom list of Thai positive and negative words for the unigram and bigrams
+* Dictionary-based with a custom list of Thai positive and negative words for the unigram and bigram
   
 Total of 8 text representations were extracted for each corpus.  
 @Authors: pree.t@cmu.ac.th
