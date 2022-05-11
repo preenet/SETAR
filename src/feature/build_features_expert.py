@@ -23,10 +23,9 @@ import src.utilities as utils
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from pythainlp.tag import pos_tag_sents
 from gensim.models import Word2Vec
-from scipy import sparse # for converting w2v embed vector to spare matrix and targets  
+from scipy import sparse 
 
 from src.feature.tfidf_embedding_vectorizer import TfidfEmbeddingVectorizer
-from src.feature.process_thai_text import process_text
 from src.feature.pos_rule import word_tag, tag, tag_emoj
 from src.visualization.visualize import top_feats_all, plot_top_feats
 
@@ -103,10 +102,10 @@ def bow(df_kt, y_t_kt, df_ds, y_t_ds):
     text_bow2_kt = bow2_fit_kt.transform(df_kt['processed'].apply(str))
     text_bow2_ds = bow2_fit_kt.transform(df_ds['processed'].apply(str))
 
-    print(text_bow1_kt.toarray().shape,  text_bow1_kt.toarray().shape)
-    print(text_bow2_kt.toarray().shape,  text_bow2_kt.toarray().shape, end = " ")
-    print(text_bow1_ds.toarray().shape,  text_bow1_ds.toarray().shape)
-    print(text_bow2_ds.toarray().shape,  text_bow2_ds.toarray().shape, end = " ")
+    print(text_bow1_kt.toarray().shape)
+    print(text_bow2_kt.toarray().shape)
+    print(text_bow1_ds.toarray().shape)
+    print(text_bow2_ds.toarray().shape)
     
     # visualize 
     y = y_t_kt.todense()
@@ -137,10 +136,10 @@ def tfidf(df_kt, y_t_kt, df_ds, y_t_ds):
     text_tfidf2_kt = tfidf2_fit_kt.transform(df_kt['processed'].apply(str))
     text_tfidf2_ds = tfidf2_fit_kt.transform(df_ds['processed'].apply(str))
 
-    print(text_tfidf1_kt.toarray().shape,  text_tfidf1_kt.toarray().shape)
-    print(text_tfidf2_kt.toarray().shape,  text_tfidf2_kt.toarray().shape, end =" ")
-    print(text_tfidf1_ds.toarray().shape,  text_tfidf1_ds.toarray().shape)
-    print(text_tfidf2_ds.toarray().shape,  text_tfidf2_ds.toarray().shape, end =" ")
+    print(text_tfidf1_kt.toarray().shape)
+    print(text_tfidf2_kt.toarray().shape)
+    print(text_tfidf1_ds.toarray().shape)
+    print(text_tfidf2_ds.toarray().shape)
 
     write_to_disk(text_tfidf1_kt, y_t_kt, 'text_tfidf1_kt.pkl')
     write_to_disk(text_tfidf2_kt, y_t_kt, 'text_tfidf2_kt.pkl')
@@ -196,8 +195,8 @@ def pos_bow(df_kt, y_t_kt, df_ds, y_t_ds):
     # text_pos_bow2_kt = text_pos_bow2_fit_kt.transform(df_kt['pos_tag2'])
     # text_pos_bow2_ds = text_pos_bow2_fit_kt.transform(df_ds['pos_
 
-    print(text_pos_bow1_kt.toarray().shape,  text_pos_bow1_kt.toarray().shape)
-    print(text_pos_bow1_ds.toarray().shape,  text_pos_bow1_ds.toarray().shape)
+    print(text_pos_bow1_kt.toarray().shape)
+    print(text_pos_bow1_ds.toarray().shape)
 
     # print(text_pos_bow2_kt.toarray().shape,  text_pos_bow2_kt.toarray().shape)
     # print(text_pos_bow2_ds.toarray().shape,  text_pos_bow2_ds.toarray().shape)
@@ -223,11 +222,11 @@ def pos_tfidf(df_kt, y_t_kt, df_ds, y_t_ds):
     text_pos_tfidf2_kt = text_pos_tfidf2_fit_kt.transform(df_kt['pos_tag2'])
     text_pos_tfidf2_ds = text_pos_tfidf2_fit_kt.transform(df_ds['pos_tag2'])
 
-    print(text_pos_tfidf1_kt.toarray().shape,  text_pos_tfidf1_kt.toarray().shape)
-    print(text_pos_tfidf1_ds.toarray().shape,  text_pos_tfidf1_ds.toarray().shape)
+    print(text_pos_tfidf1_kt.toarray().shape)
+    print(text_pos_tfidf1_ds.toarray().shape)
 
-    print(text_pos_tfidf2_kt.toarray().shape,  text_pos_tfidf2_kt.toarray().shape)
-    print(text_pos_tfidf2_ds.toarray().shape,  text_pos_tfidf2_ds.toarray().shape)
+    print(text_pos_tfidf2_kt.toarray().shape)
+    print(text_pos_tfidf2_ds.toarray().shape)
 
     write_to_disk(text_pos_tfidf1_kt, y_t_kt, 'text_pos_tfidf1_kt.pkl')
     write_to_disk(text_pos_tfidf2_kt, y_t_kt, 'text_pos_tfidf2_kt.pkl')
@@ -250,11 +249,11 @@ def dict_bow(df_kt, y_t_kt, df_ds, y_t_ds):
     text_dict_bow2_kt = text_dict_bow2_fit.transform(df_kt['processed'].apply(str))
     text_dict_bow2_ds = text_dict_bow2_fit.transform(df_ds['processed'].apply(str))
 
-    print(text_dict_bow1_kt.toarray().shape,  text_dict_bow1_kt.toarray().shape)
-    print(text_dict_bow1_ds.toarray().shape,  text_dict_bow1_ds.toarray().shape)
+    print(text_dict_bow1_kt.toarray().shape)
+    print(text_dict_bow1_ds.toarray().shape)
 
-    print(text_dict_bow2_kt.toarray().shape,  text_dict_bow2_kt.toarray().shape)
-    print(text_dict_bow2_ds.toarray().shape,  text_dict_bow2_ds.toarray().shape)
+    print(text_dict_bow2_kt.toarray().shape)
+    print(text_dict_bow2_ds.toarray().shape)
 
     write_to_disk(text_dict_bow1_kt, y_t_kt, 'text_dict_bow1_kt.pkl')
     write_to_disk(text_dict_bow2_kt, y_t_kt, 'text_dict_bow2_kt.pkl')
@@ -277,11 +276,11 @@ def dict_tfidf(df_kt, y_t_kt, df_ds, y_t_ds):
     text_dict_tfidf2_kt = text_dict_tfidf2_fit.transform(df_kt['processed'].apply(str))
     text_dict_tfidf2_ds = text_dict_tfidf2_fit.transform(df_ds['processed'].apply(str))
 
-    print(text_dict_tfidf1_kt.toarray().shape,  text_dict_tfidf1_kt.toarray().shape)
-    print(text_dict_tfidf1_ds.toarray().shape,  text_dict_tfidf1_ds.toarray().shape)
+    print(text_dict_tfidf1_kt.toarray().shape)
+    print(text_dict_tfidf1_ds.toarray().shape)
 
-    print(text_dict_tfidf2_kt.toarray().shape,  text_dict_tfidf2_kt.toarray().shape)
-    print(text_dict_tfidf2_ds.toarray().shape,  text_dict_tfidf2_ds.toarray().shape)
+    print(text_dict_tfidf2_kt.toarray().shape)
+    print(text_dict_tfidf2_ds.toarray().shape)
 
     write_to_disk(text_dict_tfidf1_kt, y_t_kt, 'text_dict_tfidf1_kt.pkl')
     write_to_disk(text_dict_tfidf2_kt, y_t_kt, 'text_dict_tfidf2_kt.pkl')
