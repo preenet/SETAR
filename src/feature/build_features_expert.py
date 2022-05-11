@@ -72,7 +72,6 @@ def extract(df_kt, df_ds):
     elif(text_rep == 'POSTFIDF'):
         pos_tfidf(df_kt, y_t_kt, df_ds, y_t_ds)
     elif(text_rep == 'DICTBOW'):
-        my_vocabs = get_dict_vocab()
         dict_bow(df_kt, y_t_kt, df_ds, y_t_ds)
     elif(text_rep == 'DICTTFIDF'):
         dict_tfidf(df_kt, y_t_kt, df_ds, y_t_ds)
@@ -92,17 +91,17 @@ def extract(df_kt, df_ds):
 def bow(df_kt, y_t_kt, df_ds, y_t_ds):
     print("Extracting BOW...")  
     # BOW with unigram and bigrams
-    bow1 = CountVectorizer(tokenizer=process_text, ngram_range=(1, 1), min_df=5)
-    bow2 = CountVectorizer(tokenizer=process_text, ngram_range=(2, 2), min_df=5)
+    bow1 = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(1, 1), min_df=5)
+    bow2 = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(2, 2), min_df=5)
 
     # fit kt and transform to both datasets
-    bow1_fit_kt = bow1.fit(df_kt['text'].apply(str))
-    text_bow1_kt = bow1_fit_kt.transform(df_kt['text'].apply(str))
-    text_bow1_ds = bow1_fit_kt.transform(df_ds['text'].apply(str))
+    bow1_fit_kt = bow1.fit(df_kt['processed'].apply(str))
+    text_bow1_kt = bow1_fit_kt.transform(df_kt['processed'].apply(str))
+    text_bow1_ds = bow1_fit_kt.transform(df_ds['processed'].apply(str))
 
-    bow2_fit_kt = bow2.fit(df_kt['text'].apply(str))
-    text_bow2_kt = bow2_fit_kt.transform(df_kt['text'].apply(str))
-    text_bow2_ds = bow2_fit_kt.transform(df_ds['text'].apply(str))
+    bow2_fit_kt = bow2.fit(df_kt['processed'].apply(str))
+    text_bow2_kt = bow2_fit_kt.transform(df_kt['processed'].apply(str))
+    text_bow2_ds = bow2_fit_kt.transform(df_ds['processed'].apply(str))
 
     print(text_bow1_kt.toarray().shape,  text_bow1_kt.toarray().shape)
     print(text_bow2_kt.toarray().shape,  text_bow2_kt.toarray().shape, end = " ")
@@ -126,17 +125,17 @@ def bow(df_kt, y_t_kt, df_ds, y_t_ds):
 def tfidf(df_kt, y_t_kt, df_ds, y_t_ds):
     print("Extracting TFI-IDF...")  
     # TF-IDF with unigram and bigrams
-    tfidf1 = TfidfVectorizer(tokenizer=process_text, ngram_range=(1, 1), min_df=5)
-    tfidf2 = TfidfVectorizer(tokenizer=process_text, ngram_range=(2, 2), min_df=5)
+    tfidf1 = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=(1, 1), min_df=5)
+    tfidf2 = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=(2, 2), min_df=5)
 
     # fit kt and transform to both datasets
-    tfidf1_fit_kt = tfidf1.fit(df_kt['text'].apply(str))
-    text_tfidf1_kt = tfidf1_fit_kt.transform(df_kt['text'].apply(str))
-    text_tfidf1_ds = tfidf1_fit_kt.transform(df_ds['text'].apply(str))
+    tfidf1_fit_kt = tfidf1.fit(df_kt['processed'].apply(str))
+    text_tfidf1_kt = tfidf1_fit_kt.transform(df_kt['processed'].apply(str))
+    text_tfidf1_ds = tfidf1_fit_kt.transform(df_ds['processed'].apply(str))
 
-    tfidf2_fit_kt = tfidf2.fit(df_kt['text'].apply(str))
-    text_tfidf2_kt = tfidf2_fit_kt.transform(df_kt['text'].apply(str))
-    text_tfidf2_ds = tfidf2_fit_kt.transform(df_ds['text'].apply(str))
+    tfidf2_fit_kt = tfidf2.fit(df_kt['processed'].apply(str))
+    text_tfidf2_kt = tfidf2_fit_kt.transform(df_kt['processed'].apply(str))
+    text_tfidf2_ds = tfidf2_fit_kt.transform(df_ds['processed'].apply(str))
 
     print(text_tfidf1_kt.toarray().shape,  text_tfidf1_kt.toarray().shape)
     print(text_tfidf2_kt.toarray().shape,  text_tfidf2_kt.toarray().shape, end =" ")
@@ -160,7 +159,7 @@ def w2v_tfidf(df_kt, y_t_kt, df_ds, y_t_ds):
     print(w2v_kt.wv.most_similar("บะหมี่"))
 
     w2v_tfidf_emb_kt = TfidfEmbeddingVectorizer(w2v_kt)
-    w2v_tifdf_fit_kt = w2v_tfidf_emb_kt.fit(df_kt['processed'].apply(str))
+    w2v_tifdf_fit_kt = w2v_tfidf_emb_kt.fit(df_kt['processed'])
 
     # transfrom on both corpuses
     text_w2v_tfidf_kt = w2v_tifdf_fit_kt.transform(df_kt['processed'])
@@ -240,16 +239,16 @@ def pos_tfidf(df_kt, y_t_kt, df_ds, y_t_ds):
 def dict_bow(df_kt, y_t_kt, df_ds, y_t_ds):
     print("Extracting DICT_BOW...")  
     my_vocabs = get_dict_vocab()
-    bow1 = CountVectorizer(tokenizer=process_text, ngram_range=(1, 1))
-    bow2 = CountVectorizer(tokenizer=process_text, ngram_range=(2, 2))
+    bow1 = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(1, 1))
+    bow2 = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(2, 2))
 
     text_dict_bow1_fit = bow1.fit(my_vocabs)
-    text_dict_bow1_kt = text_dict_bow1_fit.transform(df_kt['text'].apply(str))
-    text_dict_bow1_ds = text_dict_bow1_fit.transform(df_ds['text'].apply(str))
+    text_dict_bow1_kt = text_dict_bow1_fit.transform(df_kt['processed'].apply(str))
+    text_dict_bow1_ds = text_dict_bow1_fit.transform(df_ds['processed'].apply(str))
 
     text_dict_bow2_fit = bow2.fit(my_vocabs)
-    text_dict_bow2_kt = text_dict_bow2_fit.transform(df_kt['text'].apply(str))
-    text_dict_bow2_ds = text_dict_bow2_fit.transform(df_ds['text'].apply(str))
+    text_dict_bow2_kt = text_dict_bow2_fit.transform(df_kt['processed'].apply(str))
+    text_dict_bow2_ds = text_dict_bow2_fit.transform(df_ds['processed'].apply(str))
 
     print(text_dict_bow1_kt.toarray().shape,  text_dict_bow1_kt.toarray().shape)
     print(text_dict_bow1_ds.toarray().shape,  text_dict_bow1_ds.toarray().shape)
@@ -267,16 +266,16 @@ def dict_bow(df_kt, y_t_kt, df_ds, y_t_ds):
 def dict_tfidf(df_kt, y_t_kt, df_ds, y_t_ds):
     print("Extracting DICT_TF-IDF...")  
     my_vocabs = get_dict_vocab()
-    tfidf1 = TfidfVectorizer(tokenizer=process_text, ngram_range=(1, 1))
-    tfidf2 = TfidfVectorizer(tokenizer=process_text, ngram_range=(2, 2))
+    tfidf1 = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=(1, 1))
+    tfidf2 = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=(2, 2))
 
     text_dict_tfidf1_fit = tfidf1.fit(my_vocabs)
-    text_dict_tfidf1_kt = text_dict_tfidf1_fit.transform(df_kt['text'].apply(str))
-    text_dict_tfidf1_ds = text_dict_tfidf1_fit.transform(df_ds['text'].apply(str))
+    text_dict_tfidf1_kt = text_dict_tfidf1_fit.transform(df_kt['processed'].apply(str))
+    text_dict_tfidf1_ds = text_dict_tfidf1_fit.transform(df_ds['processed'].apply(str))
 
     text_dict_tfidf2_fit = tfidf2.fit(my_vocabs)
-    text_dict_tfidf2_kt = text_dict_tfidf2_fit.transform(df_kt['text'].apply(str))
-    text_dict_tfidf2_ds = text_dict_tfidf2_fit.transform(df_ds['text'].apply(str))
+    text_dict_tfidf2_kt = text_dict_tfidf2_fit.transform(df_kt['processed'].apply(str))
+    text_dict_tfidf2_ds = text_dict_tfidf2_fit.transform(df_ds['processed'].apply(str))
 
     print(text_dict_tfidf1_kt.toarray().shape,  text_dict_tfidf1_kt.toarray().shape)
     print(text_dict_tfidf1_ds.toarray().shape,  text_dict_tfidf1_ds.toarray().shape)
