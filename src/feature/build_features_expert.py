@@ -238,8 +238,8 @@ def pos_tfidf(df_kt, y_t_kt, df_ds, y_t_ds):
 def dict_bow(df_kt, y_t_kt, df_ds, y_t_ds):
     print("Extracting DICT_BOW...")  
     my_vocabs = get_dict_vocab()
-    bow1 = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(1, 1))
-    bow2 = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(2, 2))
+    bow1 = CountVectorizer(vocabulary=my_vocabs, tokenizer=lambda x:x.split(), ngram_range=(1, 1))
+    bow2 = CountVectorizer(vocabulary=my_vocabs, tokenizer=lambda x:x.split(), ngram_range=(2, 2))
 
     text_dict_bow1_fit = bow1.fit(my_vocabs)
     text_dict_bow1_kt = text_dict_bow1_fit.transform(df_kt['processed'].apply(str))
@@ -268,11 +268,11 @@ def dict_tfidf(df_kt, y_t_kt, df_ds, y_t_ds):
     tfidf1 = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=(1, 1))
     tfidf2 = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=(2, 2))
 
-    text_dict_tfidf1_fit = tfidf1.fit(my_vocabs)
+    text_dict_tfidf1_fit = tfidf1.fit(df_kt['processed'].apply(str))
     text_dict_tfidf1_kt = text_dict_tfidf1_fit.transform(df_kt['processed'].apply(str))
     text_dict_tfidf1_ds = text_dict_tfidf1_fit.transform(df_ds['processed'].apply(str))
 
-    text_dict_tfidf2_fit = tfidf2.fit(my_vocabs)
+    text_dict_tfidf2_fit = tfidf2.fit(df_kt['processed'].apply(str))
     text_dict_tfidf2_kt = text_dict_tfidf2_fit.transform(df_kt['processed'].apply(str))
     text_dict_tfidf2_ds = text_dict_tfidf2_fit.transform(df_ds['processed'].apply(str))
 
@@ -311,7 +311,9 @@ def get_dict_vocab():
         print("Error: can't open file to read", e)
         sys.exit(1)
     f.close()
-    return my_vocabs
+    
+    # return as dict with indx as values.
+    return {k: v for v, k in enumerate(my_vocabs)}
 
 def write_to_disk(text_rep, y, file_name):
     joblib.dump(np.hstack((text_rep, y)), config['output_scratch'] + file_name)
