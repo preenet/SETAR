@@ -1,8 +1,6 @@
 **/__pycache__/
 .ipynb_checkpoints/
 .vscode/
-*.csv
-*.py
 
 data/lexicon/
 data/raw/kt4.0/
@@ -15,3 +13,7 @@ output-scratch/
 # ignore w2v large files
 data/final/original/text_w2v_tfidf_kt.pkl
 data/final/original/text_w2v_tfidf_ws.pkl
+
+/12classifier_TFIDF1_test.csv
+/12classifier_TFIDF1_val.csv
+/ws.sav
