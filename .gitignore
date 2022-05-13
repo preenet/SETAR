@@ -4,7 +4,6 @@
 
 data/lexicon/
 data/raw/kt4.0/
-data/raw/dict/
 data/raw/pretrained/
 data/processed/kt.csv
 
