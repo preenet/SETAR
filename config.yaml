@@ -21,7 +21,7 @@
     final_feature_selection: data/final/feature-selection/
 
     # train/test split 80/20
-    final_train_test: data/final/train-test/
+    final_train_val_test: data/final/train-val-test/
 
     # repeated 10 random for train/validation/test 60/20/20
     final_repeat_random10: data/final/rep-rand10

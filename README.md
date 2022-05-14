@@ -17,12 +17,10 @@ Output:
 For all the feature extraction methods above, Joblib objects as sparse matrix on text feature were dumped (see data folders).  
 
 #Todo
-  1. [x] รัน KT->WS  ดาต้า WS  ("BOW1","BOW2","TFIDF1","TFIDF2","DICT_BOW1")   (compare_10repeated)
-  2. [x] Extract Thai Tales แบบเดิม KT->TT
-  3. [x] รัน KT->TT  ดาต้า TT   ("BOW1","BOW2","TFIDF1","TFIDF2")   (compare_10repeated)
-  4. [ ] Wanchan->KT (NoTune)   Extract Feature
-  5. [ ] Wanchan->KT (Tune)  Extract Feature
-  (4, 5) ไม่ต้องรีบ หรือส่ง KT ให้ผมรัน ก็ได้
+1. [ ] POSTAG  Features
+2. [ ] Thaitales  รัน 10 repeated ให้หน่อย
+3. [ ] แอบอยากรู้ min_df= 20  ngaram 1,2   (TFIDF)
+4. [ ] KT รัน 10 repeated ให้หน่อย
 
 
 **Existing models (published)**

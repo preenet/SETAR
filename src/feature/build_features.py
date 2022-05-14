@@ -13,15 +13,15 @@ Total of 8 text representations were extracted for each corpus.
 import sys
 import pandas as pd
 import numpy as np
-import joblib
+from sklearn.preprocessing import maxabs_scale
 import src.utilities as utils
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from pythainlp.tag import pos_tag_sents
 from gensim.models import Word2Vec
-from scipy import sparse 
 
 from src.feature.tfidf_embedding_vectorizer import TfidfEmbeddingVectorizer
+
 from src.feature.pos_rule import word_tag, tag, tag_emoj
 from src.visualization.visualize import top_feats_all, plot_top_feats
 
@@ -33,7 +33,9 @@ config = utils.read_config()
 text_rep = ""
 data_name = ""
 
-def extract(df_ds):
+__all__ = ['extract']
+
+def extract(df_ds, min_max):
 
     # transfrom target string to int
     y = df_ds['target'].astype('category').cat.codes
@@ -47,84 +49,63 @@ def extract(df_ds):
     # class distribution
     print("DS classes dist.:", df_ds.target.value_counts() / df_ds.shape[0])
 
-    # transfrom class target 
-    yt = y.to_numpy().reshape(-1, 1)
-    yt = sparse.csr_matrix(yt)
-
     if text_rep == 'BOW':        
-        bow(df_ds, yt)
+        vect, feature = bow(df_ds, min_max)
     elif text_rep == 'TFIDF':    
-        tfidf(df_ds, yt)
+        vect, feature = tfidf(df_ds, min_max)
     elif text_rep == 'W2V':    
-        w2v_tfidf(df_ds, yt)
+        vect, feature = w2v_tfidf(df_ds, min_max)
     elif text_rep == 'POSBOW': 
-        pos_bow(df_ds, yt)
+        vect, feature = pos_bow(df_ds, min_max)
     elif(text_rep == 'POSTFIDF'):
-        pos_tfidf(df_ds, yt)
+        vect, feature = pos_tfidf(df_ds, min_max)
     elif(text_rep == 'DICTBOW'):
-        dict_bow(df_ds, yt)
+        vect, feature = dict_bow(df_ds, min_max)
     elif(text_rep == 'DICTTFIDF'):
-        dict_tfidf(df_ds, yt)
+        vect, feature = dict_tfidf(df_ds, min_max)
     elif(text_rep== 'ALL'):
         print("Extracted with all methods...")
-        bow(df_ds, yt)
-        tfidf(df_ds, yt)
-        w2v_tfidf(df_ds, yt)
-        pos_bow(df_ds, yt)
-        pos_tfidf(df_ds, yt)
-        dict_bow(df_ds, yt)
-        dict_tfidf(df_ds, yt)
+        bow(df_ds, min_max)
+        tfidf(df_ds, min_max)
+        w2v_tfidf(df_ds)
+        pos_bow(df_ds, min_max)
+        pos_tfidf(df_ds, min_max)
+        dict_bow(df_ds, min_max)
+        dict_tfidf(df_ds, min_max)
     else:
         sys.exit(1)
-    return
+    return vect, feature
 
-def bow(df_ds, yt):
+def bow(df_ds, min_max):
     print("Extracting BOW...")  
-    # BOW with unigram and bigrams
-    bow1 = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(1, 1), min_df=5)
-    bow2 = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(2, 2), min_df=5)
+    bow = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=5)
 
     # fit kt and transform to both datasets
-    bow1_fit = bow1.fit(df_ds['processed'].apply(str))
-    text_bow1 = bow1_fit.transform(df_ds['processed'].apply(str))
+    bow_fit = bow.fit(df_ds['processed'].apply(str))
+    text_bow = bow_fit.transform(df_ds['processed'].apply(str))
 
-    bow2_fit = bow2.fit(df_ds['processed'].apply(str))
-    text_bow2 = bow2_fit.transform(df_ds['processed'].apply(str))
-    
-    print(text_bow1.toarray().shape)
-    print(text_bow2.toarray().shape)
+    print(text_bow.toarray().shape)
     
     # visualize 
     # y = yt.todense()
     # y = np.array(y.reshape(y.shape[0],))[0]
     # plot_feats(bow1_fit, text_bow1, y)
 
-    # write to disk
-    write_to_disk(text_bow1, yt,'text_bow1_' + data_name + '.pkl')
-    write_to_disk(text_bow2, yt,'text_bow2_' + data_name + '.pkl')
-    return 
+    return bow_fit, text_bow
 
-def tfidf(df_ds, yt):
+def tfidf(df_ds, min_max):
     print("Extracting TFI-IDF...")  
-    # TF-IDF with unigram and bigrams
-    tfidf1 = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=(1, 1), min_df=5)
-    tfidf2 = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=(2, 2), min_df=5)
+    tfidf = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=5)
 
     # fit kt and transform to both datasets
-    tfidf1_fit = tfidf1.fit(df_ds['processed'].apply(str))
-    text_tfidf1 = tfidf1_fit.transform(df_ds['processed'].apply(str))
+    tfidf_fit = tfidf.fit(df_ds['processed'].apply(str))
+    text_tfidf = tfidf_fit.transform(df_ds['processed'].apply(str))
+    
+    print(text_tfidf.toarray().shape)
 
-    tfidf2_fit = tfidf2.fit(df_ds['processed'].apply(str))
-    text_tfidf2 = tfidf2_fit.transform(df_ds['processed'].apply(str))
+    return tfidf_fit, text_tfidf
 
-    print(text_tfidf1.toarray().shape)
-    print(text_tfidf2.toarray().shape)
-
-    write_to_disk(text_tfidf1, yt, 'text_tfidf1_' + data_name + '.pkl')
-    write_to_disk(text_tfidf2, yt, 'text_tfidf2_' + data_name + '.pkl')
-    return
-
-def w2v_tfidf(df_ds, yt):
+def w2v_tfidf(df_ds):
     print("Extracting W2V-TFIDF...")  
     # create word2vec for kt corpus
     w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=4)
@@ -134,11 +115,10 @@ def w2v_tfidf(df_ds, yt):
     w2v_tfidf_emb = TfidfEmbeddingVectorizer(w2v)
     w2v_tifdf_fit = w2v_tfidf_emb.fit(df_ds['processed'])
     text_w2v_tfidf = w2v_tifdf_fit.transform(df_ds['processed'])
-    
-    write_to_disk(sparse.csr_matrix(text_w2v_tfidf), yt, 'text_w2v_tfidf_' + data_name + '.pkl')
-    return 
 
-def pos_bow(df_ds, yt):
+    return w2v_tifdf_fit, text_w2v_tfidf
+
+def pos_bow(df_ds, min_max):
     print("Extracting POS_BOW...")   
 
     pos = pos_tag_sents(df_ds['processed'].tolist(), corpus='orchid_ud')
@@ -150,82 +130,47 @@ def pos_bow(df_ds, yt):
     print(df_ds['pos_tag2'].iloc[1000:1010])
 
     # create bow vectors
-    bow1 = CountVectorizer(ngram_range=(1, 1))
-    #bow2 = CountVectorizer(ngram_range=(2, 2))
+    bow = CountVectorizer(ngram_range=min_max)
 
-    text_pos_bow1_fit = bow1.fit(df_ds['pos_tag1'])
-    text_pos_bow1 = text_pos_bow1_fit.transform(df_ds['pos_tag1'])
+    pos_bow_fit = bow.fit(df_ds['pos_tag1'])
+    text_pos_bow = pos_bow_fit.transform(df_ds['pos_tag1'])
 
-    # text_pos_bow2_fit = bow2.fit(df_ds['pos_tag1'])
-    # text_pos_bow2 = text_pos_bow2_fit.transform(df_ds['pos_tag1'])
+    print(text_pos_bow.toarray().shape)
 
-    print(text_pos_bow1.toarray().shape)
+    return pos_bow_fit, text_pos_bow
 
-    # print(text_pos_bow2.toarray().shape,  text_pos_bow2_ds.toarray().shape)
-
-    write_to_disk(text_pos_bow1, yt, 'text_pos_bow1_' + data_name + '.pkl')
-
-    # write_to_disk(text_pos_bow2, yt, 'text_pos_bow2_' + data_name + '.pkl')
-    return
-
-def pos_tfidf(df_ds, yt):
+def pos_tfidf(df_ds, min_max):
     print("Extracting POS_TF-IDF...")  
-    # create tfidf vectors
-    tfidf1 = TfidfVectorizer(ngram_range=(1, 1))
-    tfidf2 = TfidfVectorizer(ngram_range=(2, 2))
+    tfidf = TfidfVectorizer(ngram_range=min_max)
 
-    text_pos_tfidf1_fit = tfidf1.fit(df_ds['pos_tag1'])
-    text_pos_tfidf1 = text_pos_tfidf1_fit.transform(df_ds['pos_tag1'])
+    pos_tfidf_fit = tfidf.fit(df_ds['pos_tag1'])
+    text_pos_tfidf = pos_tfidf_fit.transform(df_ds['pos_tag1'])
 
-    text_pos_tfidf2_fit = tfidf2.fit(df_ds['pos_tag1'])
-    text_pos_tfidf2 = text_pos_tfidf2_fit.transform(df_ds['pos_tag2'])
+    print(text_pos_tfidf.toarray().shape)
 
-    print(text_pos_tfidf1.toarray().shape)
-    print(text_pos_tfidf2.toarray().shape)
+    return pos_tfidf_fit, text_pos_tfidf
 
-
-    write_to_disk(text_pos_tfidf1, yt, 'text_pos_tfidf1_' + data_name + '.pkl')
-    write_to_disk(text_pos_tfidf2, yt, 'text_pos_tfidf2_' + data_name + '.pkl')
-    return
-
-def dict_bow(df_ds, yt):
+def dict_bow(df_ds, min_max):
     print("Extracting DICT_BOW...")  
     my_vocabs = get_dict_vocab()
-    bow1 = CountVectorizer(vocabulary=my_vocabs, tokenizer=lambda x:x.split(), ngram_range=(1, 1))
-    bow2 = CountVectorizer(vocabulary=my_vocabs, tokenizer=lambda x:x.split(), ngram_range=(2, 2))
+    bow = CountVectorizer(vocabulary=my_vocabs, tokenizer=lambda x:x.split(), ngram_range=min_max)
 
-    text_dict_bow1_fit = bow1.fit(df_ds['processed'].apply(str))
-    text_dict_bow1 = text_dict_bow1_fit.transform(df_ds['processed'].apply(str))
+    dict_bow_fit = bow.fit(df_ds['processed'].apply(str))
+    text_dict_bow = dict_bow_fit.transform(df_ds['processed'].apply(str))
 
-    text_dict_bow2_fit = bow2.fit(df_ds['processed'].apply(str))
-    text_dict_bow2 = text_dict_bow2_fit.transform(df_ds['processed'].apply(str))
+    print(text_dict_bow.toarray().shape)
+    return dict_bow_fit, text_dict_bow
 
-    print(text_dict_bow1.toarray().shape)
-    print(text_dict_bow2.toarray().shape)
-
-
-    write_to_disk(text_dict_bow1, yt, 'text_dict_bow1_' + data_name + '.pkl')
-    write_to_disk(text_dict_bow2, yt, 'text_dict_bow2_' + data_name + '.pkl')
-    return
-
-def dict_tfidf(df_ds, yt):
+def dict_tfidf(df_ds, min_max):
     print("Extracting DICT_TF-IDF...")  
     my_vocabs = get_dict_vocab()
-    tfidf1 = TfidfVectorizer(vocabulary=my_vocabs, tokenizer=lambda x:x.split(), ngram_range=(1, 1))
-    tfidf2 = TfidfVectorizer(vocabulary=my_vocabs, tokenizer=lambda x:x.split(), ngram_range=(2, 2))
+    tfidf1 = TfidfVectorizer(vocabulary=my_vocabs, tokenizer=lambda x:x.split(), ngram_range=min_max)
 
-    text_dict_tfidf1_fit = tfidf1.fit(df_ds['processed'].apply(str))
-    text_dict_tfidf1 = text_dict_tfidf1_fit.transform(df_ds['processed'].apply(str))
-
-    text_dict_tfidf2_fit = tfidf2.fit(df_ds['processed'].apply(str))
-    text_dict_tfidf2 = text_dict_tfidf2_fit.transform(df_ds['processed'].apply(str))
-
-    print(text_dict_tfidf1.toarray().shape)
-    print(text_dict_tfidf2.toarray().shape)
-
-    write_to_disk(text_dict_tfidf1, yt, 'text_dict_tfidf1_' + data_name + '.pkl')
-    write_to_disk(text_dict_tfidf2, yt, 'text_dict_tfidf2_' + data_name + '.pkl')
-    return
+    dict_tfidf_fit = tfidf1.fit(df_ds['processed'].apply(str))
+    text_dict_tfidf = dict_tfidf_fit.transform(df_ds['processed'].apply(str))
+    
+    print(text_dict_tfidf.toarray().shape)
+    return dict_tfidf_fit, text_dict_tfidf
 
 def get_dict_vocab():
     # load list of our custom positive and negative words
@@ -248,9 +193,14 @@ def get_dict_vocab():
     f.close()
     return np.unique(pos_words + neg_words)
 
-def write_to_disk(text_rep, y, file_name):
-    joblib.dump(np.hstack((text_rep, y)), config['output_scratch'] + file_name)
-    return
+# def write_to_disk(text_rep, y, file_name):
+#     X_train, X_tmp, y_train, y_tmp = train_test_split(text_rep, y, test_size=0.4, random_state=0, stratify=y)
+#     X_val, X_test, y_val, y_test = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=0, stratify=y_tmp)
+    
+#     joblib.dump(np.hstack((X_train, y_train)), config['data']['final_train_val_test'] + "train_" + file_name)
+#     joblib.dump(np.hstack((X_val, y_val)), config['data']['final_train_val_test'] + "val_" + file_name)
+#     joblib.dup(np.hstack((X_test, y_test)), config['data']['final_train_val_test']+ "test_" + file_name)
+#     return
 
 def plot_feats(vectorizer, X, y):
     features = vectorizer.get_feature_names()
@@ -260,19 +210,25 @@ def plot_feats(vectorizer, X, y):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         print("*Error: incorrect number of arguments.")
-        print("*Usage: ", config['feature']['build_method'] , "| [dataset name]")
+        print("*Usage:[dataset name]", config['feature']['build_method'], "[min,max]")
         sys.exit(1)
 
-    elif sys.argv[1] in config['feature']['build_method'] and sys.argv[2] in config['data']['name']: 
-        text_rep = sys.argv[1]
-        data_name = sys.argv[2]
+    elif sys.argv[2] in config['feature']['build_method'] and sys.argv[1] in config['data']['name']: 
+        data_name = sys.argv[1]
+        text_rep = sys.argv[2]
+        min_max = sys.argv[3]
 
         print("Loading and converting from csv...")
-        df_ds = pd.read_csv(config['data']['processed_kt'], converters={'processed': pd.eval})    
+        if data_name == 'kt':
+            df_ds = pd.read_csv(config['data']['processed_kt'], converters={'processed': pd.eval})
+        elif data_name == 'ws':
+            df_ds = pd.read_csv(config['data']['processed_ws'], converters={'processed': pd.eval})
+        else:
+            sys.exit(1)
         print("*Building ", text_rep, "representation(s) for: ", data_name)
-        extract(df_ds)
+        extract(df_ds, tuple(map(int, min_max.split(','))))
     else:
         print("*Error: incorrect argument name.")
         sys.exit(1)

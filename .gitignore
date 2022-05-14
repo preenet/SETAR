@@ -10,8 +10,8 @@ data/processed/kt.csv
 output-scratch/
 
 # ignore w2v large files
-data/final/original/text_w2v_tfidf_kt.pkl
-data/final/original/text_w2v_tfidf_ws.pkl
+data/final/train-val-test/train_text_w2v_tfidf_kt.pkl
+data/final/train-val-test/train_text_w2v_tfidf_ws.pkl
 
 /12classifier_TFIDF1_test.csv
 /12classifier_TFIDF1_val.csv
