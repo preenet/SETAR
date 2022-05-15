@@ -41,6 +41,9 @@ def tag_emoj(pos):
     return tag_list
 
 # this approach convert nest-list to simply list of word follows by tag ['word', 'NOUN']
-def flatten(text):
-    res = list(sum(text, ()))
-    return res
+def flatten(pos):
+    tag_list = []
+    for item in pos:
+        tag = list(sum(pos(item), ()))
+        tag_list.append(tag )
+    return tag_list
