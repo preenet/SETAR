@@ -6,7 +6,7 @@
 """
 
 
-__all__ = ['word_tag', 'tag', 'tag_emoj', 'flatten']
+__all__ = ['word_tag', 'tag', 'tag_emoj', 'flatten', 'onehot_mean']
 
 # concate word and tag with underscore (มัน_ADV)
 def word_tag(pos):
@@ -44,6 +44,12 @@ def tag_emoj(pos):
 def flatten(pos):
     tag_list = []
     for item in pos:
-        tag = list(sum(pos(item), ()))
-        tag_list.append(tag )
+        tag = list(sum(item, ()))
+        tag_list.append(tag)
     return tag_list
+
+# use one-hot-encoding for each word base on taggin scheme and return mean embed vector back.
+def onehot_mean(pos):
+    from sklearn.preprocessing import LabelBinarizer
+    res = LabelBinarizer().fit_transform(pos).toarray()
+    return

@@ -22,7 +22,7 @@ from gensim.models import Word2Vec
 
 from src.feature.tfidf_embedding_vectorizer import TfidfEmbeddingVectorizer
 
-from src.feature.pos_rule import word_tag, tag, tag_emoj, flatten
+from src.feature.postag_transform import onehot_mean, word_tag, tag, tag_emoj, flatten
 from src.visualization.visualize import top_feats_all, plot_top_feats
 
 from matplotlib import pyplot as plt
@@ -57,7 +57,7 @@ def extract(text_rep, feat, min_max):
 
 def bow(feat, min_max):
     print("Extracting BOW...")  
-    bow = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=5)
+    bow = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=20)
 
     # fit kt and transform to both datasets
     bow_fit = bow.fit(feat.apply(str))
@@ -74,7 +74,7 @@ def bow(feat, min_max):
 
 def tfidf(feat, min_max):
     print("Extracting TFI-IDF...")  
-    tfidf = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=5)
+    tfidf = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=20)
 
     # fit kt and transform to both datasets
     tfidf_fit = tfidf.fit(feat.apply(str))
@@ -87,7 +87,7 @@ def tfidf(feat, min_max):
 def w2v_tfidf(feat):
     print("Extracting W2V-TFIDF...")  
     # create word2vec for kt corpus
-    w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=4)
+    w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=6)
     w2v.build_vocab(feat)
     w2v.train(feat, total_examples=w2v.corpus_count, epochs=100)
 
@@ -101,7 +101,8 @@ def pos_bow(feat, min_max):
     print("Extracting POS_BOW...")   
 
     pos = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
-    pos = tag(tag_emoj(pos))
+    #pos = tag(tag_emoj(pos))
+    onehot_mean(pos)
     
     # create bow vectors
     bow = CountVectorizer(ngram_range=min_max)
@@ -198,6 +199,6 @@ if __name__ == "__main__":
         print("*Building ", text_rep, "representation(s) for: ", data_name)
         extract(text_rep, df_ds['processed'], tuple(map(int, min_max.split(','))))
     else:
-        print("*Error: incorrect argument name.")
+        print("*Error: incorrect argument name or dataset name.")
         sys.exit(1)
     print('*Program terminate successfully!')
