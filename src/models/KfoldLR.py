@@ -6,7 +6,7 @@ import src.utilities as utils
 import src.feature.build_features as bf
 import pandas as pd
 import warnings
-warnings.filterwarnings("ignore")
+
 config = utils.read_config()
 
 df_ds = pd.read_csv(config['data']['processed_ws'])
@@ -14,12 +14,10 @@ y_ds = df_ds['target'].astype('category').cat.codes
 
 Xo = df_ds['processed']
 yo = y_ds.to_numpy()
-text_reps = ['BOW']
+text_reps = ['POSTFIDF']
 file = open(config['output_scratch']+"KFoldLR.csv", "a")  
 
 for text_rep in text_reps:
-    if(text_rep == 'DICTOBW' or text_rep =='DICTTFIDF'):
-        df_ds = pd.read_csv(config['data']['processed_ws'], converters={'processed': pd.eval})
     file.write(text_rep+"\n")
     for i in range(0, 10):
         X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=i, stratify=yo)

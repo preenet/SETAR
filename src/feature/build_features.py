@@ -22,7 +22,7 @@ from gensim.models import Word2Vec
 
 from src.feature.tfidf_embedding_vectorizer import TfidfEmbeddingVectorizer
 
-from src.feature.postag_transform import onehot_mean, word_tag, tag, tag_emoj, flatten
+from src.feature.postag_transform import onehot_label, word_tag, tag, tag_emoj, flatten
 from src.visualization.visualize import top_feats_all, plot_top_feats
 
 from matplotlib import pyplot as plt
@@ -44,8 +44,8 @@ def extract(text_rep, feat, min_max):
         vect, feature = w2v_tfidf(feat)
     elif text_rep == 'POSBOW': 
         vect, feature = pos_bow(feat, min_max)
-    # elif(text_rep == 'POSTFIDF'):
-    #     #vect, feature = pos_tfidf(feat, min_max)
+    elif(text_rep == 'POSTFIDF'):
+        vect, feature = pos_tfidf(feat, min_max)
     elif(text_rep == 'DICTBOW'):
         vect, feature = dict_bow(feat, min_max)
     elif(text_rep == 'DICTTFIDF'):
@@ -99,11 +99,9 @@ def w2v_tfidf(feat):
 
 def pos_bow(feat, min_max): 
     print("Extracting POS_BOW...")   
+    tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
+    pos = tag(tag_emoj(tagged))
 
-    pos = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
-    #pos = tag(tag_emoj(pos))
-    onehot_mean(pos)
-    
     # create bow vectors
     bow = CountVectorizer(ngram_range=min_max)
 
@@ -114,13 +112,17 @@ def pos_bow(feat, min_max):
 
     return pos_bow_fit, text_pos_bow
 
-# def pos_tfidf(feat, min_max):
-#     print("Extracting POS_TF-IDF...")  
-#     tfidf = TfidfVectorizer(ngram_range=min_max)
-#     pos_tfidf_fit = tfidf.fit(feat)
-#     text_pos_tfidf = pos_tfidf_fit.transform(feat)
+
+def pos_tfidf(feat, min_max):
+    print("Extracting POS_TF-IDF...")  
+    tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
+    pos = onehot_label(tag_emoj(tagged))
     
-#     print(text_pos_tfidf.toarray().shape)
+    # tfidf = TfidfVectorizer(ngram_range=min_max)
+    # pos_tfidf_fit = tfidf.fit(pos)
+    # text_pos_tfidf = pos_tfidf_fit.transform(pos)
+    
+    # print(text_pos_tfidf.toarray().shape)
 
     return pos_tfidf_fit, text_pos_tfidf
 
