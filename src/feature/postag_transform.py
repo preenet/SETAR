@@ -52,7 +52,7 @@ def flatten(tagged):
 # use one-hot-encoding for each word base on taggin scheme
 
 def onehot_label(tagged):
-    pos_tag_ud = ['ADJ', 'ADP', 'ADV', 'AUX', 'CCONJ', 'DET', 'INTJ', 'NOUN', 'NUM', 'PART', 'PRON', 'PUNCT', 'SCONJ', 'SYM', 'VERB', 'X']
+    pos_tag_ud = ['ADJ', 'ADP', 'ADV', 'AUX', 'CCONJ', 'DET', 'INTJ', 'NOUN', 'NUM', 'PART', 'PRON', 'PUNCT', 'SCONJ', 'SYM', 'VERB', 'X', 'EMOJI']
     pos_tag_ud_arr = np.array(pos_tag_ud)
     tag_list = []
 
@@ -62,5 +62,6 @@ def onehot_label(tagged):
             tag_only = ' '.join(map(str, tmp))
             tag_only = list(tag_only.split(" "))
             onehot_data = lb.transform(tag_only)
-            tag_list.append(onehot_data)
+            
+            tag_list.append( flatten(onehot_data) )
     return  tag_list

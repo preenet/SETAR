@@ -14,7 +14,8 @@ y_ds = df_ds['target'].astype('category').cat.codes
 Xo = df_ds['processed']
 yo = y_ds.to_numpy()
 text_reps = ['POSTFIDF']
-file = open(config['output_scratch']+"KFoldLR.csv", "a")  
+file = open(config['output_scratch']+"KFoldLR.csv", "a")
+file.write("valid_acc, precision,recall, f1_score, mean_cv, test_acc" + "\n") 
 
 for text_rep in text_reps:
     file.write(text_rep+"\n")

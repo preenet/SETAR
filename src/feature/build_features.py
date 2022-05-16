@@ -117,6 +117,8 @@ def pos_tfidf(feat, min_max):
     # get pos tag list 
     tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
     pos = tag(tag_emoj(tagged))
+    
+    # one-hot vector as list of string??
     #pos = onehot_label(tag_emoj(tagged))
     
     # create word2vec model from the list
