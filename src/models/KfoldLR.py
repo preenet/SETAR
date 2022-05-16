@@ -5,7 +5,6 @@ from sklearn.preprocessing import MaxAbsScaler
 import src.utilities as utils
 import src.feature.build_features as bf
 import pandas as pd
-import warnings
 
 config = utils.read_config()
 

@@ -112,19 +112,24 @@ def pos_bow(feat, min_max):
 
     return pos_bow_fit, text_pos_bow
 
-
 def pos_tfidf(feat, min_max):
-    print("Extracting POS_TF-IDF...")  
+    print("Extracting POS_W2V_TF-IDF...")  
+    # get pos tag list 
     tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
-    pos = onehot_label(tag_emoj(tagged))
+    pos = tag(tag_emoj(tagged))
+    #pos = onehot_label(tag_emoj(tagged))
     
-    # tfidf = TfidfVectorizer(ngram_range=min_max)
-    # pos_tfidf_fit = tfidf.fit(pos)
-    # text_pos_tfidf = pos_tfidf_fit.transform(pos)
+    # create word2vec model from the list
+    w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=8)
+    w2v.build_vocab(pos)
+    w2v.train(pos, total_examples=w2v.corpus_count, epochs=100)
     
-    # print(text_pos_tfidf.toarray().shape)
+    # now convert to embbed vector 
+    w2v_tfidf_emb = TfidfEmbeddingVectorizer(w2v)
+    w2v_tifdf_fit = w2v_tfidf_emb.fit(feat)
+    text_w2v_tfidf = w2v_tifdf_fit.transform(feat)
 
-    return pos_tfidf_fit, text_pos_tfidf
+    return w2v_tifdf_fit, text_w2v_tfidf
 
 def dict_bow(feat, min_max):
     print("Extracting DICT_BOW...")  
