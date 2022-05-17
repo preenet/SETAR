@@ -57,11 +57,10 @@ def onehot_label(tagged):
     tag_list = []
 
     for item in tagged:
-            lb = LabelBinarizer().fit(pos_tag_ud_arr)
-            tmp = [el[1] for el in item]
-            tag_only = ' '.join(map(str, tmp))
-            tag_only = list(tag_only.split(" "))
-            onehot_data = lb.transform(tag_only)
-            
-            tag_list.append( flatten(onehot_data) )
+        lb = LabelBinarizer().fit(pos_tag_ud_arr)
+        tmp = [el[1] for el in item]
+        tag_only = ' '.join(map(str, tmp))
+        tag_only = list(tag_only.split(" "))
+        onehot_data = lb.transform(tag_only)
+        tag_list.append(np.mean(onehot_data), axis=0)
     return  tag_list
