@@ -33,7 +33,7 @@ config = utils.read_config()
 text_rep = ""
 data_name = ""
 
-__all__ = ['extract']
+__all__ = ['extract', 'get_dict_vocab']
 
 def extract(text_rep, feat, min_max):
     if text_rep == 'BOW':        
@@ -41,7 +41,7 @@ def extract(text_rep, feat, min_max):
     elif text_rep == 'TFIDF':    
         vect, feature = tfidf(feat, min_max)
     elif text_rep == 'W2V':    
-        vect, feature = w2v_tfidf(feat)
+        vect, feature = w2v_tfidf(feat, min_max)
     elif text_rep == 'POSBOW': 
         vect, feature = pos_bow(feat, min_max)
     elif(text_rep == 'POSTFIDF'):
@@ -74,7 +74,7 @@ def bow(feat, min_max):
 
 def tfidf(feat, min_max):
     print("Extracting TFI-IDF...")  
-    tfidf = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=20)
+    tfidf = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=20, sublinear_tf=True)
 
     # fit kt and transform to both datasets
     tfidf_fit = tfidf.fit(feat.apply(str))
@@ -84,14 +84,14 @@ def tfidf(feat, min_max):
 
     return tfidf_fit, text_tfidf
 
-def w2v_tfidf(feat):
+def w2v_tfidf(feat, min_max):
     print("Extracting W2V-TFIDF...")  
     # create word2vec for kt corpus
-    w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=6)
+    w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=8)
     w2v.build_vocab(feat)
     w2v.train(feat, total_examples=w2v.corpus_count, epochs=100)
 
-    w2v_tfidf_emb = TfidfEmbeddingVectorizer(w2v)
+    w2v_tfidf_emb = TfidfEmbeddingVectorizer(w2v, min_max)
     w2v_tifdf_fit = w2v_tfidf_emb.fit(feat)
     text_w2v_tfidf = w2v_tifdf_fit.transform(feat)
 
@@ -115,10 +115,8 @@ def pos_bow(feat, min_max):
 def pos_tfidf(feat, min_max):
     print("Extracting POS_W2V_TF-IDF...")  
     # get pos tag list 
-    tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
+    tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud', min_df=20, sublinear_tf=True)
     pos = tag(tag_emoj(tagged))
-    
-    # one-hot vector as list of string??
     #pos = onehot_label(tag_emoj(tagged))
     
     # create word2vec model from the list
@@ -127,7 +125,7 @@ def pos_tfidf(feat, min_max):
     w2v.train(pos, total_examples=w2v.corpus_count, epochs=100)
     
     # now convert to embbed vector 
-    w2v_tfidf_emb = TfidfEmbeddingVectorizer(w2v)
+    w2v_tfidf_emb = TfidfEmbeddingVectorizer(w2v, min_max)
     w2v_tifdf_fit = w2v_tfidf_emb.fit(feat)
     text_w2v_tfidf = w2v_tifdf_fit.transform(feat)
 
