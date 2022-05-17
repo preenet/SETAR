@@ -39,8 +39,6 @@ X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_sta
 iname = sys.argv[1]
 tok_train = [text.split() for text in X_train]
 
-bf.extract(iname, X_train, (1,1))
-
 fe, X_train_val = bf.extract(iname, X_train, (1,1))
 X_train_val = sparse.csr_matrix(X_train_val)
 X_val_val = sparse.csr_matrix(fe.transform(X_val))
@@ -52,7 +50,7 @@ X = scaler.transform(X_train_val)
 Xv = scaler.transform(X_val_val)
 Xt = scaler.transform(X_test_val)  
 
-file = open(config['output_scratch'] + str(item) +"_12classifier_"+iname+ "_res.csv", "a")
+file = open(config['output'] + str(item) +"_12classifier_"+iname+ "_res.csv", "a")
 allclf = []
 
 #SVM
