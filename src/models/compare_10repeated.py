@@ -14,7 +14,6 @@ from sklearn.linear_model import LogisticRegression
 from lightgbm import LGBMClassifier
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import MaxAbsScaler
-from scipy import sparse
 from sklearn.model_selection import train_test_split
 
 import src.utilities as utils
@@ -38,14 +37,13 @@ for item in range(0, 10):
     iname = sys.argv[1]
 
     if iname == "POSMEAN":
-        X_train_val = sparse.csr_matrix(bf.extract(iname, X_train, (1,1)))
-        X_val_val = sparse.csr_matrix(bf.extract(iname, X_val, (1,1)))
-        X_test_val = sparse.csr_matrix(bf.extract(iname, X_test, (1,1)))
+        X_train_val = bf.extract(iname, X_train, (1,1))
+        X_val_val = bf.extract(iname, X_val, (1,1))
+        X_test_val = bf.extract(iname, X_test, (1,1))
     else:
         fe, X_train_val = bf.extract(iname, X_train, (1,1))
-        X_train_val = sparse.csr_matrix(X_train_val)
-        X_val_val = sparse.csr_matrix(fe.transform(X_val))
-        X_test_val = sparse.csr_matrix(fe.transform(X_test))
+        X_val_val = fe.transform(X_val)
+        X_test_val = fe.transform(X_test)
 
     scaler = MaxAbsScaler()
     scaler.fit(X_train_val)
