@@ -30,11 +30,11 @@ Xo = df_ds['processed']
 yo = y_ds.to_numpy()
 dict = bf.get_dict_vocab()
 
-for i in range(0, 10):
-    print("SEED:", i)
+for item in range(0, 10):
+    print("SEED:", item)
 
-    X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=i, stratify=yo)
-    X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=i, stratify=y_tmp)
+    X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
+    X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
     iname = sys.argv[1]
 
     if iname == "POSMEAN":
@@ -53,7 +53,7 @@ for i in range(0, 10):
     Xv = scaler.transform(X_val_val)
     Xt = scaler.transform(X_test_val)  
 
-    file = open(config['output'] + str(i) +"_12classifier_"+iname+ "_res.csv", "a")
+    file = open(config['output'] + str(item) +"_12classifier_"+iname+ "_res.csv", "a")
     allclf = []
 
     #SVM
