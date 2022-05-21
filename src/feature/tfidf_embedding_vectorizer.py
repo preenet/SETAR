@@ -33,4 +33,7 @@ class TfidfEmbeddingVectorizer(object):
                          for w in words if w in self.word2vec] or
                         [np.zeros(self.dim)], axis=0)
                 for words in X
-            ])
+            ],  dtype="float32")
+        
+        
+        

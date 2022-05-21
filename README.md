@@ -1,9 +1,8 @@
 # Thai_SA_Journal Dev.
 =======================  
 **State of the arts in Thai Sentimental Analysis**  
-We extracted features from three sentimental corpora: kt4.0 (data from our acquisition), thaitale, and wisesight. By training with our proposed SoTA classifiers on the kt4.0 dataset, we expect to see an improvement in the classification performance of the wisesight as well as thaitale dataset.
 
-Several feature extraction methods were applied on text feature to both corpus as follows:  
+Several feature extraction methods were applied on text feature to all the corpuses as follows:  
 
     * Bag of words for unigram and bigrams
     * TF-IDF for unigram and bigrams
@@ -17,10 +16,8 @@ Output:
 For all the feature extraction methods above, Joblib objects as sparse matrix on text feature were dumped (see data folders).  
 
 #Todo
-1. [ ] POSTAG  Features
-2. [ ] Thaitales  รัน 10 repeated ให้หน่อย
-3. [ ] แอบอยากรู้ min_df= 20  ngaram 1,2   (TFIDF)
-4. [ ] KT รัน 10 repeated ให้หน่อย
+1. [x] POSTAG  run
+2. [ ] KT รัน 10 repeated ให้หน่อย
 
 
 **Existing models (published)**
@@ -55,3 +52,7 @@ Information regarding the corpus can be found from https://github.com/PyThaiNLP/
 
 # Thaitale corpus   
 Information regarding the corpus can be found from https://github.com/dsmlr/40-Thai-Children-Stories  
+
+# Wongnai corpus  
+Information regarding the corpus can be found from https://github.com/wongnai/wongnai-corpus
+
