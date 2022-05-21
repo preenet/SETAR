@@ -68,7 +68,6 @@ for i in range(0, 10):
     for i in range(0,len(param)):
         clf = SVC(C=param[i], random_state=0, probability=True)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-        print(acc[i])
     choose = np.argmax(acc)
     allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
     file.write(str(item)+"SVMRBF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
