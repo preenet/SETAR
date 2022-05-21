@@ -26,6 +26,7 @@ class TfidfEmbeddingVectorizer(object):
 
         return self
 
+
     def transform(self, X):
         return sparse.csr_matrix([
                 np.mean([self.word2vec[w] * self.word2weight[w]

@@ -1,10 +1,13 @@
+## base-line with LR 5 fold CV
+import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.metrics import confusion_matrix, accuracy_score, f1_score, precision_score, recall_score, classification_report
+from sklearn.metrics import  accuracy_score
 from sklearn.preprocessing import MaxAbsScaler
 import src.utilities as utils
 import src.feature.build_features as bf
-import pandas as pd
+from src.models.metrics import CV
+
 
 config = utils.read_config()
 
@@ -13,7 +16,7 @@ y_ds = df_ds['target'].astype('category').cat.codes
 
 Xo = df_ds['processed']
 yo = y_ds.to_numpy()
-text_reps = ['POSTFIDF']
+text_reps = ['W2V']
 file = open(config['output_scratch']+"KFoldLR.csv", "a")
 file.write("valid_acc, precision,recall, f1_score, mean_cv, test_acc" + "\n") 
 
@@ -32,16 +35,6 @@ for text_rep in text_reps:
         X = scaler.transform(X_train_val)
         Xv = scaler.transform(X_val_val)
         Xt = scaler.transform(X_test_val)   
-
-        def CV(model, X_train, y_train, X_valid, y_valid):
-            scores = (cross_val_score(model, X_train, y_train, cv = 5).mean())
-            model = model.fit(X_train, y_train)
-            y_pred = model.predict(X_valid)
-            acc_sc = accuracy_score(y_valid, y_pred)
-            pre_sc = precision_score(y_valid, y_pred, average='weighted')
-            rec_sc = recall_score(y_valid, y_pred, average='weighted')
-            f1_sc = f1_score(y_valid, y_pred, average='weighted')
-            return acc_sc, pre_sc, rec_sc, f1_sc, scores
         
         model = LogisticRegression(C=2., penalty="l2", solver="liblinear", dual=False, multi_class="ovr")
 

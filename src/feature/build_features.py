@@ -44,8 +44,10 @@ def extract(text_rep, feat, min_max):
         vect, feature = w2v_tfidf(feat, min_max)
     elif text_rep == 'POSBOW': 
         vect, feature = pos_bow(feat, min_max)
-    elif(text_rep == 'POSTFIDF'):
-        vect, feature = pos_tfidf(feat, min_max)
+    elif text_rep == 'POSMEAN':
+        vect, feature = pos_mean_emb(feat)
+    elif(text_rep == 'POSW2V'):
+        vect, feature = pos_w2v_tfidf(feat, min_max)
     elif(text_rep == 'DICTBOW'):
         vect, feature = dict_bow(feat, min_max)
     elif(text_rep == 'DICTTFIDF'):
@@ -69,7 +71,6 @@ def bow(feat, min_max):
     # y = yt.todense()
     # y = np.array(y.reshape(y.shape[0],))[0]
     # plot_feats(bow1_fit, text_bow1, y)
-
     return bow_fit, text_bow
 
 def tfidf(feat, min_max):
@@ -90,7 +91,6 @@ def w2v_tfidf(feat, min_max):
     w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=8)
     w2v.build_vocab(feat)
     w2v.train(feat, total_examples=w2v.corpus_count, epochs=100)
-
     w2v_tfidf_emb = TfidfEmbeddingVectorizer(w2v, min_max)
     w2v_tifdf_fit = w2v_tfidf_emb.fit(feat)
     text_w2v_tfidf = w2v_tifdf_fit.transform(feat)
@@ -118,12 +118,6 @@ def pos_mean_emb(feat):
     text_mean_emb = onehot_label(tag_emoj(tagged))
     return text_mean_emb
 
-def pos_mean_emb_tfidf(feat, min_max):
-    """
-    Later
-    """
-    return
-    
 
 def pos_w2v_tfidf(feat, min_max):
     print("Extracting POS_W2V_TF-IDF...")  
