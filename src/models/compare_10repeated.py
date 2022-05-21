@@ -36,12 +36,16 @@ for i in range(0, 10):
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=i, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=i, stratify=y_tmp)
     iname = sys.argv[1]
-    tok_train = [text.split() for text in X_train]
 
-    fe, X_train_val = bf.extract(iname, X_train, (1,1))
-    X_train_val = sparse.csr_matrix(X_train_val)
-    X_val_val = sparse.csr_matrix(fe.transform(X_val))
-    X_test_val = sparse.csr_matrix(fe.transform(X_test))
+    if iname == "POSMEAN":
+        X_train_val = sparse.csr_matrix(bf.extract(iname, X_train, (1,1)))
+        X_val_val = sparse.csr_matrix(bf.extract(iname, X_val, (1,1)))
+        X_test_val = sparse.csr_matrix(bf.extract(iname, X_test, (1,1)))
+    else:
+        fe, X_train_val = bf.extract(iname, X_train, (1,1))
+        X_train_val = sparse.csr_matrix(X_train_val)
+        X_val_val = sparse.csr_matrix(fe.transform(X_val))
+        X_test_val = sparse.csr_matrix(fe.transform(X_test))
 
     scaler = MaxAbsScaler()
     scaler.fit(X_train_val)
@@ -64,6 +68,7 @@ for i in range(0, 10):
     for i in range(0,len(param)):
         clf = SVC(C=param[i], random_state=0, probability=True)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+        print(acc[i])
     choose = np.argmax(acc)
     allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
     file.write(str(item)+"SVMRBF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  

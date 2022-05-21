@@ -45,7 +45,7 @@ def extract(text_rep, feat, min_max):
     elif text_rep == 'POSBOW': 
         vect, feature = pos_bow(feat, min_max)
     elif text_rep == 'POSMEAN':
-        vect, feature = pos_mean_emb(feat)
+        return pos_mean_emb(feat)
     elif(text_rep == 'POSW2V'):
         vect, feature = pos_w2v_tfidf(feat, min_max)
     elif(text_rep == 'DICTBOW'):
