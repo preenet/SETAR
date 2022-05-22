@@ -19,7 +19,7 @@ import src.utilities as utils
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from pythainlp.tag import pos_tag_sents
 from gensim.models import Word2Vec
-
+from scipy import sparse
 from src.feature.tfidf_embedding_vectorizer import TfidfEmbeddingVectorizer
 
 from src.feature.postag_transform import onehot_label, word_tag, tag, tag_emoj, flatten
@@ -44,9 +44,13 @@ def extract(text_rep, feat, min_max):
         vect, feature = w2v_tfidf(feat, min_max)
     elif text_rep == 'POSBOW': 
         vect, feature = pos_bow(feat, min_max)
+    elif text_rep == 'POSCONCAT':
+        vect, feature = pos_bow(feat, 'concat', min_max)
+    elif text_rep == 'POSFLAT':
+        vect, feature = pos_bow(feat, 'flat', min_max)    
     elif text_rep == 'POSMEAN':
         return pos_mean_emb(feat)
-    elif(text_rep == 'POSW2V'):
+    elif text_rep == 'POSW2V':
         vect, feature = pos_w2v_tfidf(feat, min_max)
     elif(text_rep == 'DICTBOW'):
         vect, feature = dict_bow(feat, min_max)
@@ -97,10 +101,16 @@ def w2v_tfidf(feat, min_max):
 
     return w2v_tifdf_fit, text_w2v_tfidf
 
-def pos_bow(feat, min_max): 
-    print("Extracting POS_BOW...")   
+def pos_bow(feat, type, min_max): 
+    print("Extracting POSBOW_" + type + "...")   
     tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
-    pos = tag(tag_emoj(tagged))
+    
+    if type == 'concat':
+        pos = word_tag(tag_emoj(tagged))
+    elif type == 'flat':
+        pos = flatten(tag_emoj(tagged))
+    else:
+        pos = tag(tag_emoj(tagged))
 
     # create bow vectors
     bow = CountVectorizer(ngram_range=min_max)
@@ -113,14 +123,14 @@ def pos_bow(feat, min_max):
     return pos_bow_fit, text_pos_bow
 
 def pos_mean_emb(feat):
-    print("Extracting POS_MEAN_EMB...")
+    print("Extracting POSMEAN...")
     tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
     text_mean_emb = onehot_label(tag_emoj(tagged))
-    return text_mean_emb
+    return sparse.csr_matrix(text_mean_emb, dtype="float32")
 
 
 def pos_w2v_tfidf(feat, min_max):
-    print("Extracting POS_W2V_TF-IDF...")  
+    print("Extracting POSW2V_TF-IDF...")  
     tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
     pos = tag(tag_emoj(tagged))
     

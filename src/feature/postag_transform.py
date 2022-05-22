@@ -9,7 +9,7 @@ from sklearn.preprocessing import LabelBinarizer
 
 __all__ = ['word_tag', 'tag', 'tag_emoj', 'flatten', 'onehot_label']
 
-# concate word and tag with underscore (มัน_ADV)
+# concat word and tag with underscore (มัน_ADV)
 def word_tag(tagged):
     tag_list = []
     for item in tagged:

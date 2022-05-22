@@ -7,7 +7,6 @@ from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential
 from keras import layers
-from scipy import sparse
 
 import src.utilities as utils
 import src.feature.build_features as bf
@@ -28,16 +27,16 @@ for item in range(0, 10):
     
     
     fe, X_train_val = bf.extract(iname, X_train, (1,1))
-    X_train_val = sparse.csr_matrix(X_train_val)
-    X_val_val = sparse.csr_matrix(fe.transform(X_val))
-    X_test_val = sparse.csr_matrix(fe.transform(X_test))
+    X_train_val = X_train_val
+    X_val_val = fe.transform(X_val)
+    X_test_val = fe.transform(X_test)
     
     
     EMBEDDING_DIM=300
     maxlen = 300
 
     model = Sequential()
-    model.add(layers.Embedding(vocab_size, embedding_dim, input_length=maxlen))
+    model.add(layers.Embedding(vocab_size, EMBEDDING_DIM, input_length=maxlen))
     model.add(layers.Conv1D(128, 5, activation='relu'))
     model.add(layers.GlobalMaxPooling1D())
     model.add(layers.Dense(10, activation='relu'))
