@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 # Implementation of existing pos-tagging techniques.  
-# TODO: 1. test performance of each
 @Authors: pree.t@cmu.ac.th
 """
 import numpy as np
@@ -13,7 +12,8 @@ __all__ = ['word_tag', 'tag', 'tag_emoj', 'flatten', 'onehot_label']
 def word_tag(tagged):
     tag_list = []
     for item in tagged:
-        tag = ['_'.join(map(str, el)) for el in item]
+        #tag = ['_'.join(map(str, el)) for el in item]
+        tag = ['_'.join(el) for el in item]
         tag_list.append(' '.join(tag))
     return tag_list
 
@@ -45,7 +45,7 @@ def tag_emoj(tagged):
 def flatten(tagged):
     tag_list = []
     for item in tagged:
-        tag = list(sum(item, ()))
+        tag = ' '.join( [el for sublist in item for el in sublist] )
         tag_list.append(tag)
     return tag_list
 

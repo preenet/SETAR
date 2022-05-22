@@ -19,7 +19,7 @@
 
 # feature config
 - feature:
-    build_method: ['BOW', 'TFIDF', 'W2V', 'POSBOW', 'POSCONCAT', 'POSFLAT', 'POSMEAN', 'POSW2V', 'POSTFIDF', 'DICTBOW', 'DICTTFIDF', 'ALL']
+    build_method: ['BOW', 'TFIDF', 'W2V', 'POSBOW', 'POSBOWCONCAT', 'POSBOWFLAT', 'POSMEAN', 'POSW2V', 'POSTFIDF', 'DICTBOW', 'DICTTFIDF', 'ALL']
     selection:
         vi_dim: 1500
         mi_dim: 700

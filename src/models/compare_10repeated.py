@@ -54,23 +54,23 @@ for item in range(0, 10):
     file = open(config['output'] + str(item) +"_12classifier_"+iname+ "_res.csv", "a")
     allclf = []
 
-    #SVM
-    print("SVM..")
-    param = [1,2,4,8,16,32]
-    acc = np.zeros(len(param)) 
-    sens = np.zeros(len(param)) 
-    spec = np.zeros(len(param)) 
-    mcc = np.zeros(len(param)) 
-    roc = np.zeros(len(param)) 
-    f1 = np.zeros(len(param))
-    for i in range(0,len(param)):
-        clf = SVC(C=param[i], random_state=0, probability=True)
-        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    choose = np.argmax(acc)
-    allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
-    file.write(str(item)+"SVMRBF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    # #SVM
+    # print("SVM..")
+    # param = [1,2,4,8,16,32]
+    # acc = np.zeros(len(param)) 
+    # sens = np.zeros(len(param)) 
+    # spec = np.zeros(len(param)) 
+    # mcc = np.zeros(len(param)) 
+    # roc = np.zeros(len(param)) 
+    # f1 = np.zeros(len(param))
+    # for i in range(0,len(param)):
+    #     clf = SVC(C=param[i], random_state=0, probability=True)
+    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+    # choose = np.argmax(acc)
+    # allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
+    # file.write(str(item)+"SVMRBF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
+    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
     #LinearSVC
     print("L-SVM..")
@@ -84,6 +84,7 @@ for item in range(0, 10):
     for i in range(0,len(param)):
         clf =  SVC(C=param[i], kernel='linear',random_state=0, probability=True)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+        print(acc[i])
     choose = np.argmax(acc)
     allclf.append(SVC(C=param[i], kernel='linear',random_state=0, probability=True).fit(X,y))
     file.write(str(item)+"SVMLN,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  

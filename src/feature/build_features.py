@@ -43,11 +43,11 @@ def extract(text_rep, feat, min_max):
     elif text_rep == 'W2V':    
         vect, feature = w2v_tfidf(feat, min_max)
     elif text_rep == 'POSBOW': 
-        vect, feature = pos_bow(feat, min_max)
-    elif text_rep == 'POSCONCAT':
-        vect, feature = pos_bow(feat, 'concat', min_max)
-    elif text_rep == 'POSFLAT':
-        vect, feature = pos_bow(feat, 'flat', min_max)    
+        vect, feature = pos_bow(text_rep,feat, min_max)
+    elif text_rep == 'POSBOWCONCAT':
+        vect, feature = pos_bow(text_rep, feat, min_max)
+    elif text_rep == 'POSBOWFLAT':
+        vect, feature = pos_bow(text_rep,feat, min_max)    
     elif text_rep == 'POSMEAN':
         return pos_mean_emb(feat)
     elif text_rep == 'POSW2V':
@@ -101,19 +101,22 @@ def w2v_tfidf(feat, min_max):
 
     return w2v_tifdf_fit, text_w2v_tfidf
 
-def pos_bow(feat, type, min_max): 
-    print("Extracting POSBOW_" + type + "...")   
+def pos_bow(text_rep, feat, min_max): 
+    print("Extracting ", text_rep + "...")   
     tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
     
-    if type == 'concat':
+    if text_rep == 'POSBOWCONCAT':
         pos = word_tag(tag_emoj(tagged))
-    elif type == 'flat':
+        bow = CountVectorizer(ngram_range=min_max, min_df=20)
+    elif text_rep == 'POSBOWFLAT':
         pos = flatten(tag_emoj(tagged))
-    else:
+        bow = CountVectorizer(ngram_range=min_max, min_df=20)
+    elif text_rep == 'POSBOW':
         pos = tag(tag_emoj(tagged))
-
-    # create bow vectors
-    bow = CountVectorizer(ngram_range=min_max)
+        bow = CountVectorizer(ngram_range=min_max)
+    else:
+        print("Error: incorrect type name.")
+        sys.exit(1)
 
     pos_bow_fit = bow.fit(pos)
     text_pos_bow = pos_bow_fit.transform(pos)
