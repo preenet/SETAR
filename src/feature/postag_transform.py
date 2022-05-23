@@ -12,7 +12,6 @@ __all__ = ['word_tag', 'tag', 'tag_emoj', 'flatten', 'onehot_label']
 def word_tag(tagged):
     tag_list = []
     for item in tagged:
-        #tag = ['_'.join(map(str, el)) for el in item]
         tag = ['_'.join(el) for el in item]
         tag_list.append(' '.join(tag))
     return tag_list
