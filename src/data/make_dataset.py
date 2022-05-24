@@ -73,6 +73,21 @@ def make_tt():
     df_tt.to_csv(config['data']['processed_tt'])
     return
 
+def make_wn():
+    print('making wongnai corpus...')
+    train_df = pd.read_csv(config['data']['raw_wn'] + 'w_review_train.csv', sep=";", header=None).drop_duplicates()
+    test_df = pd.read_csv(config['data']['raw_wn'] + 'test_file.csv', sep=";")
+    train_df.columns = ['text', 'target']
+    test_df["rating"] = 0
+    test_df.rename(columns={'review': 'text', 'rating': 'target'}, inplace=True)
+    test_df = test_df.drop('reviewID', 1)
+    df_wn = pd.concat([train_df , test_df], axis=0).reset_index(drop=True)
+    
+    print("Pre-processing stage 2 with word tokenizing...")
+    df_wn['processed'] = df_wn['text'].apply(str).apply(process_text)
+    df_wn.to_csv(config['data']['processed_wn'])
+    return
+    
 if __name__ == "__main__":
     # get config file
     config = utils.read_config()
@@ -90,6 +105,8 @@ if __name__ == "__main__":
             make_ws()
         elif data_name == 'tt':
             make_tt()
+        elif data_name == 'wn':
+            make_wn()
     else:
         print("*Error: no such data name.")
         sys.exit(1)

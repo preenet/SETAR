@@ -1,19 +1,20 @@
 # file paths
 - data:
-    name: ['kt', 'ws', 'tt'] # available dataset for benchmarking
+    name: ['kt', 'ws', 'tt', 'wn'] # available dataset for benchmarking
 
     # don't touch
     raw_kt: data/raw/kt4.0/pantip_cleaned_1.csv
     raw_ws: data/raw/wisesight/
     raw_tt: data/raw/thaitale/tale_data.csv
+    raw_wn: data/raw/wongnai/
     raw_dict: data/raw/dict/
 
     # datasets that were executed by make_dataset.py
     processed_kt: data/processed/kt.csv
     processed_ws: data/processed/wisesight.csv
     processed_tt: data/processed/thaitale.csv
+    processed_wn: data/processed/wongnai.csv
 
-    
 
 - models: src/models/
 
