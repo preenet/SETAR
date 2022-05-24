@@ -1,3 +1,4 @@
+import sys
 import pandas as pd 
 import numpy as np 
 
@@ -21,6 +22,7 @@ print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 config = utils.read_config()
 df_ds = pd.read_csv(config['data']['processed_ws'])
 
+iname = sys.argv[1]
 
 y_ds = df_ds['target'].astype('category').cat.codes
 
@@ -28,12 +30,11 @@ Xo = df_ds['processed']
 yo = y_ds.to_numpy()
 dict = bf.get_dict_vocab()
 
-acc = []
-pre_sc = []
-rec_sc = []
-f1 = []
-
+file = open(config['output_scratch'] +"CNN_"+iname+ "_ws.csv", "a")
+file.write("ACC, PRE, REC, F1 \n")
 for item in range(0, 10):
+    
+    
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
 
@@ -83,9 +84,13 @@ for item in range(0, 10):
     y_pred = np.argmax(model.predict(X_test_ps), axis=1)
     rounded_labels = np.argmax(yt_c, axis=1)
 
-    # acc[item] = accuracy_score(yv, y_pred)
-    # pre_sc[item] = precision_score(yv, y_pred, average='weighted')
-    # rec_sc[item] = recall_score(yv, y_pred, average='weighted')
+    acc = accuracy_score(yt, y_pred)
+    pre_sc = precision_score(yt, y_pred, average='weighted')
+    rec_sc = recall_score(yt, y_pred, average='weighted')
+    f1_sc = f1_score(yt, y_pred, average='weighted')
+    
+    file.write(str(acc) + "," + str(pre_sc) + "," + str(rec_sc) + "," + str(f1_sc) + "\n")
+file.close()
 
 #print(classification_report(rounded_labels, pred))
 
