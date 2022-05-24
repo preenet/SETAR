@@ -16,8 +16,14 @@ Output:
 For all the feature extraction methods above, Joblib objects as sparse matrix on text feature were dumped (see data folders).  
 
 #Todo
-1. [x] POSTAG  run
-2. [ ] KT รัน 10 repeated ให้หน่อย
+งาน อ.เปิ้ล  
+1. Run Wongnai  
+2. ปั้น  Wanchan Stack   (WS /  TT /  Wongnai)
+3. ปั้น Wanchan Boosting Stack Ensemble (God Mode)  (WS/ TT/ Wongnai)      เย๊อะ แฮะ ฮ่าๆๆ
+งาน อ.ปรี
+1. POSTAG (ทุก Data)
+2. KT Baseline
+3. Deep Baseline (ทุก Data)
 
 
 **Existing models (published)**
