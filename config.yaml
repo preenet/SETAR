@@ -13,7 +13,7 @@
     processed_kt: data/processed/kt.csv
     processed_ws: data/processed/wisesight.csv
     processed_tt: data/processed/thaitale.csv
-    processed_wn: data/processed/wongnai.csv
+    processed_wn: data/processed/wongnai.txt
 
 
 - models: src/models/

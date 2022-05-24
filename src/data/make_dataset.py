@@ -75,15 +75,28 @@ def make_tt():
 
 def make_wn():
     print('making wongnai corpus...')
-    train_df = pd.read_csv(config['data']['raw_wn'] + 'w_review_train.csv', sep=";", header=None).drop_duplicates()
-    test_df = pd.read_csv(config['data']['raw_wn'] + 'test_file.csv', sep=";")
-    train_df.columns = ['text', 'target']
-    test_df["rating"] = 0
-    test_df.rename(columns={'review': 'text', 'rating': 'target'}, inplace=True)
-    test_df = test_df.drop('reviewID', 1)
-    df_wn = pd.concat([train_df , test_df], axis=0).reset_index(drop=True)
+    from datasets import list_datasets, load_dataset
+    [item for item in list_datasets() if 'wongnai' in item]
+    wongnai = load_dataset('wongnai_reviews')
+    
+    file = open(config['data']['processed_wn'], "w",  encoding="utf-8")
+    file.write("text, target\n")
+    for i, item in enumerate(wongnai['train'][:]['review_body']):
+        text = item.replace(',', '')
+        text = text.replace('\n', '')
+        label = wongnai['train'][i]['star_rating']
+        file.write(text + ',' + str(label)+ '\n')
+        
+    for i, item in enumerate(wongnai['test'][:]['review_body']):
+        text = item.replace(',', '')
+        text = text.replace('\n', '')
+        label = wongnai['test'][i]['star_rating']
+        file.write(text + ',' + str(label)+ '\n')
+
+    file.close()
     
     print("Pre-processing stage 2 with word tokenizing...")
+    df_wn = pd.read_csv(config['data']['processed_wn'])
     df_wn['processed'] = df_wn['text'].apply(str).apply(process_text)
     df_wn.to_csv(config['data']['processed_wn'])
     return
