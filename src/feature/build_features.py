@@ -142,8 +142,8 @@ def pos_w2v_tfidf(feat, min_max):
     w2v.train(pos, total_examples=w2v.corpus_count, epochs=100)
     
     w2v_tfidf_emb = TfidfEmbeddingVectorizer(w2v, min_max)
-    w2v_tifdf_fit = w2v_tfidf_emb.fit(feat)
-    text_w2v_tfidf = w2v_tifdf_fit.transform(feat)
+    w2v_tifdf_fit = w2v_tfidf_emb.fit(pos)
+    text_w2v_tfidf = w2v_tifdf_fit.transform(pos)
 
     return w2v_tifdf_fit, text_w2v_tfidf
 
