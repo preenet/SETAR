@@ -16,8 +16,10 @@ def read_config():
 
 def generate_report_10repeated(file_name):
     df = pd.read_csv(config['output'] + file_name, header=None)
-    df = df.sum().to_frame().T.rename_axis(None, axis=1)
-    df.to_csv(config['output'] + file_name + 'report.csv', header = False)
+    df = df.mean().round(decimals=4).astype(str).add(u"\u00B1" + \
+        df.std().round(decimals=4).astype(str)).to_frame(0).T
+   
+    df.to_csv(config['output'] + file_name + '_report.csv', header = False)
     return
 
 
