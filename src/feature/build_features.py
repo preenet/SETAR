@@ -136,6 +136,7 @@ def pos_w2v_tfidf(feat, min_max):
     print("Extracting POSW2V_TF-IDF...")  
     tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
     pos = tag(tag_emoj(tagged))
+    pos = [x.split(' ') for x in pos]
     
     w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=8)
     w2v.build_vocab(pos)

@@ -30,7 +30,7 @@ Xo = df_ds['processed']
 yo = y_ds.to_numpy()
 dict = bf.get_dict_vocab()
 
-file = open(config['output_scratch'] +"CNN_"+iname+ "_ws.csv", "a")
+file = open(config['output_scratch'] +iname+ "_ws.csv", "a")
 file.write("ACC, PRE, REC, F1 \n")
 
 #for item in range(0, 10):

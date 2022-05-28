@@ -32,7 +32,7 @@ dict = bf.get_dict_vocab()
 
 file = open(config['output_scratch'] +"CNN_"+iname+ "_ws.csv", "a")
 file.write("ACC, PRE, REC, F1 \n")
-for item in range(9, 10):
+for item in range(0, 10):
     
     
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
@@ -62,7 +62,7 @@ for item in range(9, 10):
 
     model = Sequential()
     model.add(layers.Embedding(vocab_size, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH))
-    model.add(layers.Conv1D(128, 3, activation='relu'))
+    model.add(layers.Conv1D(128, 5, activation='relu'))
     model.add(layers.GlobalMaxPooling1D())
     model.add(layers.Dense(64, activation='relu'))
     model.add(layers.Dense(4, activation='softmax'))
@@ -75,7 +75,7 @@ for item in range(9, 10):
     history = model.fit(X_train_ps, y_c,
                         epochs=10,
                         validation_data=(X_val_ps, yv_c),
-                        batch_size=10)
+                        batch_size=50)
 
     # evaluate model
     scores = model.evaluate(X_test_ps, yt_c, verbose=1)
@@ -92,18 +92,21 @@ for item in range(9, 10):
     file.write(str(acc) + "," + str(pre_sc) + "," + str(rec_sc) + "," + str(f1_sc) + "\n")
 file.close()
 
-print(classification_report(rounded_labels, y_pred))
+#print(classification_report(rounded_labels, pred))
 
-# plot loss during training
-pyplot.subplot(211)
-pyplot.title('Loss')
-pyplot.plot(history.history['loss'], label='train')
-pyplot.plot(history.history['val_loss'], label='test')
-pyplot.legend()
-# plot accuracy during training
-pyplot.subplot(212)
-pyplot.title('Accuracy')
-pyplot.plot(history.history['accuracy'], label='train')
-pyplot.plot(history.history['val_accuracy'], label='test')
-pyplot.legend()
-pyplot.show()
+# # plot loss during training
+# pyplot.subplot(211)
+# pyplot.title('Loss')
+# pyplot.plot(history.history['loss'], label='train')
+# pyplot.plot(history.history['val_loss'], label='test')
+
+
+
+# pyplot.legend()
+# # plot accuracy during training
+# pyplot.subplot(212)
+# pyplot.title('Accuracy')
+# pyplot.plot(history.history['accuracy'], label='train')
+# pyplot.plot(history.history['val_accuracy'], label='test')
+# pyplot.legend()
+# pyplot.show()
