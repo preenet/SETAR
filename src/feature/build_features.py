@@ -35,7 +35,7 @@ data_name = ""
 
 __all__ = ['extract', 'get_dict_vocab']
 
-def extract(text_rep, feat, min_max):
+def extract(text_rep: str, feat: pd.DataFrame, min_max: tuple):
     if text_rep == 'BOW':        
         vect, feature = bow(feat, min_max)
     elif text_rep == 'TFIDF':    
@@ -61,7 +61,7 @@ def extract(text_rep, feat, min_max):
         sys.exit(1)
     return vect, feature
 
-def bow(feat, min_max):
+def bow(feat: pd.DataFrame, min_max: tuple):
     print("Extracting BOW...")  
     bow = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=20)
 
@@ -77,7 +77,7 @@ def bow(feat, min_max):
     # plot_feats(bow1_fit, text_bow1, y)
     return bow_fit, text_bow
 
-def tfidf(feat, min_max):
+def tfidf(feat, min_max: tuple):
     print("Extracting TFI-IDF...")  
     tfidf = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=20, sublinear_tf=True)
 
@@ -89,7 +89,7 @@ def tfidf(feat, min_max):
 
     return tfidf_fit, text_tfidf
 
-def w2v_tfidf(feat, min_max):
+def w2v_tfidf(feat: pd.DataFrame, min_max: tuple):
     print("Extracting W2V-TFIDF...")  
     # create word2vec for kt corpus
     w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=8)
@@ -101,7 +101,7 @@ def w2v_tfidf(feat, min_max):
 
     return w2v_tifdf_fit, text_w2v_tfidf
 
-def pos_bow(text_rep, feat, min_max): 
+def pos_bow(text_rep:str, feat:pd.DataFrame, min_max: tuple): 
     print("Extracting ", text_rep + "...")   
     tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
     
@@ -125,18 +125,18 @@ def pos_bow(text_rep, feat, min_max):
 
     return pos_bow_fit, text_pos_bow
 
-def pos_mean_emb(feat):
+def pos_mean_emb(feat:pd.DataFrame):
     print("Extracting POSMEAN...")
     tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
     text_mean_emb = onehot_label(tag_emoj(tagged))
     return sparse.csr_matrix(text_mean_emb, dtype="float32")
 
 
-def pos_w2v_tfidf(feat, min_max):
+def pos_w2v_tfidf(feat:pd.DataFrame, min_max: tuple):
     print("Extracting POSW2V_TF-IDF...")  
     tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
-    pos = tag(tag_emoj(tagged))
-    pos = [x.split(' ') for x in pos]
+    pos = word_tag(tag_emoj(tagged))
+    #pos = [x.split(' ') for x in pos]
     
     w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=8)
     w2v.build_vocab(pos)
@@ -148,7 +148,7 @@ def pos_w2v_tfidf(feat, min_max):
 
     return w2v_tifdf_fit, text_w2v_tfidf
 
-def dict_bow(feat, min_max):
+def dict_bow(feat:pd.DataFrame, min_max: tuple):
     print("Extracting DICT_BOW...")  
     my_vocabs = get_dict_vocab()
     bow = CountVectorizer(vocabulary=my_vocabs, tokenizer=lambda x:x.split(), ngram_range=min_max)
@@ -159,7 +159,7 @@ def dict_bow(feat, min_max):
     print(text_dict_bow.toarray().shape)
     return dict_bow_fit, text_dict_bow
 
-def dict_tfidf(feat, min_max):
+def dict_tfidf(feat:pd.DataFrame, min_max: tuple):
     print("Extracting DICT_TF-IDF...")  
     my_vocabs = get_dict_vocab()
     tfidf1 = TfidfVectorizer(vocabulary=my_vocabs, tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=20, sublinear_tf=True)
