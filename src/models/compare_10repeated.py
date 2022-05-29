@@ -41,7 +41,6 @@ for item in range(0, 10):
         X_val_val = bf.extract(iname, X_val, (1,1))
         X_test_val = bf.extract(iname, X_test, (1,1))
     else:
-        print("here")
         fe, X_train_val = bf.extract(iname, X_train, (1,1))
         X_val_val = fe.transform(X_val)
         X_test_val = fe.transform(X_test)
