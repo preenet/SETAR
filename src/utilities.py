@@ -13,8 +13,8 @@ def read_config():
     return config
 
 
-def generate_report_10repeated(data_name, file_name):
-    """_summary_
+def generate_report_10repeated_baseline(data_name, file_name):
+    """_create mean and std from 10 separated csv files as a single file_
 
     Args:
         data_name (_str_): _name of the folder_
@@ -45,6 +45,16 @@ def generate_report_10repeated(data_name, file_name):
     
     return
 
+def generate_report_10repeated_deepbaseline(data_name, file_name):
+    """_create row of mean and std from a csv file as a row_
+
+    Args:
+        data_name (_str_): _name of the folder_
+        file_name (_str_): _common name of the file_
+    """
+    
+    return
+
 if __name__ == "__main__":
     config = read_config()
-    generate_report_10repeated('pos_tag_ws', '12classifier_POSBOWFLAT_res.csv')
+    generate_report_10repeated_baseline('pos_tag_ws', '12classifier_POSBOWFLAT_res.csv')

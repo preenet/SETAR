@@ -84,11 +84,13 @@ y_pred = np.argmax(model.predict(X_test_ps), axis=1)
 rounded_labels = np.argmax(yt_c, axis=1)
 
 acc = accuracy_score(yt, y_pred)
-pre_sc = precision_score(yt, y_pred, average='weighted')
-rec_sc = recall_score(yt, y_pred, average='weighted')
-f1_sc = f1_score(yt, y_pred, average='weighted')
+pre_sc = precision_score(yt, y_pred, average='macro')
+rec_sc = recall_score(yt, y_pred, average='macro')
+mcc_sc = matthews_corrcoef(yt, y_pred)
+acc_sc = accuracy_score(yt, y_pred)
+f1_sc = 2*pre_sc*rec_sc/(pre_sc+rec_sc)
 
-file.write(str(acc) + "," + str(pre_sc) + "," + str(rec_sc) + "," + str(f1_sc) + "\n")
+file.write(str(acc) + "," + str(pre_sc) + "," + str(rec_sc) + "," + str(mcc_sc) + "," + str(f1_sc) + "\n")
 file.close()
 
 #print(classification_report(rounded_labels, pred))

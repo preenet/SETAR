@@ -1,7 +1,10 @@
+"""_supporting normal padding and word2vec embedding_
+"""
 import sys
 import pandas as pd 
 import numpy as np 
 
+from gensim.models import Word2Vec
 from sklearn.model_selection import train_test_split
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
@@ -19,6 +22,9 @@ import tensorflow as tf
 
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
+EMBEDDING_DIM= 300
+MAX_SEQUENCE_LENGTH = 500
+
 config = utils.read_config()
 df_ds = pd.read_csv(config['data']['processed_ws'])
 
@@ -30,16 +36,30 @@ Xo = df_ds['processed']
 yo = y_ds.to_numpy()
 dict = bf.get_dict_vocab()
 
+def gensim_to_keras_embedding(model, train_embeddings=False):
+    keyed_vectors = model.wv  
+    weights = keyed_vectors.vectors  
+    layer = layers.Embedding(
+        input_dim=weights.shape[0],
+        output_dim=weights.shape[1],
+        weights=[weights],
+        trainable=train_embeddings,
+    )
+    return layer
+
+if iname == 'w2v':
+    w2v = Word2Vec(vector_size=EMBEDDING_DIM, min_count=1, window=4, workers=8)
+    w2v.build_vocab(Xo)
+    w2v.train(Xo, total_examples=w2v.corpus_count, epochs=100)
+
+        
 file = open(config['output_scratch'] +"CNN_"+iname+ "_ws.csv", "a")
 file.write("ACC, PRE, REC, F1 \n")
 for item in range(9, 10):
     
-    
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
 
-    MAX_SEQUENCE_LENGTH = 500
-    EMBEDDING_DIM= 300
 
     tokenizer  = Tokenizer(num_words = MAX_SEQUENCE_LENGTH)
     tokenizer.fit_on_texts(X_train)
@@ -61,7 +81,10 @@ for item in range(9, 10):
     yt_c = to_categorical(yt)
 
     model = Sequential()
-    model.add(layers.Embedding(vocab_size, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH))
+    if iname == 'w2v':
+        model.add(gensim_to_keras_embedding(w2v, True))
+    else:
+        model.add(layers.Embedding(vocab_size, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH))
     model.add(layers.Dropout(0.5))
     model.add(layers.Conv1D(128, 3, activation='relu'))
     model.add(layers.GlobalMaxPooling1D())
@@ -86,11 +109,13 @@ for item in range(9, 10):
     rounded_labels = np.argmax(yt_c, axis=1)
 
     acc = accuracy_score(yt, y_pred)
-    pre_sc = precision_score(yt, y_pred, average='weighted')
-    rec_sc = recall_score(yt, y_pred, average='weighted')
-    f1_sc = f1_score(yt, y_pred, average='weighted')
+    pre_sc = precision_score(yt, y_pred, average='macro')
+    rec_sc = recall_score(yt, y_pred, average='macro')
+    mcc_sc = matthews_corrcoef(yt, y_pred)
+    auc_sc = roc_auc_score(yt, y_pred, multi_class='ovo', average='macro')
+    f1_sc = 2*pre_sc*rec_sc/(pre_sc+rec_sc)
     
-    file.write(str(acc) + "," + str(pre_sc) + "," + str(rec_sc) + "," + str(f1_sc) + "\n")
+    file.write(str(acc) + "," + str(pre_sc) + "," + str(rec_sc) + "," + str(mcc_sc) + "," + str(auc_sc) + "," + str(f1_sc) + "\n")
 file.close()
 
 print(classification_report(rounded_labels, y_pred))
