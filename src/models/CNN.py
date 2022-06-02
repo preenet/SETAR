@@ -97,25 +97,26 @@ for item in range(9, 10):
 
     # fit the model
     history = model.fit(X_train_ps, y_c,
-                        epochs=50,
+                        epochs=2,
                         validation_data=(X_val_ps, yv_c),
                         batch_size=10)
 
     # evaluate model
     scores = model.evaluate(X_test_ps, yt_c, verbose=1)
     print("Accuracy: %.2f%%" % (scores[1]*100))
-
+    
+    y_pred_prob = model.predict(X_test_ps)
     y_pred = np.argmax(model.predict(X_test_ps), axis=1)
+    
     rounded_labels = np.argmax(yt_c, axis=1)
 
-    acc = accuracy_score(yt, y_pred)
+    acc_sc = accuracy_score(yt, y_pred)
     pre_sc = precision_score(yt, y_pred, average='macro')
     rec_sc = recall_score(yt, y_pred, average='macro')
     mcc_sc = matthews_corrcoef(yt, y_pred)
-    auc_sc = roc_auc_score(yt, y_pred, multi_class='ovo', average='macro')
-    f1_sc = 2*pre_sc*rec_sc/(pre_sc+rec_sc)
-    
-    file.write(str(acc) + "," + str(pre_sc) + "," + str(rec_sc) + "," + str(mcc_sc) + "," + str(auc_sc) + "," + str(f1_sc) + "\n")
+    f1_sc = f1_score(yt, y_pred, average='macro')
+    auc_sc = roc_auc_score(yt, y_pred_prob, multi_class='ovo', average='macro')
+    file.write(str(acc_sc) + "," + str(pre_sc) + "," + str(rec_sc) + "," + str(mcc_sc) + "," + str(auc_sc) + "," + str(f1_sc) + "\n")
 file.close()
 
 print(classification_report(rounded_labels, y_pred))
@@ -125,8 +126,6 @@ pyplot.subplot(211)
 pyplot.title('Loss')
 pyplot.plot(history.history['loss'], label='train')
 pyplot.plot(history.history['val_loss'], label='test')
-
-
 
 pyplot.legend()
 # plot accuracy during training
