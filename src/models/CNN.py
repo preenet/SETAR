@@ -1,5 +1,6 @@
 """_supporting random embeddings and word2vec embedding_
 """
+from enum import unique
 from msilib import sequence
 import sys
 import pandas as pd 
@@ -11,7 +12,7 @@ from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential, Model
 from keras import layers
-from keras.layers.core import Reshape, Flatten
+from keras.layers.core import Reshape
 from keras.layers import Input, Dense, Embedding, Conv2D, MaxPooling2D, Dropout,concatenate
 from tensorflow.keras.utils import to_categorical
 from sklearn.metrics import classification_report
@@ -19,8 +20,9 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, matth
 from matplotlib import pyplot
 import src.utilities as utils
 import src.feature.build_features as bf
-from src.models.metrics import test
+from src.models.metrics import test, f1_m
 import tensorflow as tf
+import tensorflow_addons as tfa
 
 
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
@@ -34,6 +36,7 @@ df_ds = pd.read_csv(config['data']['processed_ws'])
 iname = sys.argv[1]
 
 y_ds = df_ds['target'].astype('category').cat.codes
+f1 = tfa.metrics.F1Score(num_classes=df_ds['target'].unique().shape[0], average='macro')
 
 Xo = df_ds['processed']
 yo = y_ds.to_numpy()
@@ -105,53 +108,39 @@ for item in range(9, 10):
     if iname == 'w2v':
         model = Sequential()
         model.add(gensim_to_keras_embedding(w2v, True))
-        # model = Sequential()
-        # model.add(layers.Embedding(vocab_size, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH))
-        model.add(layers.Conv2D(128, 3, activation='relu')) 
-        model.add(layers.GlobalMaxPooling2D())
-        # ANN layers
-        model.add(layers.Dense(32, activation='relu'))
-        model.add(layers.Dense(16, activation='relu'))
-        model.add(layers.Dense(8, activation='relu'))
+        #model.add(layers.Embedding(vocab_size, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH))
+        
+        model.add(layers.Dropout(0.5))
+        model.add(layers.Conv1D(128, 3, activation='relu'))
+        model.add(layers.GlobalMaxPooling1D())
         model.add(layers.Dropout(0.5))
         model.add(layers.Dense(4, activation='softmax'))
-        
     elif iname == 'w2v2d':
         
         sequence_length = X_train_ps.shape[1]
         encoder_input = Input(shape=(sequence_length,))
         emb = embedding_layer(encoder_input)
-        reshape = Reshape((sequence_length,EMBEDDING_DIM,1))(emb)
+        reshape = Reshape((sequence_length, EMBEDDING_DIM, 1))(emb)
         conv = layers.Conv2D(128, 3, activation='relu')(reshape)
-        max_pool = layers.GlobalMaxPooling2D()(conv)
-        dense_1 = layers.Dense(32, activation='relu')(max_pool)
-        dense_2 = layers.Dense(16, activation='relu')(dense_1)
-        flatten = layers.Flatten()(dense_2)
+        max_pool_1 = layers.MaxPooling2D(2,2)(conv)
+        conv_1 = layers.Conv2D(128, 3, activation='relu')(max_pool_1)
+        max_pool_2 = layers.MaxPooling2D(2,2)(conv_1)
+        flatten = layers.Flatten()(max_pool_2)
         drop = layers.Dropout(0.5)(flatten)
         output = layers.Dense(4, activation='softmax')(drop)
         model = Model(encoder_input, output)
-        
-        # sequence_length = X_train_ps.shape[1]
-        # model = Sequential()
-        # input = layers.Input(shape=(sequence_length,))
-        # emb = embedding_layer(input)
-        # model.add(layers.Reshape((sequence_length,EMBEDDING_DIM, 1))) 
-        # model.add(Reshape((sequence_length, EMBEDDING_DIM, 1)))
-        # model.add(layers.Conv2D(128, 3, activation='relu'))
-        # model.add(layers.GlobalMaxPooling2D())
-        # model.add(layers.Flatten())
-        # model.add(layers.Dense(4, activation='softmax'))
-        # model.build(input)
+
+        #model.build(input)
     model.compile(optimizer='adam',
                 loss='categorical_crossentropy',
-                metrics=['accuracy'])
+                metrics=['accuracy', f1])
     model.summary()
 
     # fit the model
     history = model.fit(X_train_ps, y_c,
-                        epochs=10,
+                        epochs=30,
                         validation_data=(X_val_ps, yv_c),
-                        batch_size=20)
+                        batch_size=50)
 
     # evaluate model
     scores = model.evaluate(X_val_ps, yv_c, verbose=1)
@@ -168,10 +157,13 @@ for item in range(9, 10):
     f1_sc = 2*pre_sc*rec_sc/(pre_sc+rec_sc)
     auc_sc = roc_auc_score(yv, y_pred_prob, multi_class='ovo', average='macro')
     file.write(str(item) + "," +str(acc_sc) + "," + str(pre_sc) + "," + str(rec_sc) + "," + str(mcc_sc) + "," + str(auc_sc) + "," + str(f1_sc) + "\n")
-file.close()
+    
+    # test with unseen data
+    # combine train and valid as a training set
+    history = model.fit( np.vstack(X_train_ps, X_val_ps), np.hstack(y_c, yv_c), epochs=30, validation_data=(X_test_ps, yt_c), batch_size=50 )
 
-# test with unseen data 
 
+# for investigation
 print(classification_report(rounded_labels, y_pred))
 
 # plot loss during training
