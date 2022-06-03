@@ -16,7 +16,7 @@
     processed_wn: data/processed/wongnai.txt
 
 
-- models: src/models/
+- models: models/
 
 # feature config
 - feature:

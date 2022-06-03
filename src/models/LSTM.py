@@ -30,7 +30,7 @@ Xo = df_ds['processed']
 yo = y_ds.to_numpy()
 dict = bf.get_dict_vocab()
 
-file = open(config['output_scratch'] +iname+ "_ws.csv", "a")
+file = open(config['output_scratch'] +"LSTM_"+iname+ "_ws.csv", "a")
 file.write("ACC, PRE, REC, F1 \n")
 
 #for item in range(0, 10):
@@ -80,31 +80,34 @@ history = model.fit(X_train_ps, y_c,
 scores = model.evaluate(X_test_ps, yt_c, verbose=1)
 print("Accuracy: %.2f%%" % (scores[1]*100))
 
+y_pred_prob = model.predict(X_test_ps)
 y_pred = np.argmax(model.predict(X_test_ps), axis=1)
+
 rounded_labels = np.argmax(yt_c, axis=1)
 
-acc = accuracy_score(yt, y_pred)
-pre_sc = precision_score(yt, y_pred, average='macro')
-rec_sc = recall_score(yt, y_pred, average='macro')
-mcc_sc = matthews_corrcoef(yt, y_pred)
-acc_sc = accuracy_score(yt, y_pred)
-f1_sc = 2*pre_sc*rec_sc/(pre_sc+rec_sc)
-
-file.write(str(acc) + "," + str(pre_sc) + "," + str(rec_sc) + "," + str(mcc_sc) + "," + str(f1_sc) + "\n")
+acc_sc = accuracy_score(yv, y_pred)
+pre_sc = precision_score(yv, y_pred, average='macro')
+rec_sc = recall_score(yv, y_pred, average='macro')
+mcc_sc = matthews_corrcoef(yv, y_pred)
+f1_sc = f1_score(yv, y_pred, average='macro')
+auc_sc = roc_auc_score(yv, y_pred_prob, multi_class='ovo', average='macro')
+file.write(str(acc_sc) + "," + str(pre_sc) + "," + str(rec_sc) + "," + str(mcc_sc) + "," + str(auc_sc) + "," + str(f1_sc) + "\n")
 file.close()
 
-#print(classification_report(rounded_labels, pred))
+print(classification_report(rounded_labels, pred))
 
-# # plot loss during training
-# pyplot.subplot(211)
-# pyplot.title('Loss')
-# pyplot.plot(history.history['loss'], label='train')
-# pyplot.plot(history.history['val_loss'], label='test')
-# pyplot.legend()
-# # plot accuracy during training
-# pyplot.subplot(212)
-# pyplot.title('Accuracy')
-# pyplot.plot(history.history['accuracy'], label='train')
-# pyplot.plot(history.history['val_accuracy'], label='test')
-# pyplot.legend()
-# pyplot.show()
+# plot loss during training
+pyplot.subplot(211)
+pyplot.title('Loss')
+pyplot.plot(history.history['loss'], label='train')
+pyplot.plot(history.history['val_loss'], label='test')
+
+pyplot.legend()
+# plot accuracy during training
+pyplot.subplot(212)
+pyplot.title('Accuracy')
+pyplot.plot(history.history['accuracy'], label='train')
+pyplot.plot(history.history['val_accuracy'], label='test')
+pyplot.legend()
+#pyplot.show()
+pyplot.savefig("lstm.png")
