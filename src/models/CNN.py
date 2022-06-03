@@ -1,4 +1,4 @@
-"""_supporting random embeddings and word2vec embedding_
+"""_supporting random embeddings and gensim embedding_
 """
 from enum import unique
 from msilib import sequence
@@ -13,17 +13,14 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential, Model
 from keras import layers
 from keras.layers.core import Reshape
-from keras.layers import Input, Dense, Embedding, Conv2D, MaxPooling2D, Dropout,concatenate
+from keras.layers import Input, Dense, Embedding, Conv2D, MaxPooling2D, Dropout
 from tensorflow.keras.utils import to_categorical
-from sklearn.metrics import classification_report
-from sklearn.metrics import accuracy_score, precision_score, recall_score, matthews_corrcoef, roc_auc_score
 from matplotlib import pyplot
 import src.utilities as utils
 import src.feature.build_features as bf
-from src.models.metrics import test, f1_m
+from src.models.metrics import test_deep
 import tensorflow as tf
 import tensorflow_addons as tfa
-
 
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
@@ -36,7 +33,6 @@ df_ds = pd.read_csv(config['data']['processed_ws'])
 iname = sys.argv[1]
 
 y_ds = df_ds['target'].astype('category').cat.codes
-f1 = tfa.metrics.F1Score(num_classes=df_ds['target'].unique().shape[0], average='macro')
 
 Xo = df_ds['processed']
 yo = y_ds.to_numpy()
@@ -53,16 +49,14 @@ def gensim_to_keras_embedding(model, train_embeddings):
     )
     return layer
         
-
 file = open(config['output_scratch'] +"CNN_"+iname+ "_ws.csv", "a")
-file.write("ACC, PRE, REC, MCC, AUC, F1 \n")
 
-for item in range(9, 10):
-    
+for item in range(0, 10):
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
 
-
+    f1 = tfa.metrics.F1Score(num_classes=np.unique(y).shape[0], average='macro')
+    
     tokenizer  = Tokenizer(num_words = MAX_SEQUENCE_LENGTH)
     tokenizer.fit_on_texts(X_train)
     train_sequences =  tokenizer.texts_to_sequences(X_train)
@@ -87,8 +81,6 @@ for item in range(9, 10):
         except KeyError:
             embedding_matrix[i]=np.random.normal(0,np.sqrt(0.25),EMBEDDING_DIM)
 
-
-
     from keras.layers import Embedding
     embedding_layer = Embedding(vocabulary_size,
                             EMBEDDING_DIM,
@@ -107,8 +99,8 @@ for item in range(9, 10):
 
     if iname == 'w2v':
         model = Sequential()
-        model.add(gensim_to_keras_embedding(w2v, True))
-        #model.add(layers.Embedding(vocab_size, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH))
+        model.add(gensim_to_keras_embedding(w2v, True)) # use gensim word2vec
+        #model.add(layers.Embedding(vocab_size, EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH)) 
         
         model.add(layers.Dropout(0.5))
         model.add(layers.Conv1D(128, 3, activation='relu'))
@@ -146,25 +138,14 @@ for item in range(9, 10):
     scores = model.evaluate(X_val_ps, yv_c, verbose=1)
     print("Accuracy: %.2f%%" % (scores[1]*100))
     
-    y_pred_prob = model.predict(X_val_ps)
-    y_pred = np.argmax(model.predict(X_val_ps), axis=1)
+    acc, pre, rec, mcc, auc, f1 = test_deep(model, X_val_ps, yv)
+    file.write(str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1))
     
-    rounded_labels = np.argmax(yv_c, axis=1)
-    acc_sc = accuracy_score(yv, y_pred)
-    pre_sc = precision_score(yv, y_pred, average='macro')
-    rec_sc = recall_score(yv, y_pred, average='macro')
-    mcc_sc = matthews_corrcoef(yv, y_pred)
-    f1_sc = 2*pre_sc*rec_sc/(pre_sc+rec_sc)
-    auc_sc = roc_auc_score(yv, y_pred_prob, multi_class='ovo', average='macro')
-    file.write(str(item) + "," +str(acc_sc) + "," + str(pre_sc) + "," + str(rec_sc) + "," + str(mcc_sc) + "," + str(auc_sc) + "," + str(f1_sc) + "\n")
-    
-    # test with unseen data
-    # combine train and valid as a training set
-    history = model.fit( np.vstack(X_train_ps, X_val_ps), np.hstack(y_c, yv_c), epochs=30, validation_data=(X_test_ps, yt_c), batch_size=50 )
-
-
-# for investigation
-print(classification_report(rounded_labels, y_pred))
+    # combine train and valid as a training set, train a model and test with unseen data
+    history = model.fit( np.vstack((X_train_ps, X_val_ps)), np.vstack((y_c, yv_c)), epochs=30, validation_data=(X_test_ps, yt_c), batch_size=50 )
+    acc, sens, spec, mcc, roc, f1 = test_deep(model, X_test_ps, yt)
+    file.write("," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) + "\n")
+file.close()
 
 # plot loss during training
 pyplot.subplot(211)

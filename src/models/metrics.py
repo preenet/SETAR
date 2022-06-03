@@ -1,6 +1,6 @@
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, matthews_corrcoef, roc_auc_score
-from keras import backend as K
+import numpy as np
 
 __all__ = ['CV', 'test', 'f1_m']
 
@@ -14,8 +14,6 @@ def CV(model, X_train, y_train, X_valid, y_valid):
     f1_sc = f1_score(y_valid, y_pred, average='weighted')
     return acc_sc, pre_sc, rec_sc, f1_sc, scores
 
-
-        
 def test(clf, X, y, Xt, yt):
     train_X, test_X = X, Xt
     train_y, test_y = y, yt
@@ -30,4 +28,14 @@ def test(clf, X, y, Xt, yt):
     F1 = 2*SENS*SPEC/(SENS+SPEC)
     return ACC, SENS, SPEC, MCC, AUC, F1
 
-
+# overload version w/o fitting and for deep models
+def test_deep(clf, Xt, yt):
+    y_pred_prob = clf.predict(Xt)
+    y_pred = np.argmax(clf.predict(Xt), axis=1)
+    ACC = accuracy_score(yt, y_pred)
+    SENS = precision_score(yt, y_pred, average='macro')
+    SPEC = recall_score(yt, y_pred, average='macro')
+    MCC = matthews_corrcoef(yt, y_pred)
+    AUC = roc_auc_score(yt, y_pred_prob,multi_class='ovo',average='macro')
+    F1 = 2*SENS*SPEC/(SENS+SPEC)
+    return ACC, SENS, SPEC, MCC, AUC, F1
