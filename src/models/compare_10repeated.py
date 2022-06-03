@@ -54,11 +54,11 @@ def run(data_name, iname, df_ds, min_max):
         Xv = scaler.transform(X_val_val)
         Xt = scaler.transform(X_test_val)  
 
-        file = open(config['output'] + str(item) +"_12classifier_"+iname+ "_res.csv", "a")
+        file = open(config['output'] + str(item) +"_12classifier_"+iname+ "_" + str(min_max) + "_" + data_name + ".csv", "a")
         allclf = []
 
         #SVM
-        print("SVM..")
+        print("SVM...")
         param = [1,2,4,8,16,32]
         acc = np.zeros(len(param)) 
         sens = np.zeros(len(param)) 
@@ -76,7 +76,7 @@ def run(data_name, iname, df_ds, min_max):
         file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
         #LinearSVC
-        print("L-SVM..")
+        print("Linear-SVM...")
         param = [1,2,4,8,16,32]
         acc = np.zeros(len(param)) 
         sens = np.zeros(len(param)) 
@@ -94,7 +94,7 @@ def run(data_name, iname, df_ds, min_max):
         file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
         #RF
-        print("RF..")
+        print("RF...")
         param = [20, 50, 100, 200]
         acc = np.zeros(len(param)) 
         sens = np.zeros(len(param)) 
@@ -112,7 +112,7 @@ def run(data_name, iname, df_ds, min_max):
         file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
         #E-Tree
-        print("E-tree..")
+        print("E-tree...")
         param = [20, 50, 100, 200]
         acc = np.zeros(len(param)) 
         sens = np.zeros(len(param)) 
@@ -130,7 +130,7 @@ def run(data_name, iname, df_ds, min_max):
         file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
         #XGBoost
-        print("XGBoost..")
+        print("XGBoost...")
         param = [20, 50, 100, 200]
         acc = np.zeros(len(param)) 
         sens = np.zeros(len(param)) 
@@ -148,7 +148,7 @@ def run(data_name, iname, df_ds, min_max):
         file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
         #LightGBM
-        print("LightGBM..")
+        print("LightGBM...")
         param = [20, 50, 100, 200]
         acc = np.zeros(len(param)) 
         sens = np.zeros(len(param)) 
@@ -166,7 +166,7 @@ def run(data_name, iname, df_ds, min_max):
         file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
         #MLP
-        print("MLP..")
+        print("MLP...")
         param = [20, 50, 100, 200]
         acc = np.zeros(len(param)) 
         sens = np.zeros(len(param)) 
@@ -184,7 +184,7 @@ def run(data_name, iname, df_ds, min_max):
         file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
         #NB
-        print("NB..")
+        print("NB...")
         clf = MultinomialNB()
         acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
         allclf.append(clf)
@@ -193,7 +193,7 @@ def run(data_name, iname, df_ds, min_max):
         file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
         #1NN
-        print("1NN..")
+        print("1NN...")
         clf = KNeighborsClassifier(n_neighbors=1)
         acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
         allclf.append(clf)
@@ -202,7 +202,7 @@ def run(data_name, iname, df_ds, min_max):
         file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
         #DT
-        print("DT..")
+        print("DT...")
         clf = DecisionTreeClassifier(random_state=0)
         acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
         allclf.append(clf)
@@ -211,7 +211,7 @@ def run(data_name, iname, df_ds, min_max):
         file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
         #Logistic
-        print("LR..")
+        print("LR...")
         param = [0.001,0.01,0.1,1,10,100]
         acc = np.zeros(len(param)) 
         sens = np.zeros(len(param)) 
@@ -229,7 +229,7 @@ def run(data_name, iname, df_ds, min_max):
         file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
         #PLS
-        print("PLS..")
+        print("PLS...")
         clf = OneVsRestClassifier(PLS())
         acc, sens, spec, mcc, roc, f1 = test(clf,X.toarray(),y,Xv.toarray(),yv)
         allclf.append(clf)
