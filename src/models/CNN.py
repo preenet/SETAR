@@ -36,7 +36,6 @@ y_ds = df_ds['target'].astype('category').cat.codes
 
 Xo = df_ds['processed']
 yo = y_ds.to_numpy()
-dict = bf.get_dict_vocab()
 
 def gensim_to_keras_embedding(model, train_embeddings):
     keyed_vectors = model.wv  
@@ -67,7 +66,7 @@ for item in range(0, 10):
     print("vocab size is:", vocab_size)
     word_index = tokenizer.word_index
     
-    w2v = Word2Vec.load(config['models'] + 'w2v_ws300.word2vec')
+    w2v = Word2Vec.load(config['models'] + 'w2v_ws_thwiki300.word2vec')
 
     vocabulary_size = min(len(word_index)+1, MAX_SEQUENCE_LENGTH)
     embedding_matrix = np.zeros((vocabulary_size, EMBEDDING_DIM))
@@ -130,7 +129,7 @@ for item in range(0, 10):
 
     # fit the model
     history = model.fit(X_train_ps, y_c,
-                        epochs=30,
+                        epochs=50,
                         validation_data=(X_val_ps, yv_c),
                         batch_size=50)
 
