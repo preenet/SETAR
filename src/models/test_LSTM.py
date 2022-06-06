@@ -43,7 +43,7 @@ def gensim_to_keras_embedding(model, train_embeddings):
 
 file = open(config['output_scratch'] +"BiLSTM_"+iname+ "_ws.csv", "a")
 
-for item in range(9, 10):
+for item in range(0, 10):
     
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
@@ -142,7 +142,7 @@ for item in range(9, 10):
 
     # fit the model
     history = model.fit(X_train_ps, y_c,
-                        epochs=30,
+                        epochs=50,
                         validation_data=(X_val_ps, yv_c),
                         batch_size=64)
 
@@ -154,9 +154,8 @@ for item in range(9, 10):
     file.write(str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1))
     
     # combine train and valid as a training set, train a model and test with unseen data
-    #history = model.fit( np.vstack((X_train_ps, X_val_ps)), np.vstack((y_c, yv_c)), epochs=30, validation_data=(X_test_ps, yt_c), batch_size=50 )
-    #acc, sens, spec, mcc, roc, f1 = test_deep(model, X_test_ps, yt)
-    #file.write("," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) + "\n")
+    acc, pre, rec, mcc, auc, f1 = test_deep(model, np.vstack((X_test_ps, X_test_ps)), np.hstack((yt, yt)))
+    file.write("," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) + "\n")
 file.close()
 
 # plot loss during training

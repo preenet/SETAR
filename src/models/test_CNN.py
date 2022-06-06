@@ -1,26 +1,26 @@
 """_supporting random embeddings and gensim embedding_
 """
+import sys
 from enum import unique
 from msilib import sequence
-import sys
-import pandas as pd 
-import numpy as np 
 
-from gensim.models import Word2Vec
-from sklearn.model_selection import train_test_split
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-from keras.models import Sequential, Model
-from keras import layers
-from keras.layers.core import Reshape
-from keras.layers import Input, Dense, Embedding, Conv2D, MaxPooling2D, Dropout
-from tensorflow.keras.utils import to_categorical
-from matplotlib import pyplot
-import src.utilities as utils
+import numpy as np
+import pandas as pd
 import src.feature.build_features as bf
-from src.models.metrics import test_deep
+import src.utilities as utils
 import tensorflow as tf
 import tensorflow_addons as tfa
+from gensim.models import Word2Vec
+from keras import layers
+from keras.layers import Conv2D, Dense, Dropout, Embedding, Input, MaxPooling2D
+from keras.layers.core import Reshape
+from keras.models import Model, Sequential
+from keras.preprocessing.sequence import pad_sequences
+from keras.preprocessing.text import Tokenizer
+from matplotlib import pyplot
+from sklearn.model_selection import train_test_split
+from src.models.metrics import test_deep
+from tensorflow.keras.utils import to_categorical
 
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
@@ -122,6 +122,7 @@ for item in range(0, 10):
         model = Model(encoder_input, output)
 
         #model.build(input)
+    callback = tf.keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=5, mode="max", verbose=True)
     model.compile(optimizer='adam',
                 loss='categorical_crossentropy',
                 metrics=['accuracy', f1])
@@ -130,7 +131,7 @@ for item in range(0, 10):
     # fit the model
     history = model.fit(X_train_ps, y_c,
                         epochs=50,
-                        validation_data=(X_val_ps, yv_c),
+                        validation_data=(X_val_ps, yv_c),callbacks=[callback],
                         batch_size=50)
 
     # evaluate model
