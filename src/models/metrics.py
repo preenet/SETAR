@@ -1,6 +1,7 @@
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, matthews_corrcoef, roc_auc_score
 import numpy as np
+from sklearn.metrics import (accuracy_score, f1_score, matthews_corrcoef,
+                             precision_score, recall_score, roc_auc_score)
+from sklearn.model_selection import cross_val_score
 
 __all__ = ['CV', 'test', 'f1_m']
 

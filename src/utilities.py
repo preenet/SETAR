@@ -1,8 +1,8 @@
 """
 This script provides useful funcs to all other scripts
 """
-import yaml
 import pandas as pd
+import yaml
 
 
 def read_config():
@@ -14,6 +14,7 @@ def read_config():
 
 
 def generate_report_10repeated_baseline(data_name, file_name):
+    # for n classifiers
     """_create mean and std from 10 separated csv files as a single file_
 
     Args:
@@ -46,6 +47,7 @@ def generate_report_10repeated_baseline(data_name, file_name):
     return
 
 def generate_report_10repeated_deepbaseline(data_name, file_name):
+    # for 1 classifier
     """_create row of mean and std from a csv file as a row_
 
     Args:
@@ -67,6 +69,6 @@ def generate_report_10repeated_deepbaseline(data_name, file_name):
 
 if __name__ == "__main__":
     config = read_config()
-    #generate_report_10repeated_baseline('pos_tag_ws', '12classifier_POSBOWFLAT_res.csv')
-    generate_report_10repeated_deepbaseline('CNN_WS1', 'CNN_w2v_ws.csv')
+    generate_report_10repeated_baseline('pos_tag_ws', '12classifier_POSBOWFLAT_(1, 1)_ws.csv')
+    #generate_report_10repeated_deepbaseline('CNN_WS1', 'CNN_w2v_ws.csv')
     
