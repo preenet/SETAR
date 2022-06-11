@@ -18,4 +18,4 @@ data/final/train-val-test/train_text_w2v_tfidf_ws.pkl
 /ws.sav
 /PLS.py
 
-/wandb
+src/models/wandb

@@ -1,17 +1,23 @@
 """
 This script provides useful funcs to all other scripts
 """
+from pathlib import Path
+
+import git
 import pandas as pd
 import yaml
 
 
+def get_project_root():
+    return Path(git.Repo('.', search_parent_directories=True).working_tree_dir)
+
 def read_config():
     # Read in config file
+    root = get_project_root()
     config = {k: v for d in yaml.load(
-        open('config.yaml'),
+        open(Path.joinpath(root, 'config.yaml')),
              Loader=yaml.SafeLoader) for k, v in d.items()}
     return config
-
 
 def generate_report_10repeated_baseline(data_name, file_name):
     # for n classifiers

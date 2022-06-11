@@ -19,7 +19,6 @@ from keras.preprocessing.text import Tokenizer
 from matplotlib import pyplot
 from pythainlp import word_vector
 from sklearn.model_selection import train_test_split
-from src.models.LRFind import LRFind
 from src.models.metrics import test_deep
 from tensorflow.keras.utils import to_categorical
 
