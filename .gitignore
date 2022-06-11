@@ -17,3 +17,5 @@ data/final/train-val-test/train_text_w2v_tfidf_ws.pkl
 /12classifier_TFIDF1_val.csv
 /ws.sav
 /PLS.py
+
+/wandb
