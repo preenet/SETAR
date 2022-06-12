@@ -35,6 +35,7 @@ Xo = df_ds['processed']
 
 w2v_path = str(Path.joinpath(root, configs['models']))
 w2v = Word2Vec.load(w2v_path+ '/' + 'w2v_ws_thwiki300_300.word2vec')
+
 # get weight from word2vec as a keras embedding metric
 keyed_vectors = w2v.wv  
 weights = keyed_vectors.vectors  
@@ -107,4 +108,4 @@ model.fit(X_train_ps, y_c,  validation_data=(X_val_ps, yv_c),
           initial_epoch=wandb.run.step,  # for resumed runs
           callbacks=[WandbCallback()])
 
-model.save(Path.joinpath(root, configs['models']+"cnn_ws.h5"))
+model.save(str(Path.joinpath(root, configs['models']) + "/" +"cnn_ws.h5"))
