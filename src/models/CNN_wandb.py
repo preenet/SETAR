@@ -15,7 +15,6 @@ import pandas as pd
 import src.utilities as utils
 import tensorflow as tf
 import tensorflow_addons as tfa
-import wandb
 from gensim.models import Word2Vec
 from keras.layers import (Conv1D, Dense, Dropout, Embedding, Flatten, Input,
                           MaxPooling1D)
@@ -26,6 +25,8 @@ from pythainlp import word_vector
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
 from wandb.keras import WandbCallback
+
+import wandb
 
 configs = utils.read_config()
 root = utils.get_project_root()

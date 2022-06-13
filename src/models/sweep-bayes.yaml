@@ -1,10 +1,11 @@
 program: CNN_wandb.py
 project: cnn-ws
 entity: rapry60
-method: grid
+name: cnn-base
+method: bayes
 metric:
-  goal: maximize
-  name: val_accuracy
+  goal: minimize
+  name: val_loss
 parameters:
   dropout:
     values: [0.2, 0.3, 0.4, 0.5]
@@ -15,4 +16,4 @@ parameters:
   learn_rate:
     values: [0.00001,0.0001, 0.001, 0.01, 0.1]
   epochs:
-    value: 80
+    value: 100
