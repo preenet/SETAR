@@ -40,6 +40,7 @@ for item in range(0, 10):
     
     recall = tf.keras.metrics.Recall()
     precision = tf.keras.metrics.Precision()
+    auc = tf.keras.metrics.AUC()
     f1 = tfa.metrics.F1Score(num_classes=np.unique(y).shape[0], average='macro')
 
     tokenizer  = Tokenizer(num_words = MAX_SEQUENCE_LENGTH)
@@ -73,7 +74,9 @@ for item in range(0, 10):
                                     validation_data=(X_test_ps, yt_c),
                                     verbose=1,
                                     callbacks=[es])
-    file.write(str(item) + "," + max(hist.history['val_accuracy']) + "," + max(hist.history['val_accuracy'])  + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1))
+    file.write( str(item) + "," + str(max(hist.history['val_accuracy'])) + "," + str(max(hist.history['val_precision'])) + \
+        "," + str(max(hist.history['val_recall'])) + ","  + str(max(hist.history['val_auc'])) + "," + str(max(hist.history['val_f1'])))
+
     print("Val_f1score:", f1)
     
     # test with test set
