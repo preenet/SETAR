@@ -83,7 +83,7 @@ num_class = np.unique(y).shape[0]
 recall = tf.keras.metrics.Recall()
 precision = tf.keras.metrics.Precision()
 auc = tf.keras.metrics.AUC()
-mcc = tfa.metrics.MatthewsCorrelationCoefficient()
+mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=np.unique(y).shape[0])
 f1 = tfa.metrics.F1Score(num_classes=np.unique(y).shape[0], average='macro')
 adam = tf.keras.optimizers.Adam(lr=config.learn_rate)
 
