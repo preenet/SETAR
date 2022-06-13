@@ -1,4 +1,4 @@
-program: CNN.py
+program: CNN_wandb.py
 project: cnn-ws
 entity: rapry60
 method: grid
@@ -15,4 +15,4 @@ parameters:
   learn_rate:
     values: [0.00001,0.0001, 0.001, 0.01, 0.1]
   epochs:
-    value: 100
+    value: 80

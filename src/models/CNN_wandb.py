@@ -82,6 +82,7 @@ num_class = np.unique(y).shape[0]
 
 recall = tf.keras.metrics.Recall()
 precision = tf.keras.metrics.Precision()
+auc = tf.keras.metrics.AUC()
 f1 = tfa.metrics.F1Score(num_classes=np.unique(y).shape[0], average='macro')
 adam = tf.keras.optimizers.Adam(lr=config.learn_rate)
 
@@ -122,7 +123,7 @@ else:
     model.add(Dense(num_class, activation='softmax'))
 
     model.compile(
-        loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy' , precision, recall, f1])
+        loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy' , precision, recall, auc, f1])
 
 model.fit(X_train_ps, y_c,  validation_data=(X_val_ps, yv_c),
           epochs=config.epochs,
