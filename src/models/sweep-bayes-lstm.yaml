@@ -1,7 +1,8 @@
-program: CNN_wandb.py
-project: cnn-ws
+program: BLSTM_wandb.py
+project: blstm-ws
+name: blstm-base
 entity: rapry60
-name: cnn-base
+
 method: bayes
 metric:
   goal: minimize

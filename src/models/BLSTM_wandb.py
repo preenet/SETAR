@@ -15,9 +15,9 @@ import pandas as pd
 import src.utilities as utils
 import tensorflow as tf
 import tensorflow_addons as tfa
-import wandb
 from gensim.models import Word2Vec
-from keras.layers import LSTM, Bidirectional, Dense, Dropout, Embedding, Input
+from keras.layers import (LSTM, Bidirectional, Dense, Dropout, Embedding,
+                          Flatten, Input)
 from keras.models import Sequential, load_model
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
@@ -25,6 +25,8 @@ from pythainlp import word_vector
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
 from wandb.keras import WandbCallback
+
+import wandb
 
 configs = utils.read_config()
 root = utils.get_project_root()
@@ -39,19 +41,19 @@ y_ds = df_ds['target'].astype('category').cat.codes
 yo = y_ds.to_numpy()
 Xo = df_ds['processed']
 
-print("Building w2v model...")
+# print("Building w2v model...")
 
-w2v = Word2Vec(vector_size=300, min_count=1, window = 5, workers=8)
-w2v.build_vocab(df_ds['processed'])
-w2v.train(df_ds['processed'], total_examples=w2v.corpus_count, epochs=100)
+# w2v = Word2Vec(vector_size=300, min_count=1, window = 5, workers=8)
+# w2v.build_vocab(df_ds['processed'])
+# w2v.train(df_ds['processed'], total_examples=w2v.corpus_count, epochs=100)
 
-w2v_thwiki = word_vector.get_model()
-w2v.build_vocab(w2v_thwiki.index_to_key, update=True)
-w2v.wv.vectors_lockf = np.ones(len(w2v.wv))
-w2v.wv.intersect_word2vec_format(model_path+ '/' + 'thai2vec.bin', binary=True, lockf=1.0)
+# w2v_thwiki = word_vector.get_model()
+# w2v.build_vocab(w2v_thwiki.index_to_key, update=True)
+# w2v.wv.vectors_lockf = np.ones(len(w2v.wv))
+# w2v.wv.intersect_word2vec_format(model_path+ '/' + 'thai2vec.bin', binary=True, lockf=1.0)
 
 
-w2v = Word2Vec.save(model_path+ '/' + 'w2v_ws_thwiki300_300.word2vec')
+w2v = Word2Vec.load(model_path+ '/' + 'w2v_ws_thwiki300_300.word2vec')
 
 # get weight from word2vec as a keras embedding metric
 keyed_vectors = w2v.wv  
@@ -110,8 +112,9 @@ else:
     model = Sequential()
     model.add(Input(shape=(MAX_SEQUENCE_LENGTH,)))
     model.add(w2v_keras_layer)
-    model.add(Bidirectional(config.layer_1_size, return_sequences = True))
+    model.add(Bidirectional(LSTM(config.layer_1_size, return_sequences = True)))
     model.add(Dropout(config.dropout))
+    model.add(Flatten())
     model.add(Dense(config.hidden_layer_size, activation='relu'))
     model.add(Dense(num_class, activation='softmax'))
 
@@ -122,5 +125,3 @@ model.fit(X_train_ps, y_c,  validation_data=(X_val_ps, yv_c),
           epochs=config.epochs,
           initial_epoch=wandb.run.step,  # for resumed runs
           callbacks=[WandbCallback()])
-
-model.save(model_path+ '/' +"cnn_ws.h5")
