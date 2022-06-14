@@ -130,4 +130,4 @@ else:
 model.fit(X_train_ps, y_c,  validation_data=(X_val_ps, yv_c),
           epochs=config.epochs,
           initial_epoch=wandb.run.step,  # for resumed runs
-          callbacks=[WandbCallback()])
+           callbacks=[WandbCallback(save_model=True, monitor="loss")])

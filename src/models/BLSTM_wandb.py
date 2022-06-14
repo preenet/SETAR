@@ -73,8 +73,7 @@ defaults = dict(
     epochs=64,
     )
 
-resume = sys.argv[-1] == "--resume"
-wandb.init(project="cnn-ws", config=defaults, resume=resume, settings=wandb.Settings(_disable_stats=True))
+wandb.init(project="cnn-ws", config=defaults, resume=True)
 config = wandb.config
 
 X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=0, stratify=yo)
@@ -112,7 +111,7 @@ yt_c = to_categorical(yt)
 if wandb.run.resumed:
     print("RESUMING")
     # restore the best model
-    model = load_model(wandb.restore("cnn_ws_model-best.h5").name)
+    model = load_model(wandb.restore("model-best.h5").name)
 else:
     model = Sequential()
     model.add(Input(shape=(MAX_SEQUENCE_LENGTH,)))
@@ -129,4 +128,4 @@ else:
 model.fit(X_train_ps, y_c,  validation_data=(X_val_ps, yv_c),
           epochs=config.epochs,
           initial_epoch=wandb.run.step,  # for resumed runs
-          callbacks=[WandbCallback()])
+           callbacks=[WandbCallback(save_model=True, monitor="loss")])
