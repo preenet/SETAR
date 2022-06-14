@@ -79,7 +79,12 @@ config = wandb.config
 
 X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=0, stratify=yo)
 X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=0, stratify=y_tmp)
+
 num_class = np.unique(y).shape[0]
+recall = tf.keras.metrics.Recall()
+precision = tf.keras.metrics.Precision()
+auc = tf.keras.metrics.AUC()
+mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=np.unique(y).shape[0])
 f1 = tfa.metrics.F1Score(num_classes=np.unique(y).shape[0], average='macro')
 adam = tf.keras.optimizers.Adam(lr=config.learn_rate)
 
@@ -119,7 +124,7 @@ else:
     model.add(Dense(num_class, activation='softmax'))
 
     model.compile(
-        loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+        loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy' , precision, recall, mcc, auc, f1])
 
 model.fit(X_train_ps, y_c,  validation_data=(X_val_ps, yv_c),
           epochs=config.epochs,
