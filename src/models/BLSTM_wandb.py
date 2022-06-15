@@ -109,7 +109,7 @@ y_c = to_categorical(y)
 yv_c = to_categorical(yv)
 yt_c = to_categorical(yt)
 
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=6)
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
 # build model
 if wandb.run.resumed:
     print("RESUMING")
