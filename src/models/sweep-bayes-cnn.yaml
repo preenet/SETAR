@@ -1,6 +1,6 @@
 program: CNN_wandb.py
 project: cnn-ws
-name: blstm-base
+name: cnn-base
 entity: rapry60
 
 method: bayes

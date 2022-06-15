@@ -75,7 +75,8 @@ defaults = dict(
     epochs=64,
     )
 
-wandb.init(project="blstm-ws", config=defaults, resume=True)
+resume = sys.argv[-1] == "--resume"
+wandb.init(project="cnn-ws", config=defaults, resume=resume, settings=wandb.Settings(_disable_stats=True))
 config = wandb.config
 
 X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=0, stratify=yo)
