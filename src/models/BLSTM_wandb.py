@@ -16,12 +16,13 @@ import src.utilities as utils
 import tensorflow as tf
 import tensorflow_addons as tfa
 from gensim.models import Word2Vec
+from keras.callbacks import EarlyStopping
 from keras.layers import (LSTM, Bidirectional, Dense, Dropout, Embedding,
                           Flatten, Input)
 from keras.models import Sequential, load_model
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
-from pythainlp import word_vector
+#from pythainlp import word_vector
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
 from wandb.keras import WandbCallback
@@ -70,10 +71,11 @@ defaults = dict(
     hidden_layer_size=128,
     layer_1_size=16,
     learn_rate=0.001,
+    batch_size = 64,
     epochs=64,
     )
 
-wandb.init(project="cnn-ws", config=defaults, resume=True)
+wandb.init(project="blstm-ws", config=defaults, resume=True)
 config = wandb.config
 
 X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=0, stratify=yo)
@@ -107,6 +109,7 @@ y_c = to_categorical(y)
 yv_c = to_categorical(yv)
 yt_c = to_categorical(yt)
 
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=6)
 # build model
 if wandb.run.resumed:
     print("RESUMING")
@@ -127,5 +130,6 @@ else:
 
 model.fit(X_train_ps, y_c,  validation_data=(X_val_ps, yv_c),
           epochs=config.epochs,
+          batch_size=config.batch_size,
           initial_epoch=wandb.run.step,  # for resumed runs
-           callbacks=[WandbCallback(save_model=True, monitor="loss")])
+           callbacks=[WandbCallback(save_model=True, monitor="loss"), es])
