@@ -22,6 +22,7 @@ from keras.layers import (Conv1D, Dense, Dropout, Embedding, Flatten, Input,
 from keras.models import Sequential, load_model
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
+from pythainlp import word_vector
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
 from wandb.keras import WandbCallback
@@ -35,7 +36,7 @@ model_path = str(Path.joinpath(root, configs['models']))
 EMBEDDING_DIM= 300
 MAX_SEQUENCE_LENGTH = 500
 
-df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_ws']))
+df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_tt']))
 
 y_ds = df_ds['target'].astype('category').cat.codes
 yo = y_ds.to_numpy()
@@ -51,9 +52,9 @@ Xo = df_ds['processed']
 # w2v.build_vocab(w2v_thwiki.index_to_key, update=True)
 # w2v.wv.vectors_lockf = np.ones(len(w2v.wv))
 # w2v.wv.intersect_word2vec_format(model_path+ '/' + 'thai2vec.bin', binary=True, lockf=1.0)
+# Word2Vec.save(w2v, model_path+ '/' + 'w2v_tt_thwiki300_300.word2vec')
 
-
-w2v = Word2Vec.load(model_path+ '/' + 'w2v_ws_thwiki300_300.word2vec')
+w2v = Word2Vec.load(model_path+ '/' + 'w2v_tt_thwiki300_300.word2vec')
 
 # get weight from word2vec as a keras embedding metric
 keyed_vectors = w2v.wv  
@@ -62,7 +63,7 @@ w2v_keras_layer = Embedding(
     input_dim=weights.shape[0],
     output_dim=weights.shape[1],
     weights=[weights],
-    trainable=True
+    trainable=False
 )
 
 defaults = dict(
@@ -121,9 +122,9 @@ else:
     model.add(w2v_keras_layer)
     model.add(Conv1D(config.layer_1_size, kernel_size=3, activation='relu'))
     model.add(MaxPooling1D())
+    model.add(Flatten()) # model.add(Dropout(config.dropout)) 
+    model.add(Dense(config.hidden_layer_size, activation='relu')) # model.add(Dropout(config.dropout)) 
     model.add(Dropout(config.dropout))
-    model.add(Flatten())
-    model.add(Dense(config.hidden_layer_size, activation='relu'))
     model.add(Dense(num_class, activation='softmax'))
 
     model.compile(

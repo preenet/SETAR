@@ -18,7 +18,7 @@ import tensorflow_addons as tfa
 from gensim.models import Word2Vec
 from keras.callbacks import EarlyStopping
 from keras.layers import (LSTM, Bidirectional, Dense, Dropout, Embedding,
-                          Flatten, Input)
+                          GlobalMaxPool1D, Input)
 from keras.models import Sequential, load_model
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
@@ -63,7 +63,7 @@ w2v_keras_layer = Embedding(
     input_dim=weights.shape[0],
     output_dim=weights.shape[1],
     weights=[weights],
-    trainable=True
+    trainable=False # false (for fixed)
 )
 
 defaults = dict(
@@ -121,9 +121,9 @@ else:
     model.add(Input(shape=(MAX_SEQUENCE_LENGTH,)))
     model.add(w2v_keras_layer)
     model.add(Bidirectional(LSTM(config.layer_1_size, return_sequences = True)))
-    model.add(Dropout(config.dropout))
-    model.add(Flatten())
+    model.add(GlobalMaxPool1D) 
     model.add(Dense(config.hidden_layer_size, activation='relu'))
+    model.add(Dropout(config.dropout))
     model.add(Dense(num_class, activation='softmax'))
 
     model.compile(
