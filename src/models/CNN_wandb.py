@@ -121,10 +121,10 @@ else:
     model.add(Input(shape=(MAX_SEQUENCE_LENGTH,)))
     model.add(w2v_keras_layer)
     model.add(Conv1D(config.layer_1_size, kernel_size=3, activation='relu'))
-    model.add(MaxPooling1D())
-    model.add(Flatten()) # model.add(Dropout(config.dropout)) 
-    model.add(Dense(config.hidden_layer_size, activation='relu')) # model.add(Dropout(config.dropout)) 
     model.add(Dropout(config.dropout))
+    model.add(MaxPooling1D())
+    model.add(Flatten()) 
+    model.add(Dense(config.hidden_layer_size, activation='relu'))
     model.add(Dense(num_class, activation='softmax'))
 
     model.compile(
