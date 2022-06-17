@@ -1,28 +1,27 @@
 import sys
-import pandas as pd 
-import numpy as np 
 
-from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import ExtraTreesClassifier
-from xgboost import XGBClassifier
-from sklearn.neural_network import MLPClassifier
+import numpy as np
+import pandas as pd
+import src.feature.build_features as bf
+import src.utilities as utils
+from lightgbm import LGBMClassifier
+from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.multiclass import OneVsRestClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.linear_model import LogisticRegression
-from lightgbm import LGBMClassifier
-from sklearn.multiclass import OneVsRestClassifier
+from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import MaxAbsScaler
-from sklearn.model_selection import train_test_split
-
-import src.utilities as utils
-import src.feature.build_features as bf
-from src.models.PLS import PLS
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearnex import patch_sklearn
 from src.models.metrics import test
+from src.models.PLS import PLS
+from xgboost import XGBClassifier
 
 # try using https://github.com/intel/scikit-learn-intelex for accelerated implementations of algorithms 
-from sklearnex import patch_sklearn 
+patch_sklearn()
 
 def run(data_name, iname, df_ds, min_max):
     y_ds = df_ds['target'].astype('category').cat.codes
