@@ -22,10 +22,10 @@
 #   epochs:
 #     value: 80
 
-#fine search
+#medium search
 program: CNN_wandb.py
-project: cnn-ws-fine
-name: cnn-base-fine
+project: cnn-ws-medium
+name: cnn-base-medium
 entity: rapry60
 
 method: bayes

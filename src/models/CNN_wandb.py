@@ -63,7 +63,7 @@ w2v_keras_layer = Embedding(
     input_dim=weights.shape[0],
     output_dim=weights.shape[1],
     weights=[weights],
-    trainable=False
+    trainable=True
 )
 
 defaults = dict(
