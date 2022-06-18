@@ -38,10 +38,10 @@ parameters:
   hidden_layer_size:
     values: [128]
   layer_1_size:
-    values: [32, 64]
+    values: [64]
   learn_rate:
-    values: [0.001, 0.005] 
+    values: [0.001] 
   batch_size:
-    values: [64, 128]
+    values: [64]
   epochs:
     value: 80

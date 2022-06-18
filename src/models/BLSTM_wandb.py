@@ -36,7 +36,7 @@ model_path = str(Path.joinpath(root, configs['models']))
 EMBEDDING_DIM= 300
 MAX_SEQUENCE_LENGTH = 500
 
-df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_ws']))
+df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_tt']))
 
 y_ds = df_ds['target'].astype('category').cat.codes
 yo = y_ds.to_numpy()
@@ -54,7 +54,7 @@ Xo = df_ds['processed']
 # w2v.wv.intersect_word2vec_format(model_path+ '/' + 'thai2vec.bin', binary=True, lockf=1.0)
 
 
-w2v = Word2Vec.load(model_path+ '/' + 'w2v_ws_thwiki300_300.word2vec')
+w2v = Word2Vec.load(model_path+ '/' + 'w2v_tt_thwiki300_300.word2vec')
 
 # get weight from word2vec as a keras embedding metric
 keyed_vectors = w2v.wv  
