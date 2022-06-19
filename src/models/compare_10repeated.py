@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -22,6 +23,7 @@ from xgboost import XGBClassifier
 
 # try using https://github.com/intel/scikit-learn-intelex for accelerated implementations of algorithms 
 patch_sklearn()
+
 
 def run(data_name, iname, df_ds, min_max):
     y_ds = df_ds['target'].astype('category').cat.codes
@@ -56,7 +58,7 @@ def run(data_name, iname, df_ds, min_max):
         file = open(config['output'] + str(item) +"_12classifier_"+iname+ "_" + str(min_max) + "_" + data_name + ".csv", "a")
         allclf = []
 
-        #SVM
+        SVM
         print("SVM...")
         param = [1,2,4,8,16,32]
         acc = np.zeros(len(param)) 
@@ -66,8 +68,11 @@ def run(data_name, iname, df_ds, min_max):
         roc = np.zeros(len(param)) 
         f1 = np.zeros(len(param))
         for i in range(0,len(param)):
+            start_time = datetime.now()
             clf = SVC(C=param[i], random_state=0, probability=True)
             acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+            elapsed = datetime.now() - start_time
+            print(str(i) , ": took =", elapsed)
         choose = np.argmax(acc)
         allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
         file.write(str(item)+"SVMRBF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
@@ -83,9 +88,13 @@ def run(data_name, iname, df_ds, min_max):
         mcc = np.zeros(len(param)) 
         roc = np.zeros(len(param))
         f1 = np.zeros(len(param)) 
+        
         for i in range(0,len(param)):
+            start_time = datetime.now()
             clf =  SVC(C=param[i], kernel='linear',random_state=0, probability=True)
             acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+            elapsed = datetime.now() - start_time
+            print(str(i) , ": took =", elapsed)
         choose = np.argmax(acc)
         allclf.append(SVC(C=param[i], kernel='linear',random_state=0, probability=True).fit(X,y))
         file.write(str(item)+"SVMLN,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
@@ -102,8 +111,11 @@ def run(data_name, iname, df_ds, min_max):
         roc = np.zeros(len(param)) 
         f1 = np.zeros(len(param))
         for i in range(0,len(param)):
+            start_time = datetime.now()
             clf = RandomForestClassifier(n_estimators=param[i], random_state=0)
             acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+            elapsed = datetime.now() - start_time
+            print(str(i) , ": took =", elapsed)
         choose = np.argmax(acc)
         allclf.append(RandomForestClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
         file.write(str(item)+"RF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
@@ -120,8 +132,11 @@ def run(data_name, iname, df_ds, min_max):
         roc = np.zeros(len(param)) 
         f1 = np.zeros(len(param))
         for i in range(0,len(param)):
+            start_time = datetime.now()
             clf = ExtraTreesClassifier(n_estimators=param[i], random_state=0)
             acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+            elapsed = datetime.now() - start_time
+            print(str(i) , ": took =", elapsed)
         choose = np.argmax(acc)
         allclf.append(ExtraTreesClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
         file.write(str(item)+"ET,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
@@ -138,8 +153,11 @@ def run(data_name, iname, df_ds, min_max):
         roc = np.zeros(len(param)) 
         f1 = np.zeros(len(param)) 
         for i in range(0,len(param)):
+            start_time = datetime.now()
             clf = XGBClassifier(n_estimators=param[i],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)
             acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+            elapsed = datetime.now() - start_time
+            print(str(i) , ": took =", elapsed)
         choose = np.argmax(acc)  
         allclf.append(XGBClassifier(n_estimators=param[i],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0).fit(X,y))
         file.write(str(item)+"XGB,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
@@ -156,8 +174,11 @@ def run(data_name, iname, df_ds, min_max):
         roc = np.zeros(len(param)) 
         f1 = np.zeros(len(param)) 
         for i in range(0,len(param)):
+            start_time = datetime.now()
             clf = LGBMClassifier(n_estimators=param[i],learning_rate=0.1, random_state=0)
             acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+            elapsed = datetime.now() - start_time
+            print(str(i) , ": took =", elapsed)
         choose = np.argmax(acc)  
         allclf.append(LGBMClassifier(n_estimators=param[i],learning_rate=0.1, random_state=0).fit(X,y))
         file.write(str(item)+"LGBM,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
@@ -174,8 +195,11 @@ def run(data_name, iname, df_ds, min_max):
         roc = np.zeros(len(param)) 
         f1 = np.zeros(len(param))
         for i in range(0,len(param)):  
+            start_time = datetime.now()
             clf = MLPClassifier(hidden_layer_sizes=(param[i],),random_state=0, max_iter = 10000)
             acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+            elapsed = datetime.now() - start_time
+            print(str(i) , ": took =", elapsed)
         choose = np.argmax(acc)
         allclf.append(MLPClassifier(hidden_layer_sizes=(param[choose],),random_state=0, max_iter=10000).fit(X,y))
         file.write(str(item)+"MLP,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose])) 
@@ -219,8 +243,11 @@ def run(data_name, iname, df_ds, min_max):
         roc = np.zeros(len(param)) 
         f1 = np.zeros(len(param))
         for i in range(0,len(param)):
+            start_time = datetime.now()
             clf = LogisticRegression(C=param[i], random_state=0, max_iter=10000)
             acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+            elapsed = datetime.now() - start_time
+            print(str(i) , ": took =", elapsed)
         choose = np.argmax(acc)
         allclf.append(LogisticRegression(C=param[choose], random_state=0, max_iter=10000).fit(X,y))
         file.write(str(item)+"LR,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))   
