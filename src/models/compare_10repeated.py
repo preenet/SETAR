@@ -6,6 +6,7 @@ import pandas as pd
 import src.feature.build_features as bf
 import src.utilities as utils
 from lightgbm import LGBMClassifier
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
@@ -14,7 +15,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import MaxAbsScaler
-from sklearn.svm import SVC
+from sklearn.svm import SVC, LinearSVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearnex import patch_sklearn
 from src.models.metrics import test
@@ -58,30 +59,31 @@ def run(data_name, iname, df_ds, min_max):
         file = open(config['output'] + str(item) +"_12classifier_"+iname+ "_" + str(min_max) + "_" + data_name + ".csv", "a")
         allclf = []
 
-        SVM
-        print("SVM...")
-        param = [1,2,4,8,16,32]
-        acc = np.zeros(len(param)) 
-        sens = np.zeros(len(param)) 
-        spec = np.zeros(len(param)) 
-        mcc = np.zeros(len(param)) 
-        roc = np.zeros(len(param)) 
-        f1 = np.zeros(len(param))
-        for i in range(0,len(param)):
-            start_time = datetime.now()
-            clf = SVC(C=param[i], random_state=0, probability=True)
-            acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-            elapsed = datetime.now() - start_time
-            print(str(i) , ": took =", elapsed)
-        choose = np.argmax(acc)
-        allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
-        file.write(str(item)+"SVMRBF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-        acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
-        file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+        
+        #SVM
+        # print("SVM...")
+        # param = [1,2,4,8,16, 32]
+        # acc = np.zeros(len(param)) 
+        # sens = np.zeros(len(param)) 
+        # spec = np.zeros(len(param)) 
+        # mcc = np.zeros(len(param)) 
+        # roc = np.zeros(len(param)) 
+        # f1 = np.zeros(len(param))
+        # for i in range(0,len(param)):
+        #     start_time = datetime.now()
+        #     clf = SVC(C=param[i], random_state=0, probability=True)
+        #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+        #     elapsed = datetime.now() - start_time
+        #     print(str(i) , ": took =", elapsed)
+        # choose = np.argmax(acc)
+        # allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
+        # file.write(str(item)+"SVMRBF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+        # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
+        # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
         #LinearSVC
-        print("Linear-SVM...")
-        param = [1,2,4,8,16,32]
+        print("Linear-SVM (sklearn.svm.LinearSVC)...")
+        param = [1,2,4,8,16 ,32]
         acc = np.zeros(len(param)) 
         sens = np.zeros(len(param)) 
         spec = np.zeros(len(param)) 
@@ -91,7 +93,9 @@ def run(data_name, iname, df_ds, min_max):
         
         for i in range(0,len(param)):
             start_time = datetime.now()
-            clf =  SVC(C=param[i], kernel='linear',random_state=0, probability=True)
+            #clf =  SVC(C=param[i], kernel='linear',random_state=0, probability=True)
+            svm = LinearSVC(C=param[i],random_state=0, max_iter=20000)
+            clf = CalibratedClassifierCV(svm, cv=3) 
             acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
             elapsed = datetime.now() - start_time
             print(str(i) , ": took =", elapsed)
@@ -100,6 +104,7 @@ def run(data_name, iname, df_ds, min_max):
         file.write(str(item)+"SVMLN,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
         acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
         file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+        
 
         #RF
         print("RF...")
