@@ -53,12 +53,12 @@ def main():
     # w2v.build_vocab(w2v_thwiki.index_to_key, update=True)
     # w2v.wv.vectors_lockf = np.ones(len(w2v.wv))
     # w2v.wv.intersect_word2vec_format(model_path+ '/' + 'thai2vec.bin', binary=True, lockf=1.0)
-    # Word2Vec.save(w2v, model_path+ '/' + 'w2v_tt_thwiki300_300.word2vec')
+    # Word2Vec.save(w2v, model_path+ '/' + 'w2v_kt_thwiki300_300.word2vec')
 
-    # make sure to load a proper word2vec model according to the dataset.
-    w2v = Word2Vec.load(model_path+ '/' + 'w2v_ws_thwiki300_300.word2vec')
+   # make sure to load a proper word2vec model according to the dataset.
+    w2v = Word2Vec.load(model_path+ '/' + 'w2v_kt_thwiki300_300.word2vec')
 
-    # get weight from word2vec as a keras embedding metric
+    #get weight from word2vec as a keras embedding metric
     keyed_vectors = w2v.wv  
     weights = keyed_vectors.vectors  
     w2v_keras_layer = Embedding(
