@@ -1,7 +1,7 @@
 #course search
 program: CNN_wandb.py
-project: cnn-kt
-name: cnn-base
+project: cnn-kt-new
+name: cnn-base-kt
 entity: rapry60
 
 method: bayes
