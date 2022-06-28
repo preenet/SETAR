@@ -75,6 +75,6 @@ def generate_report_10repeated_deepbaseline(data_name, file_name):
 
 if __name__ == "__main__":
     config = read_config()
-    generate_report_10repeated_baseline('BOW_KT', '12classifier_BOW_(1, 1)_kt.csv')
+    generate_report_10repeated_baseline('TFIDF_KT', '12classifier_TFIDF_(1, 1)_kt.csv')
     #generate_report_10repeated_deepbaseline('CNN_TT', 'cnn_10repeated_tt.csv')
     
