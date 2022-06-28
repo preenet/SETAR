@@ -1,6 +1,29 @@
+# program: BLSTM_wandb.py
+# project: blstm-kt
+# name: blstm-base-kt
+# entity: rapry60
+
+# method: bayes
+# metric:
+#   goal: minimize
+#   name: val_loss
+# parameters:
+#   dropout:
+#     values: [0.1, 0.2, 0.3, 0.4, 0.5]
+#   hidden_layer_size:
+#     values: [16, 32, 64, 128]
+#   layer_1_size:
+#     values: [16, 32, 64, 128]
+#   learn_rate:
+#     values: [1e-5, 1e-4, 1e-3, 1e-2] 
+#   batch_size:
+#     values: [32, 64, 128]
+#   epochs:
+#     value: 80
+
 program: BLSTM_wandb.py
-project: blstm-kt
-name: blstm-base-kt
+project: blstm-kt-medium
+name: blstm-base-kt-medium
 entity: rapry60
 
 method: bayes
@@ -9,14 +32,14 @@ metric:
   name: val_loss
 parameters:
   dropout:
-    values: [0.1, 0.2, 0.3, 0.4, 0.5]
+    values: [0.2, 0.3, 0.4, 0.5]
   hidden_layer_size:
     values: [16, 32, 64, 128]
   layer_1_size:
-    values: [16, 32, 64, 128]
+    values: [16, 32]
   learn_rate:
-    values: [1e-5, 1e-4, 1e-3, 1e-2] 
+    values: [1e-4, 1e-3] 
   batch_size:
     values: [32, 64, 128]
   epochs:
-    value: 80
+    value: 40
