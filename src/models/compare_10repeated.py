@@ -11,10 +11,10 @@ from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.multiclass import OneVsRestClassifier
-from sklearn.naive_bayes import MultinomialNB
+from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import MaxAbsScaler
+from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler
 from sklearn.svm import SVC, LinearSVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearnex import patch_sklearn
@@ -23,10 +23,10 @@ from src.models.PLS import PLS
 from xgboost import XGBClassifier
 
 # try using https://github.com/intel/scikit-learn-intelex for accelerated implementations of algorithms 
-patch_sklearn()
 
 
 def run(data_name, iname, df_ds, min_max):
+    patch_sklearn()
     y_ds = df_ds['target'].astype('category').cat.codes
     Xo = df_ds['processed']
     yo = y_ds.to_numpy()
@@ -50,6 +50,7 @@ def run(data_name, iname, df_ds, min_max):
             X_val_val = fe.transform(X_val)
             X_test_val = fe.transform(X_test)
 
+       
         scaler = MaxAbsScaler()
         scaler.fit(X_train_val)
         X = scaler.transform(X_train_val)
@@ -75,6 +76,7 @@ def run(data_name, iname, df_ds, min_max):
             acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
             elapsed = datetime.now() - start_time
             print(str(i) , ": took =", elapsed)
+            print(acc[i], ", ", f1[i])
         choose = np.argmax(acc)
         allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
         file.write(str(item)+"SVMRBF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
@@ -213,7 +215,7 @@ def run(data_name, iname, df_ds, min_max):
 
         #NB
         print("NB...")
-        clf = MultinomialNB()
+        clf = GaussianNB()
         acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
         allclf.append(clf)
         file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
@@ -272,7 +274,6 @@ def run(data_name, iname, df_ds, min_max):
     return 
 
 if __name__ == "__main__":
-    patch_sklearn()
     config = utils.read_config()
     
     if len(sys.argv) != 4:

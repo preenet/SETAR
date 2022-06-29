@@ -10,22 +10,22 @@ Several feature extraction methods were applied on text feature to both corpuses
 Total of 8 text representations were extracted for each corpus.  
 @Authors: pree.t@cmu.ac.th
 """
-import sys
 import ast
-import pandas as pd
+import sys
+
 import numpy as np
+import pandas as pd
 import src.utilities as utils
-
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-from pythainlp.tag import pos_tag_sents
 from gensim.models import Word2Vec
-from scipy import sparse
-from src.feature.tfidf_embedding_vectorizer import TfidfEmbeddingVectorizer
-
-from src.feature.postag_transform import onehot_label, word_tag, tag, tag_emoj, flatten
-from src.visualization.visualize import top_feats_all, plot_top_feats
-
 from matplotlib import pyplot as plt
+from pythainlp.tag import pos_tag_sents
+from scipy import sparse
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from src.feature.postag_transform import (flatten, onehot_label, tag, tag_emoj,
+                                          word_tag)
+from src.feature.tfidf_embedding_vectorizer import TfidfEmbeddingVectorizer
+from src.visualization.visualize import plot_top_feats, top_feats_all
+
 plt.rcParams['font.family'] = 'tahoma'
 
 # global vars
@@ -40,8 +40,10 @@ def extract(text_rep: str, feat: pd.DataFrame, min_max: tuple):
         vect, feature = bow(feat, min_max)
     elif text_rep == 'TFIDF':    
         vect, feature = tfidf(feat, min_max)
-    elif text_rep == 'W2V':    
-        vect, feature = w2v_tfidf(feat, min_max)
+    elif text_rep == 'W2VTFIDF':    
+        vect, feature = w2vec(feat, 'tfidf', min_max)
+    elif text_rep == 'W2VAVG':
+        vect, feature = w2vec(feat, 'avg', min_max)
     elif text_rep == 'POSBOW': 
         vect, feature = pos_bow(text_rep,feat, min_max)
     elif text_rep == 'POSBOWCONCAT':
@@ -89,13 +91,13 @@ def tfidf(feat, min_max: tuple):
 
     return tfidf_fit, text_tfidf
 
-def w2v_tfidf(feat: pd.DataFrame, min_max: tuple):
-    print("Extracting W2V-TFIDF...")  
-    # create word2vec for kt corpus
-    w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=8)
+def w2vec(feat: pd.DataFrame, type, min_max: tuple):
+    print("Extracting W2V:", type, "...")  
+    w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=8, seed=0)
     w2v.build_vocab(feat)
     w2v.train(feat, total_examples=w2v.corpus_count, epochs=100)
-    w2v_tfidf_emb = TfidfEmbeddingVectorizer(w2v, min_max)
+    
+    w2v_tfidf_emb = TfidfEmbeddingVectorizer(type, w2v, min_max)
     w2v_tifdf_fit = w2v_tfidf_emb.fit(feat)
     text_w2v_tfidf = w2v_tifdf_fit.transform(feat)
 
@@ -133,16 +135,16 @@ def pos_mean_emb(feat:pd.DataFrame):
 
 
 def pos_w2v_tfidf(feat:pd.DataFrame, min_max: tuple):
-    print("Extracting POSW2V_TF-IDF...")  
+    print("Extracting POSW2V TF-IDF...")  
     tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
     pos = word_tag(tag_emoj(tagged))
     #pos = [x.split(' ') for x in pos]
     
-    w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=8)
+    w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=8, seed=0)
     w2v.build_vocab(pos)
     w2v.train(pos, total_examples=w2v.corpus_count, epochs=100)
     
-    w2v_tfidf_emb = TfidfEmbeddingVectorizer(w2v, min_max)
+    w2v_tfidf_emb = TfidfEmbeddingVectorizer('tfidf', w2v, min_max)
     w2v_tifdf_fit = w2v_tfidf_emb.fit(pos)
     text_w2v_tfidf = w2v_tifdf_fit.transform(pos)
 
