@@ -216,7 +216,7 @@ def run(data_name, iname, df_ds, min_max):
         #NB
         print("NB...")
         clf = GaussianNB()
-        acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
+        acc, sens, spec, mcc, roc, f1 = test(clf,X.toarray(),y,Xv.toarray(),yv)
         allclf.append(clf)
         file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
         acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
