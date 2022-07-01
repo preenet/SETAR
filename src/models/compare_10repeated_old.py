@@ -14,7 +14,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler
+from sklearn.preprocessing import MaxAbsScaler
 from sklearn.svm import SVC, LinearSVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearnex import patch_sklearn
@@ -22,10 +22,9 @@ from src.models.metrics import test
 from src.models.PLS import PLS
 from xgboost import XGBClassifier
 
-# try using https://github.com/intel/scikit-learn-intelex for accelerated implementations of algorithms 
-
 
 def run(data_name, iname, df_ds, min_max):
+    # try using https://github.com/intel/scikit-learn-intelex for accelerated implementations of algorithms 
     patch_sklearn()
     y_ds = df_ds['target'].astype('category').cat.codes
     Xo = df_ds['processed']

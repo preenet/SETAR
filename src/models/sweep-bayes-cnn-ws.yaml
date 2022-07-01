@@ -1,0 +1,23 @@
+#course search
+program: CNN_wandb.py
+project: cnn-ws-new-w2vmodel
+name: cnn-base-ws-new-w2vmodel
+entity: rapry60
+
+method: bayes
+metric:
+  goal: minimize
+  name: val_loss
+parameters:
+  dropout:
+    values: [0.2, 0.3, 0.4, 0.5]
+  hidden_layer_size:
+    values: [16, 32, 64, 128]
+  layer_1_size:
+    values: [16, 32, 64, 128]
+  learn_rate:
+    values: [1e-4, 1e-3] 
+  batch_size:
+    values: [32, 64, 128]
+  epochs:
+    value: 50

@@ -24,7 +24,7 @@ def main():
     from keras.models import Sequential, load_model
     from keras.preprocessing.sequence import pad_sequences
     from keras.preprocessing.text import Tokenizer
-    #from pythainlp import word_vector
+    from pythainlp import word_vector
     from sklearn.model_selection import train_test_split
     from tensorflow.keras.utils import to_categorical
     from wandb.keras import WandbCallback
@@ -44,19 +44,19 @@ def main():
     Xo = df_ds['processed']
 
     # print("Building w2v model...")
-
+    # tok_train = [text.split() for text in Xo]
     # w2v = Word2Vec(vector_size=300, min_count=1, window = 5, workers=8)
-    # w2v.build_vocab(df_ds['processed'])
-    # w2v.train(df_ds['processed'], total_examples=w2v.corpus_count, epochs=100)
-
+    # w2v.build_vocab(tok_train )
     # w2v_thwiki = word_vector.get_model()
     # w2v.build_vocab(w2v_thwiki.index_to_key, update=True)
     # w2v.wv.vectors_lockf = np.ones(len(w2v.wv))
     # w2v.wv.intersect_word2vec_format(model_path+ '/' + 'thai2vec.bin', binary=True, lockf=1.0)
-    # Word2Vec.save(w2v, model_path+ '/' + 'w2v_kt_thwiki300_300.word2vec')
+    # w2v.train(tok_train, total_examples=w2v.corpus_count, epochs=100)
+
+    # Word2Vec.save(w2v, model_path+ '/' + 'tt_thwiki300.word2vec')
 
    # make sure to load a proper word2vec model according to the dataset.
-    w2v = Word2Vec.load(model_path+ '/' + 'w2v_kt_thwiki300_300.word2vec')
+    w2v = Word2Vec.load(model_path+ '/' + 'ws_thwiki300.word2vec')
 
     #get weight from word2vec as a keras embedding metric
     keyed_vectors = w2v.wv  
@@ -78,11 +78,11 @@ def main():
         )
 
     resume = sys.argv[-1] == "--resume"
-    wandb.init(project="cnn-ws-medium", config=defaults, resume=resume, settings=wandb.Settings(_disable_stats=True))
+    wandb.init(project="cnn-ws-new_w2vbuild", config=defaults, resume=resume, settings=wandb.Settings(_disable_stats=True))
     config = wandb.config
 
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=0, stratify=yo)
-    X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=0, stratify=y_tmp)
+    X_val, X_test, yv, _ = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=0, stratify=y_tmp)
     num_class = np.unique(y).shape[0]
 
     recall = tf.keras.metrics.Recall()
