@@ -65,8 +65,13 @@ def extract(text_rep: str, feat: pd.DataFrame, min_max: tuple):
     return vect, feature
 
 def bow(feat: pd.DataFrame, min_max: tuple):
-    print("Extracting BOW...")  
-    bow = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=20)
+    print("Extracting BOW...") 
+    
+    # lower min_df for bigram so sklearnex can run
+    min_df = 20 
+    if(min_max == (2,2)):
+        min_df = 5
+    bow = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=min_df)
 
     # fit kt and transform to both datasets
     bow_fit = bow.fit(feat.apply(str))
@@ -82,7 +87,12 @@ def bow(feat: pd.DataFrame, min_max: tuple):
 
 def tfidf(feat, min_max: tuple):
     print("Extracting TFI-IDF...")  
-    tfidf = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=20, sublinear_tf=True)
+    
+    # lower min_df for bigram so sklearnex can run
+    min_df = 20 
+    if(min_max == (2,2)):
+        min_df = 5
+    tfidf = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=min_df, sublinear_tf=True)
 
     # fit kt and transform to both datasets
     tfidf_fit = tfidf.fit(feat.apply(str))
