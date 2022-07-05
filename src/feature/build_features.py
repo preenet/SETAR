@@ -21,9 +21,10 @@ from matplotlib import pyplot as plt
 from pythainlp.tag import pos_tag_sents
 from scipy import sparse
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+#from src.feature.tfidf_embedding_vectorizer import TfidfEmbeddingVectorizer
+from src.feature.embedding_vectorizer import EmbeddingVectorizer
 from src.feature.postag_transform import (flatten, onehot_label, tag, tag_emoj,
                                           word_tag)
-from src.feature.tfidf_embedding_vectorizer import TfidfEmbeddingVectorizer
 from src.visualization.visualize import plot_top_feats, top_feats_all
 
 plt.rcParams['font.family'] = 'tahoma'
@@ -93,11 +94,10 @@ def tfidf(feat, min_max: tuple):
 
 def w2vec(feat: pd.DataFrame, type, min_max: tuple):
     print("Extracting W2V:", type, "...")  
-    w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=8, seed=0)
-    w2v.build_vocab(feat)
-    w2v.train(feat, total_examples=w2v.corpus_count, epochs=100)
+    tok_train = [text.split() for text in feat]
+    w2v_model = Word2Vec(tok_train, vector_size=300, window=5, workers=4, min_count=1, seed=0, epochs=100)
     
-    w2v_tfidf_emb = TfidfEmbeddingVectorizer(type, w2v, min_max)
+    w2v_tfidf_emb = EmbeddingVectorizer(w2v_model, type, min_max)
     w2v_tifdf_fit = w2v_tfidf_emb.fit(feat)
     text_w2v_tfidf = w2v_tifdf_fit.transform(feat)
 
