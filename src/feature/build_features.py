@@ -21,7 +21,6 @@ from matplotlib import pyplot as plt
 from pythainlp.tag import pos_tag_sents
 from scipy import sparse
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-#from src.feature.tfidf_embedding_vectorizer import TfidfEmbeddingVectorizer
 from src.feature.embedding_vectorizer import EmbeddingVectorizer
 from src.feature.postag_transform import (flatten, onehot_label, tag, tag_emoj,
                                           word_tag)
@@ -36,87 +35,92 @@ data_name = ""
 
 __all__ = ['extract', 'get_dict_vocab']
 
+
 def extract(text_rep: str, feat: pd.DataFrame, min_max: tuple):
-    if text_rep == 'BOW':        
+    if text_rep == 'BOW':
         vect, feature = bow(feat, min_max)
-    elif text_rep == 'TFIDF':    
+    elif text_rep == 'TFIDF':
         vect, feature = tfidf(feat, min_max)
-    elif text_rep == 'W2VTFIDF':    
+    elif text_rep == 'W2VTFIDF':
         vect, feature = w2vec(feat, 'tfidf', min_max)
     elif text_rep == 'W2VAVG':
         vect, feature = w2vec(feat, 'avg', min_max)
-    elif text_rep == 'POSBOW': 
-        vect, feature = pos_bow(text_rep,feat, min_max)
+    elif text_rep == 'POSBOW':
+        vect, feature = pos_bow(text_rep, feat, min_max)
     elif text_rep == 'POSBOWCONCAT':
         vect, feature = pos_bow(text_rep, feat, min_max)
     elif text_rep == 'POSBOWFLAT':
-        vect, feature = pos_bow(text_rep,feat, min_max)    
+        vect, feature = pos_bow(text_rep, feat, min_max)
     elif text_rep == 'POSMEAN':
         return pos_mean_emb(feat)
     elif text_rep == 'POSW2V':
         vect, feature = pos_w2v_tfidf(feat, min_max)
-    elif(text_rep == 'DICTBOW'):
+    elif text_rep == 'DICTBOW':
         vect, feature = dict_bow(feat, min_max)
-    elif(text_rep == 'DICTTFIDF'):
+    elif text_rep == 'DICTTFIDF':
         vect, feature = dict_tfidf(feat, min_max)
     else:
         print("Error: invalid build feature method.")
         sys.exit(1)
     return vect, feature
 
+
 def bow(feat: pd.DataFrame, min_max: tuple):
-    print("Extracting BOW...") 
-    
-    # lower min_df for bigram so sklearnex can run
-    min_df = 20 
-    if(min_max == (2,2)):
-        min_df = 5
-    bow = CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=min_df)
+    print("Extracting BOW...")
+
+    # lower min_df for bigram so sklearnex can run on the machine
+    min_df = 20
+    if min_max == (2, 2):
+        min_df = 7
+    bow = CountVectorizer(tokenizer=lambda x: x.split(), ngram_range=min_max, min_df=min_df)
 
     # fit kt and transform to both datasets
     bow_fit = bow.fit(feat.apply(str))
     text_bow = bow_fit.transform(feat.apply(str))
 
     print(text_bow.toarray().shape)
-    
+
     # visualize 
     # y = yt.todense()
     # y = np.array(y.reshape(y.shape[0],))[0]
     # plot_feats(bow1_fit, text_bow1, y)
     return bow_fit, text_bow
 
+
 def tfidf(feat, min_max: tuple):
-    print("Extracting TFI-IDF...")  
-    
-    # lower min_df for bigram so sklearnex can run
-    min_df = 20 
-    if(min_max == (2,2)):
+    print("Extracting TFI-IDF...")
+
+    # lower min_df for bigram so sklearnex can run on the machine
+    min_df = 20
+    if min_max == (2, 2):
         min_df = 5
-    tfidf = TfidfVectorizer(tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=min_df, sublinear_tf=True)
+    tfidf = TfidfVectorizer(tokenizer=lambda x: x.split(), ngram_range=min_max, min_df=min_df, sublinear_tf=True)
 
     # fit kt and transform to both datasets
     tfidf_fit = tfidf.fit(feat.apply(str))
     text_tfidf = tfidf_fit.transform(feat.apply(str))
-    
+
     print(text_tfidf.toarray().shape)
 
     return tfidf_fit, text_tfidf
 
+
 def w2vec(feat: pd.DataFrame, type, min_max: tuple):
-    print("Extracting W2V:", type, "...")  
+    print("Extracting W2V:", type, "...")
     tok_train = [text.split() for text in feat]
     w2v_model = Word2Vec(tok_train, vector_size=300, window=5, workers=4, min_count=1, seed=0, epochs=100)
-    
+
     w2v_tfidf_emb = EmbeddingVectorizer(w2v_model, type, min_max)
     w2v_tifdf_fit = w2v_tfidf_emb.fit(feat)
     text_w2v_tfidf = w2v_tifdf_fit.transform(feat)
 
     return w2v_tifdf_fit, text_w2v_tfidf
 
-def pos_bow(text_rep:str, feat:pd.DataFrame, min_max: tuple): 
-    print("Extracting ", text_rep + "...")   
+
+def pos_bow(text_rep: str, feat: pd.DataFrame, min_max: tuple):
+    print("Extracting ", text_rep + "...")
     tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
-    
+
     if text_rep == 'POSBOWCONCAT':
         pos = word_tag(tag_emoj(tagged))
         bow = CountVectorizer(ngram_range=min_max, min_df=20)
@@ -137,33 +141,35 @@ def pos_bow(text_rep:str, feat:pd.DataFrame, min_max: tuple):
 
     return pos_bow_fit, text_pos_bow
 
-def pos_mean_emb(feat:pd.DataFrame):
+
+def pos_mean_emb(feat: pd.DataFrame):
     print("Extracting POSMEAN...")
     tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
     text_mean_emb = onehot_label(tag_emoj(tagged))
     return sparse.csr_matrix(text_mean_emb, dtype="float32")
 
 
-def pos_w2v_tfidf(feat:pd.DataFrame, min_max: tuple):
-    print("Extracting POSW2V TF-IDF...")  
+def pos_w2v_tfidf(feat: pd.DataFrame, min_max: tuple):
+    print("Extracting POSW2V TF-IDF...")
     tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
     pos = word_tag(tag_emoj(tagged))
-    #pos = [x.split(' ') for x in pos]
-    
+    # pos = [x.split(' ') for x in pos]
+
     w2v = Word2Vec(vector_size=300, min_count=1, window=4, workers=8, seed=0)
     w2v.build_vocab(pos)
     w2v.train(pos, total_examples=w2v.corpus_count, epochs=100)
-    
-    w2v_tfidf_emb = TfidfEmbeddingVectorizer('tfidf', w2v, min_max)
+
+    w2v_tfidf_emb = EmbeddingVectorizer(w2v, 'tfidf', min_max)
     w2v_tifdf_fit = w2v_tfidf_emb.fit(pos)
     text_w2v_tfidf = w2v_tifdf_fit.transform(pos)
 
     return w2v_tifdf_fit, text_w2v_tfidf
 
-def dict_bow(feat:pd.DataFrame, min_max: tuple):
-    print("Extracting DICT_BOW...")  
+
+def dict_bow(feat: pd.DataFrame, min_max: tuple):
+    print("Extracting DICT_BOW...")
     my_vocabs = get_dict_vocab()
-    bow = CountVectorizer(vocabulary=my_vocabs, tokenizer=lambda x:x.split(), ngram_range=min_max)
+    bow = CountVectorizer(vocabulary=my_vocabs, tokenizer=lambda x: x.split(), ngram_range=min_max)
 
     dict_bow_fit = bow.fit(feat.apply(str))
     text_dict_bow = dict_bow_fit.transform(feat.apply(str))
@@ -171,16 +177,19 @@ def dict_bow(feat:pd.DataFrame, min_max: tuple):
     print(text_dict_bow.toarray().shape)
     return dict_bow_fit, text_dict_bow
 
-def dict_tfidf(feat:pd.DataFrame, min_max: tuple):
-    print("Extracting DICT_TF-IDF...")  
+
+def dict_tfidf(feat: pd.DataFrame, min_max: tuple):
+    print("Extracting DICT_TF-IDF...")
     my_vocabs = get_dict_vocab()
-    tfidf1 = TfidfVectorizer(vocabulary=my_vocabs, tokenizer=lambda x:x.split(), ngram_range=min_max, min_df=20, sublinear_tf=True)
+    tfidf1 = TfidfVectorizer(vocabulary=my_vocabs, tokenizer=lambda x: x.split(), ngram_range=min_max, min_df=20,
+                             sublinear_tf=True)
 
     dict_tfidf_fit = tfidf1.fit(feat.apply(str))
     text_dict_tfidf = dict_tfidf_fit.transform(feat.apply(str))
-    
+
     print(text_dict_tfidf.toarray().shape)
     return dict_tfidf_fit, text_dict_tfidf
+
 
 def get_dict_vocab():
     # load list of our custom positive and negative words
@@ -193,7 +202,7 @@ def get_dict_vocab():
         sys.exit(1)
     f.close()
 
-    try: 
+    try:
         with open(data_path_dict + 'neg.txt', encoding='utf-8') as f:
             neg_words = [line.rstrip('\n') for line in f]
 
@@ -218,7 +227,7 @@ if __name__ == "__main__":
         print("*Usage:[dataset name]", config['feature']['build_method'], "[min,max]")
         sys.exit(1)
 
-    elif sys.argv[2] in config['feature']['build_method'] and sys.argv[1] in config['data']['name']: 
+    elif sys.argv[2] in config['feature']['build_method'] and sys.argv[1] in config['data']['name']:
         data_name = sys.argv[1]
         text_rep = sys.argv[2]
         min_max = sys.argv[3]

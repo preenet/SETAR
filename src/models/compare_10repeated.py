@@ -274,7 +274,6 @@ def run(data_name, iname, df_ds, min_max):
 
 if __name__ == "__main__":
     config = utils.read_config()
-    patch_sklearn()
     if len(sys.argv) != 4:
         print("*Error: incorrect number of arguments.")
         print("*Usage:[dataset name]", config['feature']['build_method'], "[min,max]")
