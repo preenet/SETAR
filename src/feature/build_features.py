@@ -69,9 +69,9 @@ def bow(feat: pd.DataFrame, min_max: tuple):
     print("Extracting BOW...")
 
     # lower min_df for bigram so sklearnex can run on the machine
-    min_df = 20
+    min_df = 40
     if min_max == (2, 2):
-        min_df = 7
+        min_df = 10
     bow = CountVectorizer(tokenizer=lambda x: x.split(), ngram_range=min_max, min_df=min_df)
 
     # fit kt and transform to both datasets
@@ -93,7 +93,7 @@ def tfidf(feat, min_max: tuple):
     # lower min_df for bigram so sklearnex can run on the machine
     min_df = 20
     if min_max == (2, 2):
-        min_df = 5
+        min_df = 15
     tfidf = TfidfVectorizer(tokenizer=lambda x: x.split(), ngram_range=min_max, min_df=min_df, sublinear_tf=True)
 
     # fit kt and transform to both datasets

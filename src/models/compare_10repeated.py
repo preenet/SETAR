@@ -1,6 +1,7 @@
 import sys
 from datetime import datetime
 
+import joblib
 import numpy as np
 import pandas as pd
 import src.feature.build_features as bf
@@ -26,9 +27,12 @@ from xgboost import XGBClassifier
 def run(data_name, iname, df_ds, min_max):
     # try using https://github.com/intel/scikit-learn-intelex for accelerated implementations of algorithms 
     patch_sklearn()
+    
+  
     y_ds = df_ds['target'].astype('category').cat.codes
     Xo = df_ds['processed']
     yo = y_ds.to_numpy()
+
 
     for item in range(0, 10):
         print(data_name + ", " + iname , ", SEED:", item)
@@ -98,6 +102,7 @@ def run(data_name, iname, df_ds, min_max):
             #svm = LinearSVC(C=param[i],random_state=0, max_iter=20000)
             #clf = CalibratedClassifierCV(svm, cv=3) 
             acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+    
             elapsed = datetime.now() - start_time
             print(str(i) , ": took =", elapsed)
         choose = np.argmax(acc)
@@ -272,6 +277,7 @@ def run(data_name, iname, df_ds, min_max):
         file.close()
     return 
 
+
 if __name__ == "__main__":
     config = utils.read_config()
     if len(sys.argv) != 4:
@@ -292,7 +298,8 @@ if __name__ == "__main__":
         elif data_name == 'tt':
             df_ds = pd.read_csv(config['data']['processed_tt'])
         elif data_name == 'wn':
-            df_ds = pd.read_csv(config['data']['processed_wn'])
+            Xo, yo = joblib.load(config['data']['processed_wn'])
+            df_ds = pd.DataFrame(list(zip(Xo, yo)), columns=['processed', 'target'])
         else:
             sys.exit(1)
         print("*Modeling ", text_rep, "representation(s) ", "ngram = ", min_max, "for: ", data_name)

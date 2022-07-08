@@ -29,6 +29,19 @@ def test(clf, X, y, Xt, yt):
     F1 = 2*SENS*SPEC/(SENS+SPEC)
     return ACC, SENS, SPEC, MCC, AUC, F1
 
+# reduce computation time for calibrate probability for linear svm
+def test_no_auc(clf, X, y, Xt, yt):
+    train_X, test_X = X, Xt
+    train_y, test_y = y, yt
+    clf.fit(train_X, train_y)        
+    p = clf.predict(test_X)
+    ACC = accuracy_score(test_y,p)
+    SENS = precision_score(test_y,p, average='macro')
+    SPEC = recall_score(test_y,p, average='macro')
+    MCC = matthews_corrcoef(test_y,p)
+    F1 = 2*SENS*SPEC/(SENS+SPEC)
+    return ACC, SENS, SPEC, MCC, F1
+
 # overload version w/o fitting and for deep models
 def test_deep(clf, Xt, yt):
     y_pred_prob = clf.predict(Xt)

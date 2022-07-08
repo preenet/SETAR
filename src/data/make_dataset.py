@@ -6,6 +6,8 @@ Todo:
 * add google drive or one drive 
 """
 import sys
+
+import datasets
 import pandas as pd
 import src.utilities as utils
 from src.feature.process_thai_text import process_text
@@ -100,6 +102,26 @@ def make_wn():
     df_wn['processed'] = df_wn['text'].apply(str).apply(process_text)
     df_wn.to_csv(config['data']['processed_wn'])
     return
+
+def make_to():
+    print('making toxic tweet corpus...')
+    from datasets import list_datasets, load_dataset
+    [item for item in list_datasets() if 'wongnai' in item]
+    toxic_tweet = load_dataset('thai_toxicity_tweet')
+    
+    file = open(config['data']['processed_to'], "w",  encoding="utf-8")
+    file.write("text, target\n")  
+    
+    for i, item in enumerate(toxic_tweet['train'][:]['tweet_text']):
+        text = item.replace(',', '')
+        text = text.replace('\n', '')
+        label = toxic_tweet['train'][i]['is_toxic']
+    
+        # remove empty text, tweet not found, and non-label
+        if not (text == "TWEET_NOT_FOUND" or text == ""):
+            file.write(text + ',' + str(label)+ '\n')
+    file.close()
+    return
     
 if __name__ == "__main__":
     # get config file
@@ -120,6 +142,8 @@ if __name__ == "__main__":
             make_tt()
         elif data_name == 'wn':
             make_wn()
+        elif data_name == 'to':
+            make_to()
     else:
         print("*Error: no such data name.")
         sys.exit(1)

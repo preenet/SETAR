@@ -59,6 +59,7 @@ Information regarding the corpus can be found from https://github.com/PyThaiNLP/
 # Thaitale corpus   
 Information regarding the corpus can be found from https://github.com/dsmlr/40-Thai-Children-Stories  
 
-# Wongnai corpus  
-Information regarding the corpus can be found from https://github.com/wongnai/wongnai-corpus
+# Thai Toxic tweet corpus  
+Information regarding the corpus can be found from https://huggingface.co/datasets/thai_toxicity_tweet
+
 

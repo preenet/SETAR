@@ -58,19 +58,19 @@ def create_model_finetune():
     bert = 'bert-base-multilingual-cased'
     configuration = BertConfig.from_pretrained(bert, num_labels=64)
 
-    configuration.output_hidden_states = True
+    configuration.output_hidden_states = False
     transformer_model = TFBertForSequenceClassification.from_pretrained(bert, config = configuration)
 
     input_ids_layer = tf.keras.layers.Input(shape=(max_len, ), dtype=np.int32)
     input_mask_layer = tf.keras.layers.Input(shape=(max_len ), dtype=np.int32)
-    input_token_type_layer = tf.keras.layers.Input(shape=(max_len,), dtype=np.int32)
+    #input_token_type_layer = tf.keras.layers.Input(shape=(max_len,), dtype=np.int32)
 
-    bert_layer = transformer_model([input_ids_layer, input_mask_layer])[0]
+    bert_layer = transformer_model(input_ids_layer, input_mask_layer)[0]
    # flat_layer = tf.keras.layers.Flatten()(bert_layer)
     dropout= tf.keras.layers.Dropout(0.3)(bert_layer)
     dense_output = tf.keras.layers.Dense(num_class, activation='softmax')(dropout)
 
-    model = tf.keras.Model(inputs=[input_ids_layer, input_mask_layer, input_token_type_layer ], outputs=dense_output)
+    model = tf.keras.Model(inputs=[input_ids_layer, input_mask_layer], outputs=dense_output)
     
     for layer in model.layers[:2]:
         layer.trainable = False
