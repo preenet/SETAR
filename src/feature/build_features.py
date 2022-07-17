@@ -10,7 +10,6 @@ Several feature extraction methods were applied on text feature to both corpuses
 Total of 8 text representations were extracted for each corpus.  
 @Authors: pree.t@cmu.ac.th
 """
-import ast
 import sys
 
 import numpy as np
@@ -73,17 +72,10 @@ def bow(feat: pd.DataFrame, min_max: tuple):
     if min_max == (2, 2):
         min_df = 10
     bow = CountVectorizer(tokenizer=lambda x: x.split(), ngram_range=min_max, min_df=min_df)
-
-    # fit kt and transform to both datasets
-    bow_fit = bow.fit(feat.apply(str))
-    text_bow = bow_fit.transform(feat.apply(str))
+    bow_fit = bow.fit(feat)
+    text_bow = bow_fit.transform(feat)
 
     print(text_bow.toarray().shape)
-
-    # visualize 
-    # y = yt.todense()
-    # y = np.array(y.reshape(y.shape[0],))[0]
-    # plot_feats(bow1_fit, text_bow1, y)
     return bow_fit, text_bow
 
 
@@ -95,10 +87,8 @@ def tfidf(feat, min_max: tuple):
     if min_max == (2, 2):
         min_df = 15
     tfidf = TfidfVectorizer(tokenizer=lambda x: x.split(), ngram_range=min_max, min_df=min_df, sublinear_tf=True)
-
-    # fit kt and transform to both datasets
-    tfidf_fit = tfidf.fit(feat.apply(str))
-    text_tfidf = tfidf_fit.transform(feat.apply(str))
+    tfidf_fit = tfidf.fit(feat)
+    text_tfidf = tfidf_fit.transform(feat)
 
     print(text_tfidf.toarray().shape)
 
@@ -119,7 +109,7 @@ def w2vec(feat: pd.DataFrame, type, min_max: tuple):
 
 def pos_bow(text_rep: str, feat: pd.DataFrame, min_max: tuple):
     print("Extracting ", text_rep + "...")
-    tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
+    tagged = pos_tag_sents(feat, corpus='orchid_ud')
 
     if text_rep == 'POSBOWCONCAT':
         pos = word_tag(tag_emoj(tagged))
@@ -144,14 +134,14 @@ def pos_bow(text_rep: str, feat: pd.DataFrame, min_max: tuple):
 
 def pos_mean_emb(feat: pd.DataFrame):
     print("Extracting POSMEAN...")
-    tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
+    tagged = pos_tag_sents(feat, corpus='orchid_ud')
     text_mean_emb = onehot_label(tag_emoj(tagged))
     return sparse.csr_matrix(text_mean_emb, dtype="float32")
 
 
 def pos_w2v_tfidf(feat: pd.DataFrame, min_max: tuple):
     print("Extracting POSW2V TF-IDF...")
-    tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
+    tagged = pos_tag_sents(feat, corpus='orchid_ud')
     pos = word_tag(tag_emoj(tagged))
     # pos = [x.split(' ') for x in pos]
 
@@ -171,8 +161,8 @@ def dict_bow(feat: pd.DataFrame, min_max: tuple):
     my_vocabs = get_dict_vocab()
     bow = CountVectorizer(vocabulary=my_vocabs, tokenizer=lambda x: x.split(), ngram_range=min_max)
 
-    dict_bow_fit = bow.fit(feat.apply(str))
-    text_dict_bow = dict_bow_fit.transform(feat.apply(str))
+    dict_bow_fit = bow.fit(feat)
+    text_dict_bow = dict_bow_fit.transform(feat)
 
     print(text_dict_bow.toarray().shape)
     return dict_bow_fit, text_dict_bow
@@ -184,8 +174,8 @@ def dict_tfidf(feat: pd.DataFrame, min_max: tuple):
     tfidf1 = TfidfVectorizer(vocabulary=my_vocabs, tokenizer=lambda x: x.split(), ngram_range=min_max, min_df=20,
                              sublinear_tf=True)
 
-    dict_tfidf_fit = tfidf1.fit(feat.apply(str))
-    text_dict_tfidf = dict_tfidf_fit.transform(feat.apply(str))
+    dict_tfidf_fit = tfidf1.fit(feat)
+    text_dict_tfidf = dict_tfidf_fit.transform(feat)
 
     print(text_dict_tfidf.toarray().shape)
     return dict_tfidf_fit, text_dict_tfidf
