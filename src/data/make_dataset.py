@@ -106,7 +106,7 @@ def make_wn():
 def make_to():
     print('making toxic tweet corpus...')
     from datasets import list_datasets, load_dataset
-    [item for item in list_datasets() if 'wongnai' in item]
+    [item for item in list_datasets() if 'thai_toxicity_tweet' in item]
     toxic_tweet = load_dataset('thai_toxicity_tweet')
     
     file = open(config['data']['processed_to'], "w",  encoding="utf-8")
