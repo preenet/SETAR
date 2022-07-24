@@ -10,6 +10,7 @@ Several feature extraction methods were applied on text feature to both corpuses
 Total of 8 text representations were extracted for each corpus.  
 @Authors: pree.t@cmu.ac.th
 """
+import ast
 import sys
 
 import numpy as np
@@ -109,7 +110,7 @@ def w2vec(feat: pd.DataFrame, type, min_max: tuple):
 
 def pos_bow(text_rep: str, feat: pd.DataFrame, min_max: tuple):
     print("Extracting ", text_rep + "...")
-    tagged = pos_tag_sents(feat, corpus='orchid_ud')
+    tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
 
     if text_rep == 'POSBOWCONCAT':
         pos = word_tag(tag_emoj(tagged))
@@ -134,14 +135,14 @@ def pos_bow(text_rep: str, feat: pd.DataFrame, min_max: tuple):
 
 def pos_mean_emb(feat: pd.DataFrame):
     print("Extracting POSMEAN...")
-    tagged = pos_tag_sents(feat, corpus='orchid_ud')
+    tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
     text_mean_emb = onehot_label(tag_emoj(tagged))
     return sparse.csr_matrix(text_mean_emb, dtype="float32")
 
 
 def pos_w2v_tfidf(feat: pd.DataFrame, min_max: tuple):
     print("Extracting POSW2V TF-IDF...")
-    tagged = pos_tag_sents(feat, corpus='orchid_ud')
+    tagged = pos_tag_sents(feat.apply(ast.literal_eval).values.tolist(), corpus='orchid_ud')
     pos = word_tag(tag_emoj(tagged))
     # pos = [x.split(' ') for x in pos]
 
