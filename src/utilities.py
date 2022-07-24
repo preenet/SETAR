@@ -35,7 +35,7 @@ def generate_report_10repeated_baseline(data_name, file_name):
     
     # calculate mean and std of each row among files
     df_res = pd.DataFrame()
-    num_classifier = 11
+    num_classifier = 12
     for i in range(0, num_classifier):
         tmp = [df.iloc[i, :] for df in dfs]
         df_all = pd.DataFrame(tmp)
@@ -76,6 +76,6 @@ def generate_report_10repeated_deepbaseline(data_name, file_name):
 
 if __name__ == "__main__":
     config = read_config()
-    generate_report_10repeated_baseline('BOW_KT', '12classifier_BOW_(2, 2)_kt.csv')
+    generate_report_10repeated_baseline('TFIDF_KT', '12classifier_TFIDF_(2, 2)_kt.csv')
     #generate_report_10repeated_deepbaseline('BLSTM_WS', 'blstm_10repeated_ws.csv')
     
