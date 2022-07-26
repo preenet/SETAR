@@ -26,7 +26,7 @@ from xgboost import XGBClassifier
 
 def run(data_name, iname, df_ds, min_max):
     # try using https://github.com/intel/scikit-learn-intelex for accelerated implementations of algorithms 
-    patch_sklearn()
+    patch_sklearn(["SVC"]) # we patched only SVC here, since it tooks the longest.
     
   
     y_ds = df_ds['target'].astype('category').cat.codes
