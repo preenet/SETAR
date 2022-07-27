@@ -34,7 +34,7 @@ def run(data_name, iname, df_ds, min_max):
     yo = y_ds.to_numpy()
 
 
-    for item in range(0, 10):
+    for item in range(6, 7):
         print(data_name + ", " + iname , ", SEED:", item)
 
         X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)

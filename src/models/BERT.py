@@ -9,8 +9,11 @@ from tensorflow.keras.utils import to_categorical
 from transformers import (BertConfig, BertTokenizer,
                           TFBertForSequenceClassification)
 
+import wandb
+
 configs = utils.read_config()
 root = utils.get_project_root()
+model_path = str(Path.joinpath(root, configs['models']))
 
 df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_tt']))
 
@@ -25,6 +28,17 @@ sequences_train_num = tokenizer.texts_to_sequences(Xo)
 max_len = max([len(w) for w in sequences_train_num])
 sequences_train_num = tf.keras.preprocessing.sequence.pad_sequences(sequences_train_num, maxlen=max_len )
 
+
+defaults = dict(
+    dropout=0.5,
+    learn_rate=0.001,
+    batch_size = 64,
+    epochs=64,
+    )
+
+resume = sys.argv[-1] == "--resume"
+wandb.init(project="bert-kt", config=defaults, resume=resume, settings=wandb.Settings(_disable_stats=True))
+config = wandb.config
 
 tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
 def tokenize(sentences, tokenizer):
@@ -48,10 +62,6 @@ y_val_c = to_categorical(y_val)
 bert_train = tokenize(X_train, tokenizer)
 bert_val = tokenize(X_val, tokenizer)
 
-# def create_model_direct():
-
-    
-#     return model_
 
 def create_model_finetune():
     # Fine-tuning a Pretrained transformer model
@@ -67,7 +77,7 @@ def create_model_finetune():
 
     bert_layer = transformer_model(input_ids_layer, input_mask_layer)[0]
    # flat_layer = tf.keras.layers.Flatten()(bert_layer)
-    dropout= tf.keras.layers.Dropout(0.3)(bert_layer)
+    dropout= tf.keras.layers.Dropout(configs['dropout'])(bert_layer)
     dense_output = tf.keras.layers.Dense(num_class, activation='softmax')(dropout)
 
     model = tf.keras.Model(inputs=[input_ids_layer, input_mask_layer], outputs=dense_output)
@@ -77,10 +87,10 @@ def create_model_finetune():
     return model
 
 model = create_model_finetune()
-model.compile(tf.keras.optimizers.Adam(lr=2e-5), loss='categorical_crossentropy', metrics=['accuracy'])
+model.compile(tf.keras.optimizers.Adam(lr=config.learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
 metric = tf.keras.metrics.SparseCategoricalAccuracy('accuracy')
 model.summary()
 
 ep = 10
 bs = 64
-history = model.fit(bert_train, y_train_c, validation_data=(bert_val, y_val_c), batch_size=bs, epochs=ep) 
+history = model.fit(bert_train, y_train_c, validation_data=(bert_val, y_val_c), batch_size=config.batch_size, epochs=config.epochs) 
