@@ -19,6 +19,7 @@ from sklearn.preprocessing import MaxAbsScaler
 from sklearn.svm import SVC, LinearSVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearnex import patch_sklearn
+from src.feature.process_thai_text import process_text
 from src.models.metrics import test
 from src.models.PLS import PLS
 from xgboost import XGBClassifier
@@ -26,15 +27,15 @@ from xgboost import XGBClassifier
 
 def run(data_name, iname, df_ds, min_max):
     # try using https://github.com/intel/scikit-learn-intelex for accelerated implementations of algorithms 
-    patch_sklearn(["SVC"]) # we patched only SVC here, since it tooks the longest.
+    patch_sklearn() # we patched only SVC here, since it tooks the longest.
     
   
     y_ds = df_ds['target'].astype('category').cat.codes
-    Xo = df_ds['processed']
+    Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
     yo = y_ds.to_numpy()
+    
 
-
-    for item in range(6, 7):
+    for item in range(0, 10):
         print(data_name + ", " + iname , ", SEED:", item)
 
         X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
@@ -53,12 +54,13 @@ def run(data_name, iname, df_ds, min_max):
             X_val_val = fe.transform(X_val)
             X_test_val = fe.transform(X_test)
 
-       
+
         scaler = MaxAbsScaler()
         scaler.fit(X_train_val)
         X = scaler.transform(X_train_val)
         Xv = scaler.transform(X_val_val)
         Xt = scaler.transform(X_test_val)  
+        
 
         file = open(config['output'] + str(item) +"_12classifier_"+iname+ "_" + str(min_max) + "_" + data_name + ".csv", "a")
         allclf = []

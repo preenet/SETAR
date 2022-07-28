@@ -76,6 +76,6 @@ def generate_report_10repeated_deepbaseline(data_name, file_name):
 
 if __name__ == "__main__":
     config = read_config()
-    generate_report_10repeated_baseline('POS_TAG_KT', '12classifier_POSBOWCONCAT_(1, 1)_kt.csv')
+    generate_report_10repeated_baseline('POS_TAG_KT', '12classifier_POSBOW_(1, 1)_kt.csv')
     #generate_report_10repeated_deepbaseline('BLSTM_WS', 'blstm_10repeated_ws.csv')
     
