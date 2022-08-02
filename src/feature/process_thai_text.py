@@ -3,10 +3,10 @@
 Pre-processing thai social media data
 """
 import re
+
 import emoji
 from emot.emo_unicode import UNICODE_EMOJI
 from pythainlp import word_tokenize
-
 
 __all__ = ['process_text']
 
@@ -44,8 +44,11 @@ def remove_word_len(text):
     new_list = [ word for word in text if len(word) >= 2 ]
     return new_list
 
+
+
 def process_text(text):
     #pre rules
+
     res = text.lower().strip()
     res = replace_url(res)
     res = convert_emojis(res)
