@@ -110,7 +110,7 @@ def make_to():
     toxic_tweet = load_dataset('thai_toxicity_tweet')
     
     file = open(config['data']['processed_to'], "w",  encoding="utf-8")
-    file.write("text, target\n")  
+    file.write("text,target\n")  
     
     for i, item in enumerate(toxic_tweet['train'][:]['tweet_text']):
         text = item.replace(',', '')

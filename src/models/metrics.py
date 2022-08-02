@@ -26,6 +26,7 @@ def test(clf, X, y, Xt, yt):
     SPEC = recall_score(test_y,p, average='macro')
     MCC = matthews_corrcoef(test_y,p)
     AUC = roc_auc_score(test_y,pr,multi_class='ovo',average='macro')
+    #AUC = roc_auc_score(test_y,pr[:,1],multi_class='ovo',average='macro') # for binaray classification problem
     F1 = 2*SENS*SPEC/(SENS+SPEC)
     return ACC, SENS, SPEC, MCC, AUC, F1
 
