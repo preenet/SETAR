@@ -121,6 +121,11 @@ def make_to():
         if not (text == "TWEET_NOT_FOUND" or text == ""):
             file.write(text + ',' + str(label)+ '\n')
     file.close()
+    
+    print("Pre-processing stage 2 with word tokenizing...")
+    df_wn = pd.read_csv(config['data']['processed_to'])
+    df_wn['processed'] = df_wn['text'].apply(str).apply(process_text)
+    df_wn.to_csv(config['data']['processed_to'])
     return
     
 if __name__ == "__main__":
