@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import src.utilities as utils
 import tensorflow as tf
+import tensorflow_addons as tfa
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
 from transformers import (BertConfig, BertTokenizer,
@@ -58,6 +59,12 @@ num_class = np.unique(yo).shape[0]
 y_train_c = to_categorical(y_train)
 y_val_c = to_categorical(y_val)
 
+recall = tf.keras.metrics.Recall()
+precision = tf.keras.metrics.Precision()
+auc = tf.keras.metrics.AUC()
+mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=np.unique(y).shape[0])
+f1 = tfa.metrics.F1Score(num_classes=np.unique(y).shape[0], average='macro')
+adam = tf.keras.optimizers.Adam(lr=config.learn_rate)
 
 bert_train = tokenize(X_train, tokenizer)
 bert_val = tokenize(X_val, tokenizer)
@@ -87,10 +94,8 @@ def create_model_finetune():
     return model
 
 model = create_model_finetune()
-model.compile(tf.keras.optimizers.Adam(lr=config.learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
+model.compile(tf.keras.optimizers.Adam(lr=config.learning_rate), loss='categorical_crossentropy', metrics=['accuracy' , precision, recall, mcc, auc, f1])
 metric = tf.keras.metrics.SparseCategoricalAccuracy('accuracy')
 model.summary()
 
-ep = 10
-bs = 64
-history = model.fit(bert_train, y_train_c, validation_data=(bert_val, y_val_c), batch_size=config.batch_size, epochs=config.epochs) 
+model.fit(bert_train, y_train_c, validation_data=(bert_val, y_val_c), batch_size=config.batch_size, epochs=config.epochs) 

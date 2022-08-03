@@ -1,6 +1,6 @@
 program: BERT_wandb.py
-project: bert-kt
-name: bert-base-kt
+project: bert-to
+name: bert-base-to
 entity: rapry60
 
 method: bayes
@@ -11,7 +11,7 @@ parameters:
   dropout:
     values: [0.2, 0.3, 0.4, 0.5]
   learn_rate:
-    values: [3e-5, 3e-5] 
+    values: [3e-6, 3e-5] 
   batch_size:
     values: [32, 64]
   epochs:

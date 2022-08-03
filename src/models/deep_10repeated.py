@@ -24,7 +24,7 @@ model_path = str(Path.joinpath(root, configs['models']))
 EMBEDDING_DIM= 300
 MAX_SEQUENCE_LENGTH = 500
 
-df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_ws']))
+df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_to']))
 
 y_ds = df_ds['target'].astype('category').cat.codes
 yo = y_ds.to_numpy()
@@ -32,7 +32,7 @@ Xo = df_ds['processed']
 
 
 for item in range(0, 10):
-    file = open(configs['output_scratch'] +"blstm_10repeated_kt.csv", "a")
+    file = open(configs['output_scratch'] +"cnn_10repeated_to.csv", "a")
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
     num_class = np.unique(y).shape[0]
@@ -63,7 +63,7 @@ for item in range(0, 10):
     yt_c = to_categorical(yt)
 
     # load best model
-    best_model = load_model(model_path + '/best_model_h5/' + 'blstm_ws_best_model.h5', custom_objects={"F1Score": f1})
+    best_model = load_model(model_path + '/best_model_h5/' + 'cnn_to_best_model.h5', custom_objects={"F1Score": f1})
 
     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
     # train with (train+valid set)

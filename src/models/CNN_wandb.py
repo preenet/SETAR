@@ -26,6 +26,7 @@ def main():
     from keras.preprocessing.text import Tokenizer
     from pythainlp import word_vector
     from sklearn.model_selection import train_test_split
+    from src.feature.process_thai_text import process_text
     from tensorflow.keras.utils import to_categorical
     from wandb.keras import WandbCallback
 
@@ -37,12 +38,12 @@ def main():
 
     MAX_SEQUENCE_LENGTH = 500
 
-    df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_ws']))
+    df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_to']))
 
     y_ds = df_ds['target'].astype('category').cat.codes
     yo = y_ds.to_numpy()
-    Xo = df_ds['processed']
-
+    #Xo = df_ds['processed']
+    Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
     # print("Building w2v model...")
     # tok_train = [text.split() for text in Xo]
     # w2v = Word2Vec(vector_size=300, min_count=1, window = 5, workers=8)
@@ -78,7 +79,7 @@ def main():
         )
 
     resume = sys.argv[-1] == "--resume"
-    wandb.init(project="cnn-ws-new_w2vbuild", config=defaults, resume=resume, settings=wandb.Settings(_disable_stats=True))
+    wandb.init(project="cnn-to-new_w2vbuild", config=defaults, resume=resume, settings=wandb.Settings(_disable_stats=True))
     config = wandb.config
 
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=0, stratify=yo)

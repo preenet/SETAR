@@ -3,7 +3,7 @@ from sklearn.metrics import (accuracy_score, f1_score, matthews_corrcoef,
                              precision_score, recall_score, roc_auc_score)
 from sklearn.model_selection import cross_val_score
 
-__all__ = ['CV', 'test', 'f1_m']
+__all__ = ['CV', 'test']
 
 def CV(model, X_train, y_train, X_valid, y_valid):
     scores = (cross_val_score(model, X_train, y_train, cv = 5).mean())
@@ -25,8 +25,8 @@ def test(clf, X, y, Xt, yt):
     SENS = precision_score(test_y,p, average='macro')
     SPEC = recall_score(test_y,p, average='macro')
     MCC = matthews_corrcoef(test_y,p)
-    AUC = roc_auc_score(test_y,pr,multi_class='ovo',average='macro')
-    #AUC = roc_auc_score(test_y,pr[:,1],multi_class='ovo',average='macro') # for binaray classification problem
+    #AUC = roc_auc_score(test_y,pr,multi_class='ovo',average='macro')
+    AUC = roc_auc_score(test_y,pr[:,1]) # for binary classification problem
     F1 = 2*SENS*SPEC/(SENS+SPEC)
     return ACC, SENS, SPEC, MCC, AUC, F1
 
@@ -51,6 +51,7 @@ def test_deep(clf, Xt, yt):
     SENS = precision_score(yt, y_pred, average='macro')
     SPEC = recall_score(yt, y_pred, average='macro')
     MCC = matthews_corrcoef(yt, y_pred)
-    AUC = roc_auc_score(yt, y_pred_prob,multi_class='ovo',average='macro')
+    #AUC = roc_auc_score(yt, y_pred_prob,multi_class='ovo',average='macro')
+    AUC = roc_auc_score(yt, y_pred_prob[:,1]) # for binary classification problem
     F1 = 2*SENS*SPEC/(SENS+SPEC)
     return ACC, SENS, SPEC, MCC, AUC, F1

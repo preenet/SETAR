@@ -24,7 +24,8 @@ from src.models.metrics import test
 from src.models.PLS import PLS
 from xgboost import XGBClassifier
 
-    def run():
+
+def run(data_name, iname, df_ds, min_max):
     # try using https://github.com/intel/scikit-learn-intelex for accelerated implementations of algorithms 
     patch_sklearn() # we patched only SVC here, since it tooks the longest.
 
@@ -303,7 +304,7 @@ if __name__ == "__main__":
         else:
             sys.exit(1)
         print("*Modeling ", text_rep, "representation(s) ", "ngram = ", min_max, "for: ", data_name)
-       # run(data_name, text_rep, df_ds, tuple(map(int, min_max.split(','))))
+        run(data_name, text_rep, df_ds, tuple(map(int, min_max.split(','))))
     else:
         print("*Error: incorrect argument name or dataset name.")
         sys.exit(1)
