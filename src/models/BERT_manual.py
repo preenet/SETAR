@@ -12,7 +12,7 @@ from transformers import (BertConfig, BertTokenizer,
 configs = utils.read_config()
 root = utils.get_project_root()
 
-df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_ws']))
+df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_kt']))
 
 y_ds = df_ds['target'].astype('category').cat.codes
 yo = y_ds.to_numpy()
@@ -34,9 +34,10 @@ def tokenize(sentences, tokenizer):
                                              return_attention_mask=True, return_token_type_ids=True)
         input_ids.append(inputs['input_ids'])
         input_masks.append(inputs['attention_mask'])
-        input_segments.append(inputs['token_type_ids'])        
+        #input_segments.append(inputs['token_type_ids'])        
         
-    return np.asarray(input_ids, dtype='int32'), np.asarray(input_masks, dtype='int32'), np.asarray(input_segments, dtype='int32')
+    return np.asarray(input_ids, dtype='int32'), np.asarray(input_masks, dtype='int32')
+#np.asarray(input_segments, dtype='int32')
 
 
 X_train, X_val, y_train, y_val = train_test_split(Xo, yo, test_size = 0.2)
@@ -48,10 +49,6 @@ y_val_c = to_categorical(y_val)
 bert_train = tokenize(X_train, tokenizer)
 bert_val = tokenize(X_val, tokenizer)
 
-# def create_model_direct():
-
-    
-#     return model_
 
 def create_model_finetune():
     # Fine-tuning a Pretrained transformer model
@@ -63,14 +60,15 @@ def create_model_finetune():
 
     input_ids_layer = tf.keras.layers.Input(shape=(max_len, ), dtype=np.int32)
     input_mask_layer = tf.keras.layers.Input(shape=(max_len ), dtype=np.int32)
-    input_token_type_layer = tf.keras.layers.Input(shape=(max_len,), dtype=np.int32)
+   # input_token_type_layer = tf.keras.layers.Input(shape=(max_len,), dtype=np.int32)
 
     bert_layer = transformer_model([input_ids_layer, input_mask_layer])[0]
    # flat_layer = tf.keras.layers.Flatten()(bert_layer)
     dropout= tf.keras.layers.Dropout(0.3)(bert_layer)
-    dense_output = tf.keras.layers.Dense(num_class, activation='softmax')(dropout)
+    dense_output = tf.keras.layers.Dense(num_class, activation='softmax')(dropout) # for multiclass problem
+    
 
-    model = tf.keras.Model(inputs=[input_ids_layer, input_mask_layer, input_token_type_layer ], outputs=dense_output)
+    model = tf.keras.Model(inputs=[input_ids_layer, input_mask_layer], outputs=dense_output)
     
     for layer in model.layers[:2]:
         layer.trainable = False
@@ -81,5 +79,5 @@ model.compile(tf.keras.optimizers.Adam(lr=2e-5), loss='categorical_crossentropy'
 model.summary()
 
 ep = 5
-bs = 3
+bs = 8
 history = model.fit(bert_train, y_train_c, validation_data=(bert_val, y_val_c), batch_size=bs, epochs=ep) 
