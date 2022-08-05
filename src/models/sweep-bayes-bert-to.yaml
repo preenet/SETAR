@@ -1,6 +1,6 @@
 program: BERT_wandb.py
-project: bert-ws
-name: bert-base-ws
+project: bert-base-multilingual-cased-to
+name: bert-base-multilingual-cased-to
 entity: rapry60
 
 method: bayes
@@ -11,8 +11,8 @@ parameters:
   dropout:
     values: [0.3, 0.4]
   learn_rate:
-    values: [3e-6, 3e-5] 
+    values: [2e-5, 3e-5, 5e-5] 
   batch_size:
-    values: [32, 64]
+    values: 16
   epochs:
-    value: 10
+    value: 5

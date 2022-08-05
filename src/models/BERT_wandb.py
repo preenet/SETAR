@@ -6,10 +6,12 @@ import pandas as pd
 import src.utilities as utils
 import tensorflow as tf
 import tensorflow_addons as tfa
+from keras.callbacks import EarlyStopping
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
 from transformers import (BertConfig, BertTokenizer,
                           TFBertForSequenceClassification)
+from wandb.keras import WandbCallback
 
 import wandb
 
@@ -17,9 +19,7 @@ import wandb
 def main():
     configs = utils.read_config()
     root = utils.get_project_root()
-    model_path = str(Path.joinpath(root, configs['models']))
-
-    df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_tt']))
+    df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_to']))
 
     y_ds = df_ds['target'].astype('category').cat.codes
     yo = y_ds.to_numpy()
@@ -37,24 +37,25 @@ def main():
         dropout=0.5,
         learn_rate=0.0001,
         batch_size = 64,
-        epochs=10
+        epochs=5
         )
 
     resume = sys.argv[-1] == "--resume"
     wandb.init(project="bert-kt", config=defaults, resume=resume, settings=wandb.Settings(_disable_stats=True))
     config = wandb.config
 
-    tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
+    bert = 'bert-base-multilingual-cased'
+    tokenizer = BertTokenizer.from_pretrained(bert)
+    
     def tokenize(sentences, tokenizer):
-        input_ids, input_masks, input_segments = [],[],[]
+        input_ids, input_masks = [],[]
         for sentence in sentences:
             inputs = tokenizer.encode_plus(sentence, add_special_tokens=True, max_length=max_len, pad_to_max_length=True, 
                                                 return_attention_mask=True, return_token_type_ids=True)
             input_ids.append(inputs['input_ids'])
             input_masks.append(inputs['attention_mask'])
-            input_segments.append(inputs['token_type_ids'])        
             
-        return np.asarray(input_ids, dtype='int32'), np.asarray(input_masks, dtype='int32'), np.asarray(input_segments, dtype='int32')
+        return np.asarray(input_ids, dtype='int32'), np.asarray(input_masks, dtype='int32')
 
 
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=0, stratify=yo)
@@ -66,6 +67,8 @@ def main():
     y_val_c = to_categorical(yv)
  
 
+    loss = tf.keras.losses.CategoricalCrossentropy()
+    accuracy = tf.keras.metrics.CategoricalAccuracy()
     recall = tf.keras.metrics.Recall()
     precision = tf.keras.metrics.Precision()
     auc = tf.keras.metrics.AUC()
@@ -75,35 +78,33 @@ def main():
     bert_train = tokenize(X_train, tokenizer)
     bert_val = tokenize(X_val, tokenizer)
 
-
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=2)
+    
     def create_model_finetune():
         # Fine-tuning a Pretrained transformer model
-        bert = 'bert-base-multilingual-cased'
-        configuration = BertConfig.from_pretrained(bert, num_labels=64)
+        configuration = BertConfig.from_pretrained(bert)
 
-        configuration.output_hidden_states = False
+        configuration.output_hidden_states = True
         transformer_model = TFBertForSequenceClassification.from_pretrained(bert, config = configuration)
 
         input_ids_layer = tf.keras.layers.Input(shape=(max_len, ), dtype=np.int32)
         input_mask_layer = tf.keras.layers.Input(shape=(max_len ), dtype=np.int32)
-        #input_token_type_layer = tf.keras.layers.Input(shape=(max_len,), dtype=np.int32)
-
-        bert_layer = transformer_model(input_ids_layer, input_mask_layer)[0]
-    # flat_layer = tf.keras.layers.Flatten()(bert_layer)
-        dropout= tf.keras.layers.Dropout(config.dropout)(bert_layer)
-        dense_output = tf.keras.layers.Dense(num_class, activation='softmax')(dropout)
-
+        
+        embedding = transformer_model(input_ids_layer, input_mask_layer)[0]
+        #dropout= tf.keras.layers.Dropout(config.dropout)(bert_layer)
+        dense_output = tf.keras.layers.Dense(num_class, activation='softmax')(embedding)
         model = tf.keras.Model(inputs=[input_ids_layer, input_mask_layer], outputs=dense_output)
         
-        for layer in model.layers[:2]:
-            layer.trainable = False
+        # for layer in model.layers[:2]:
+        #     layer.trainable = True
         return model
 
     model = create_model_finetune()                    
-    model.compile(tf.keras.optimizers.Adam(lr=config.learn_rate), loss='categorical_crossentropy', metrics=['accuracy' , precision, recall, mcc, auc, f1])
+    model.compile(tf.keras.optimizers.Adam(lr=config.learn_rate), loss=loss, metrics=[accuracy, precision, recall, mcc, auc, f1])
     model.summary()
 
-    model.fit(bert_train, y_train_c, validation_data=(bert_val, y_val_c), batch_size=config.batch_size, epochs=config.epochs)
+    model.fit(bert_train, y_train_c, validation_data=(bert_val, y_val_c), batch_size=config.batch_size, epochs=config.epochs,
+              callbacks=[WandbCallback(save_model=True, monitor="loss"), es])
     return
     
 if __name__ == "__main__":
