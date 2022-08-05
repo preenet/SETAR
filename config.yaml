@@ -8,8 +8,8 @@
     raw_tt: data/raw/thaitale/tale_data.csv
     raw_dict: data/raw/dict/
 
-    # datasets that were executed by make_dataset.py
-    processed_kt: data/processed/kt.csv
+    # datasets that were executed by make_dataset.py (use joblib to load X, y = joblib.load())
+    processed_kt: data/processed/kt.sav
     processed_ws: data/processed/wisesight.csv
     processed_tt: data/processed/thaitale.csv
     processed_to: data/processed/thai_toxic_tweet.csv

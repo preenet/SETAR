@@ -25,15 +25,9 @@ from src.models.PLS import PLS
 from xgboost import XGBClassifier
 
 
-def run(data_name, iname, df_ds, min_max):
+def run(data_name, iname, Xo, yo, min_max):
     # try using https://github.com/intel/scikit-learn-intelex for accelerated implementations of algorithms 
     patch_sklearn() # we patched only SVC here, since it tooks the longest.
-
-
-    y_ds = df_ds['target'].astype('category').cat.codes
-    #Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
-    Xo = df_ds['processed']
-    yo = y_ds.to_numpy()
 
     for item in range(0, 10):
         print(data_name + ", " + iname , ", SEED:", item)
@@ -292,9 +286,9 @@ if __name__ == "__main__":
         text_rep = sys.argv[2]
         min_max = sys.argv[3]
 
-        print("Loading and converting from csv...")
+        print("Loading dataset...")
         if data_name == 'kt':
-            df_ds = pd.read_csv(config['data']['processed_kt'])
+            X, y = joblib.load(config['data']['processed_kt'])
         elif data_name == 'ws':
             df_ds = pd.read_csv(config['data']['processed_ws'])
         elif data_name == 'tt':
@@ -304,7 +298,7 @@ if __name__ == "__main__":
         else:
             sys.exit(1)
         print("*Modeling ", text_rep, "representation(s) ", "ngram = ", min_max, "for: ", data_name)
-        run(data_name, text_rep, df_ds, tuple(map(int, min_max.split(','))))
+        run(data_name, text_rep, X, y, tuple(map(int, min_max.split(','))))
     else:
         print("*Error: incorrect argument name or dataset name.")
         sys.exit(1)

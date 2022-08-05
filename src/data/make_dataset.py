@@ -8,21 +8,23 @@ Todo:
 import sys
 
 import datasets
+import joblib
 import pandas as pd
 import src.utilities as utils
 from src.feature.process_thai_text import process_text
 
 
 def make_kt():
-    print('Making khon-thai corpus...')
+    print('Making KhonThai corpus...')
     df_kt = pd.read_csv(config['data']['raw_kt'])
     df_kt.rename(columns={'vote': 'target'}, inplace=True)
     print(df_kt.info)
 
-    print("Pre-processing stage 2 with word tokenizing...")
-    df_kt['processed'] = df_kt['text'].apply(str).apply(process_text)
-
+    X = [' '.join(process_text(item))  for item in df_kt['text'].apply(str)]
+    y = df_kt['target'].astype('category').cat.codes
+    y = y.to_numpy()
     df_kt.to_csv(config['data']['processed_kt'])
+    joblib.dump((X, y), config['data']['processed_kt'])
     return
 
 def make_ws():
