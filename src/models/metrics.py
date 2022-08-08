@@ -30,6 +30,22 @@ def test(clf, X, y, Xt, yt):
     F1 = 2*SENS*SPEC/(SENS+SPEC)
     return ACC, SENS, SPEC, MCC, AUC, F1
 
+from sklearn.metrics import precision_recall_fscore_support
+
+
+def test_bert(clf, Xt, yt):
+    test_X = Xt
+    test_y = yt
+    p = clf.predict(test_X)
+    pr = clf.predict_proba(test_X)
+    ACC = accuracy_score(test_y,p)
+    SENS = precision_score(test_y,p, average='macro')
+    SPEC = recall_score(test_y,p, average='macro')
+    MCC = matthews_corrcoef(test_y,p)
+    AUC = roc_auc_score(test_y,pr[:,1]) # for binary classification problem
+    F1 = 2*SENS*SPEC/(SENS+SPEC)
+    return ACC, SENS, SPEC, MCC, AUC, F1
+
 # reduce computation time for calibrate probability for linear svm
 def test_no_auc(clf, X, y, Xt, yt):
     train_X, test_X = X, Xt
