@@ -194,21 +194,6 @@ es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
 # plt.legend(['Train', 'Val'], loc='upper left')
 # plt.show()
 
-from sklearn.base import BaseEstimator, ClassifierMixin
-
-
-class Deep(BaseEstimator, ClassifierMixin):
-    def __init__(self, model):
-        self.clf = model
-    def predict(self, X):
-        pr = [np.round(np.abs(item[0])) for item in self.clf.predict(X)]
-        return pr
-    def predict_proba(self, X):
-        p_all = []
-        p_all.append([1-np.abs(item[0]) for item in self.clf.predict(X)])
-        p_all.append([np.abs(item[0]) for item in self.clf.predict(X)])
-        return np.transpose(np.array(p_all))
-
 # Compute 10 repeated
 for item in range(0, 10):
     
