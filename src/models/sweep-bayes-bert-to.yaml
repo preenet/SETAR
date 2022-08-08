@@ -3,16 +3,14 @@ project: bert-base-multilingual-cased-to
 name: bert-base-multilingual-cased-to
 entity: rapry60
 
-method: bayes
+method: random
 metric:
   goal: minimize
   name: val_loss
 parameters:
-  dropout:
-    values: [0.3, 0.4]
   learn_rate:
     values: [2e-5, 3e-5, 5e-5] 
-  batch_size:
-    values: 16
   epochs:
-    value: 5
+    value: 85
+  batch_size:
+    values: [32, 64, 128]

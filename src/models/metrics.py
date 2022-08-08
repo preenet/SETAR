@@ -55,3 +55,4 @@ def test_deep(clf, Xt, yt):
     AUC = roc_auc_score(yt, y_pred_prob[:,1]) # for binary classification problem
     F1 = 2*SENS*SPEC/(SENS+SPEC)
     return ACC, SENS, SPEC, MCC, AUC, F1
+
