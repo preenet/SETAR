@@ -6,6 +6,7 @@ import pandas as pd
 import src.utilities as utils
 import tensorflow as tf
 import tensorflow_addons as tfa
+from keras.callbacks import EarlyStopping
 from sklearn.model_selection import train_test_split
 from src.feature.process_thai_text import process_text
 from src.models.metrics import test_deep
@@ -181,7 +182,8 @@ model.summary()
 init(0)  
 ep = config.epochs
 bs = config.batch_size
-hist = model.fit(bert_train, y_train_c, validation_data=(bert_val, y_val_c), batch_size=bs, epochs=ep, verbose=1,callbacks=[WandbCallback(save_model=False, monitor="loss")]) 
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
+hist = model.fit(bert_train, y_train_c, validation_data=(bert_val, y_val_c), batch_size=bs, epochs=ep, verbose=1,callbacks=[WandbCallback(save_model=False, monitor="loss"), es]) 
 
 # file.write( str(0) + "," + str(max(hist.history['val_accuracy'])) + "," + str(max(hist.history['val_precision'])) + \
 #         "," + str(max(hist.history['val_recall'])) + ","  + str(max(hist.history['val_MatthewsCorrelationCoefficient'])) + \
