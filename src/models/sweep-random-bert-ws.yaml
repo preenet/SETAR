@@ -1,0 +1,14 @@
+program: BERT_wandb.py
+project: bert-base-multilingual-cased-ws
+name: bert-base-multilingual-cased-ws
+entity: rapry60
+
+method: random
+metric:
+  goal: minimize
+  name: val_loss
+parameters:
+  learn_rate:
+    values: [2e-5, 3e-5, 5e-5] 
+  epochs:
+    value: 10

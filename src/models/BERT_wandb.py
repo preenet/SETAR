@@ -23,8 +23,8 @@ import wandb
 wandb.init(settings=wandb.Settings(_disable_stats=True))
 config = wandb.config
 
-df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_to']))
-df_ds = df_ds[df_ds['processed'].str.len() < 320]
+df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_ws']))
+#df_ds = df_ds[df_ds['processed'].str.len() < 320]
 y_ds = df_ds['target'].astype('category').cat.codes
 yo = y_ds.to_numpy()
 #Xo = df_ds['processed']
@@ -34,7 +34,8 @@ Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
 tokenizer = tf.keras.preprocessing.text.Tokenizer(lower=True)
 tokenizer.fit_on_texts(Xo)
 sequences_train_num = tokenizer.texts_to_sequences(Xo)
-max_len = max([len(w) for w in sequences_train_num])
+#max_len = max([len(w) for w in sequences_train_num])
+max_len = 128
 print("Max length is:", max_len)
 sequences_train_num = tf.keras.preprocessing.sequence.pad_sequences(sequences_train_num, maxlen=max_len )
 
@@ -119,8 +120,8 @@ def create_model():
     X = embedding_layer[1] # for classification we only care about the pooler output
     
     X = tf.keras.layers.Dense(32, activation='relu')(X)
-    X = tf.keras.layers.Dropout(0.1)(X)
-    X = tf.keras.layers.Dense(2, activation='softmax')(X)
+    X = tf.keras.layers.Dropout(0.2)(X)
+    X = tf.keras.layers.Dense(4, activation='softmax')(X)
     model = tf.keras.Model(inputs=[input_ids, attention_mask], outputs = X)
 
     # for layer in model.layers[:3]:
@@ -170,8 +171,8 @@ def init(seed):
 model = create_model()    
 recall = tf.keras.metrics.Recall()
 precision = tf.keras.metrics.Precision()
-f1 = tfa.metrics.F1Score(num_classes=2, average='macro')
-mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
+f1 = tfa.metrics.F1Score(num_classes=4, average='macro')
+mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=4)
 auc = tf.keras.metrics.AUC()
 adam = tf.keras.optimizers.Adam(learning_rate=config.learn_rate)
 
@@ -181,8 +182,8 @@ model.summary()
 
 init(0)  
 ep = config.epochs
-bs = config.batch_size
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
+bs = 32
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
 hist = model.fit(bert_train, y_train_c, validation_data=(bert_val, y_val_c), batch_size=bs, epochs=ep, verbose=1,callbacks=[WandbCallback(save_model=False, monitor="loss"), es]) 
 
 # file.write( str(0) + "," + str(max(hist.history['val_accuracy'])) + "," + str(max(hist.history['val_precision'])) + \

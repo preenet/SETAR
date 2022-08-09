@@ -1,7 +1,9 @@
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import src.utilities as utils
 import tensorflow as tf
 import tensorflow_addons as tfa
@@ -17,11 +19,18 @@ from wandb.keras import WandbCallback
 configs = utils.read_config()
 root = utils.get_project_root()
 
-df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_to']))
-df_ds = df_ds[df_ds['processed'].str.len() < 320]
+bert = 'bert-base-multilingual-cased'
+#bert = 'bert-base-thai' 
+
+df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_ws']))
+#df_ds = df_ds[df_ds['processed'].str.len() < 320]
 y_ds = df_ds['target'].astype('category').cat.codes
 yo = y_ds.to_numpy()
 #Xo = df_ds['processed']
+
+# if bert == 'bert-base-thai':
+#     Xo = [' '.join(process_text_old(item))  for item in df_ds['text'].apply(str)]
+# else:
 Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
 
 # y_ds = df_ds['target'].astype('category').cat.codes
@@ -32,11 +41,11 @@ Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
 tokenizer = tf.keras.preprocessing.text.Tokenizer(lower=True)
 tokenizer.fit_on_texts(Xo)
 sequences_train_num = tokenizer.texts_to_sequences(Xo)
-max_len = max([len(w) for w in sequences_train_num])
+#max_len = max([len(w) for w in sequences_train_num])
+max_len = 200
 print("Max length is:", max_len)
 sequences_train_num = tf.keras.preprocessing.sequence.pad_sequences(sequences_train_num, maxlen=max_len )
 
-bert = 'bert-base-multilingual-cased'
 tokenizer = BertTokenizer.from_pretrained(bert)
 
 def tokenize(sentences, tokenizer):
@@ -48,14 +57,6 @@ def tokenize(sentences, tokenizer):
         input_masks.append(inputs['attention_mask'])       
         
     return np.asarray(input_ids, dtype='int32'), np.asarray(input_masks, dtype='int32')
-
-
-
-
-
-# bert_train = tokenize(X_train, tokenizer)
-# bert_val = tokenize(X_val, tokenizer)
-# bert_test = tokenize(X_test, tokenizer)
 
 # Seed value
 # Apparently you may use different seed values at each stage
@@ -86,13 +87,18 @@ tf.compat.v1.set_random_seed(seed_value)
 # 5. Configure a new global `tensorflow` session
 from keras import backend as K
 
-#session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
-#sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
-#K.set_session(sess)
 # for later versions:
 session_conf = tf.compat.v1.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
 sess = tf.compat.v1.Session(graph=tf.compat.v1.get_default_graph(), config=session_conf)
 tf.compat.v1.keras.backend.set_session(sess)
+
+    
+def init(seed):
+    tf.random.set_seed(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    tf.keras.backend.clear_session()
 
 from transformers import BertConfig, TFBertModel
 
@@ -108,91 +114,14 @@ def create_model():
     X = embedding_layer[1] # for classification we only care about the pooler output
     
     X = tf.keras.layers.Dense(32, activation='relu')(X)
-    X = tf.keras.layers.Dropout(0.1)(X)
-    X = tf.keras.layers.Dense(2, activation='softmax')(X)
+    #X = tf.keras.layers.Dropout(0.2)(X)
+    X = tf.keras.layers.Dense(4, activation='softmax')(X)
     model = tf.keras.Model(inputs=[input_ids, attention_mask], outputs = X)
 
-    for layer in model.layers[:3]:
-      layer.trainable = False
+    # for layer in model.layers[:3]:
+    #   layer.trainable = False
     
     return model
-
-# def create_model_finetune():
-#     # Fine-tuning a Pretrained transformer model
-#     loss = tf.keras.losses.CategoricalCrossentropy()
-#     accuracy = tf.keras.metrics.CategoricalAccuracy()
-#     recall = tf.keras.metrics.Recall()
-#     precision = tf.keras.metrics.Precision()
-#     auc = tf.keras.metrics.AUC()
-#     mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=np.unique(y).shape[0])
-#     f1 = tfa.metrics.F1Score(num_classes=num_class, average='macro')
-    
-#     configuration = BertConfig.from_pretrained(bert)
-
-#     configuration.output_hidden_states = True
-#     transformer_model = TFBertForSequenceClassification.from_pretrained(bert, config = configuration)
-
-#     input_ids_layer = tf.keras.layers.Input(shape=(max_len, ), dtype=tf.int32)
-#     input_mask_layer = tf.keras.layers.Input(shape=(max_len ), dtype=tf.int32)
-
-#     embeddings = transformer_model([input_ids_layer, input_mask_layer])[0]
-#     dense_output = tf.keras.layers.Dense(num_class, activation='softmax')(embeddings ) 
-#     model = tf.keras.Model(inputs=[input_ids_layer, input_mask_layer], outputs=dense_output)
-    
-#     # for layer in model.layers[:2]:
-#     #     layer.trainable = False
-    
-#     model.compile(tf.keras.optimizers.Adam(lr=3e-5), loss=loss, metrics=[accuracy, precision, recall, mcc, auc, f1])
-#     return model
-
-# model = create_model_finetune()
-# model.summary()
-
-
-def init(seed):
-    tf.random.set_seed(seed)
-    random.seed(seed)
-    np.random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
-    tf.keras.backend.clear_session()
-    
-model = create_model()    
-recall = tf.keras.metrics.Recall()
-precision = tf.keras.metrics.Precision()
-f1 = tfa.metrics.F1Score(num_classes=2, average='macro')
-mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
-auc = tf.keras.metrics.AUC()
-adam = tf.keras.optimizers.Adam(learning_rate=5e-5)
-
-model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['accuracy', recall, precision, mcc, f1, auc])
-model.summary()
-
-init(0)  
-ep = 15
-bs = 128
-#bs = int(len(X_train))
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
-
-#hist = model.fit(bert_train, y_train_c, validation_data=(bert_val, y_val_c), batch_size=bs, epochs=ep) 
-
-
-# # test with test set
-# acc, pre, rec, mcc, auc, f1 = test_deep(model, bert_val , y_val)
-# file.write("," + str(0) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) + "\n")
-
-# import matplotlib.pyplot as plt
-# import seaborn as sns
-
-# sns.set()
-# plt.figure(num=None, figsize=(16, 8), dpi=90, facecolor='w', edgecolor='k')
-# plt.plot()
-# plt.plot(hist.history['accuracy'])
-# plt.plot(hist.history['val_accuracy'])
-# plt.title('model accuracy')
-# plt.ylabel('accuracy')
-# plt.xlabel('epoch')
-# plt.legend(['Train', 'Val'], loc='upper left')
-# plt.show()
 
 # Compute 10 repeated
 for item in range(0, 10):
@@ -210,10 +139,27 @@ for item in range(0, 10):
     
     bert_train = tokenize(XT, tokenizer)
     bert_test = tokenize(X_test, tokenizer)
-    
-    file = open(configs['output_scratch'] +"bert_10repeated_to.csv", "a") 
+
+    model = create_model()    
+    recall = tf.keras.metrics.Recall()
+    precision = tf.keras.metrics.Precision()
+    f1 = tfa.metrics.F1Score(num_classes=4, average='macro')
+    mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=4)
+    auc = tf.keras.metrics.AUC()
+    adam = tf.keras.optimizers.Adam(learning_rate=3e-4)
+
+    model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['accuracy', recall, precision, mcc, f1, auc])
+    model.summary()
+
+    init(0)  
+    ep = 30
+    bs = 16
+    #bs = int(len(X_train))
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
+
+    file = open(configs['output_scratch'] +"bert_10repeated_ws.csv", "a") 
     hist = model.fit(bert_train, YT, validation_data=(bert_test, y_test_c),
-                      batch_size=bs, epochs=ep, verbose=1,callbacks=[es]) 
+                      batch_size=bs, epochs=ep, verbose=1, callbacks=[es]) 
     
     file.write( str(item) + "," + str(max(hist.history['val_accuracy'])) + "," + str(max(hist.history['val_precision'])) + \
         "," + str(max(hist.history['val_recall'])) + ","  + str(max(hist.history['val_MatthewsCorrelationCoefficient'])) + \
@@ -233,11 +179,26 @@ for item in range(0, 10):
     y_pred_bert =  np.zeros_like(bert_pred )
     y_pred_bert[np.arange(len(y_pred_bert)), bert_pred.argmax(1)] = 1
     
-    auc = roc_auc_score(y_test,y_pred_bert[:,1])
+    auc = roc_auc_score(y_test,y_pred_bert,multi_class='ovo',average='macro')
+    #auc = roc_auc_score(y_test,y_pred_bert[:,1])
 
     # test with test set
     # acc, pre, rec, mcc, auc, f1 = test_bert(clf, bert_test, y_test_c)
     file.write("," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) + "\n")
+    
+    # import matplotlib.pyplot as plt
+    # import seaborn as sns
+
+    # sns.set()
+    # plt.figure(num=None, figsize=(16, 8), dpi=90, facecolor='w', edgecolor='k')
+    # plt.plot()
+    # plt.plot(hist.history['accuracy'])
+    # plt.plot(hist.history['val_accuracy'])
+    # plt.title('model accuracy')
+    # plt.ylabel('accuracy')
+    # plt.xlabel('epoch')
+    # plt.legend(['Train', 'Val'], loc='upper left')
+    # plt.show()
     
 file.close()
     
