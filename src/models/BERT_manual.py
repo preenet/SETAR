@@ -27,19 +27,15 @@ root = utils.get_project_root()
 bert = 'bert-base-th-cased'
 #bert = 'bert-base-thai' 
 
-df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_tt']))
-#df_ds = df_ds[df_ds['processed'].str.len() < 320]
+df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_to']))
+df_ds = df_ds[df_ds['processed'].str.len() < 320]
 y_ds = df_ds['target'].astype('category').cat.codes
 yo = y_ds.to_numpy()
 
 
 #joblib.dump((Xo, yo), "kt-bert-new-token.sav")   
 
-# token_karas = tf.keras.preprocessing.text.Tokenizer(lower=True)
-# token_karas.fit_on_texts(Xo)
-# sequences_train_num = token_karas.texts_to_sequences(Xo)
-# #max_len = max([len(w) for w in sequences_train_num])
-max_len = 50
+
 # print("Max length is:", max_len)
 
 # a custom tokenizer function and call the encode_plus method of the selected BERT tokenizer.
@@ -53,41 +49,41 @@ def tokenize(sentences, tokenizer):
         
     return np.asarray(input_ids, dtype='int32'), np.asarray(input_masks, dtype='int32')
 
-# # Seed value
-# # Apparently you may use different seed values at each stage
-# seed_value= 1
+# Seed value
+# Apparently you may use different seed values at each stage
+seed_value= 1
 
-# # 1. Set `PYTHONHASHSEED` environment variable at a fixed value
-# os.environ['PYTHONHASHSEED']=str(seed_value)
+# 1. Set `PYTHONHASHSEED` environment variable at a fixed value
+os.environ['PYTHONHASHSEED']=str(seed_value)
 
-# # 2. Set `python` built-in pseudo-random generator at a fixed value
-# import random
+# 2. Set `python` built-in pseudo-random generator at a fixed value
+import random
 
-# random.seed(seed_value)
+random.seed(seed_value)
 
-# # 3. Set `numpy` pseudo-random generator at a fixed value
-# np.random.seed(seed_value)
+# 3. Set `numpy` pseudo-random generator at a fixed value
+np.random.seed(seed_value)
 
-# # 4. Set the `tensorflow` pseudo-random generator at a fixed value
-# import tensorflow as tf
+# 4. Set the `tensorflow` pseudo-random generator at a fixed value
+import tensorflow as tf
 
-# # tf.random.set_seed(seed_value)
-# # for later versions: 
-# tf.compat.v1.set_random_seed(seed_value)
+# tf.random.set_seed(seed_value)
+# for later versions: 
+tf.compat.v1.set_random_seed(seed_value)
 
-# # 5. Configure a new global `tensorflow` session
-# # for later versions:
-# session_conf = tf.compat.v1.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
-# sess = tf.compat.v1.Session(graph=tf.compat.v1.get_default_graph(), config=session_conf)
-# tf.compat.v1.keras.backend.set_session(sess)
+# 5. Configure a new global `tensorflow` session
+# for later versions:
+session_conf = tf.compat.v1.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+sess = tf.compat.v1.Session(graph=tf.compat.v1.get_default_graph(), config=session_conf)
+tf.compat.v1.keras.backend.set_session(sess)
 
     
-# def init(seed):
-#     tf.random.set_seed(seed)
-#     random.seed(seed)
-#     np.random.seed(seed)
-#     os.environ['PYTHONHASHSEED'] = str(seed)
-#     tf.keras.backend.clear_session()
+def init(seed):
+    tf.random.set_seed(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    tf.keras.backend.clear_session()
 
 def create_model(bert_model):
     
@@ -98,8 +94,8 @@ def create_model(bert_model):
     X = embedding_layer[1] # for classification we only care about the pooler output
     
     X = tf.keras.layers.Dense(32, activation='relu')(X)
-    X = tf.keras.layers.Dropout(0.1)(X)
-    X = tf.keras.layers.Dense(3, activation='softmax')(X)
+    #X = tf.keras.layers.Dropout(0.1)(X)
+    X = tf.keras.layers.Dense(2, activation='softmax')(X)
     model = tf.keras.Model(inputs=[input_ids, attention_mask], outputs = X)
 
     # for layer in model.layers[:3]:
@@ -110,6 +106,7 @@ def create_model(bert_model):
 #FIXME: model keep using the old weight for next loop
 for item in range(0, 10):
     tf.keras.backend.clear_session()
+   
     
     if bert == 'bert-base-thai':
         Xo = [process_text_old(item) for item in df_ds['text'].apply(str)]
@@ -128,6 +125,9 @@ for item in range(0, 10):
         tokenizer = BertTokenizer.from_pretrained(bert)
         bert_config = BertConfig.from_pretrained("bert-base-multilingual-cased", output_hidden_states=True)
         bert_model = TFBertModel.from_pretrained('bert-base-multilingual-cased', bert_config)
+        
+
+    max_len = 45
     
     X_train, X_tmp, y_train, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, y_val, y_test = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
@@ -147,21 +147,24 @@ for item in range(0, 10):
     
     recall = tf.keras.metrics.Recall()
     precision = tf.keras.metrics.Precision()
-    f1 = tfa.metrics.F1Score(num_classes=3, average='macro')
-    mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=3)
+    f1 = tfa.metrics.F1Score(num_classes=2, average='macro')
+    mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
     auc = tf.keras.metrics.AUC()
+    
     adam = tf.keras.optimizers.Adam(learning_rate=5e-5)
 
     model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['accuracy', recall, precision, mcc, f1, auc])
     model.summary()
 
-    # init(0)  
-    ep = 5
-    bs = 32
+    init(0)  
+    ep = 60
+    bs = 128
     #bs = int(len(X_train))
-    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=12)
 
-    file = open(configs['output_scratch'] +"bert_10repeated_kt.csv", "a") 
+    file = open(configs['output_scratch'] +"bert_10repeated_to.csv", "a")
+    
+    
     hist = model.fit(bert_train, YT, validation_data=(bert_test, y_test_c),
                       batch_size=bs, epochs=ep, verbose=1, callbacks=[es]) 
     
@@ -184,8 +187,8 @@ for item in range(0, 10):
     y_pred_bert[np.arange(len(y_pred_bert)), bert_pred.argmax(1)] = 1
     
 
-    auc = roc_auc_score(y_test,y_pred_bert,multi_class='ovo',average='macro')
-    #auc = roc_auc_score(y_test,y_pred_bert[:,1])
+    #auc = roc_auc_score(y_test,y_pred_bert,multi_class='ovo',average='macro')
+    auc = roc_auc_score(y_test,y_pred_bert[:,1])
 
     # test with test set
     # acc, pre, rec, mcc, auc, f1 = test_bert(clf, bert_test, y_test_c)
