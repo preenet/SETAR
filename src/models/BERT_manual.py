@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -9,45 +10,53 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 from keras.callbacks import EarlyStopping
 from sklearn.model_selection import train_test_split
-from src.feature.process_thai_text import process_text
+from src.feature.process_thai_text import process_text, process_text_old
 from src.models.metrics import test_bert
 from tensorflow.keras.utils import to_categorical
-from transformers import (BertConfig, BertTokenizer,
-                          TFBertForSequenceClassification)
+from transformers import (AutoConfig, AutoModel, AutoTokenizer, BertConfig,
+                          BertTokenizer, TFAutoModel,
+                          TFBertForSequenceClassification, TFBertModel)
 from wandb.keras import WandbCallback
 
 configs = utils.read_config()
 root = utils.get_project_root()
 
-bert = 'bert-base-multilingual-cased'
+#bert = 'bert-base-multilingual-cased'
+bert = 'bert-base-th-cased'
 #bert = 'bert-base-thai' 
 
-df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_ws']))
-#df_ds = df_ds[df_ds['processed'].str.len() < 320]
+df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_to']))
+df_ds = df_ds[df_ds['processed'].str.len() < 320]
 y_ds = df_ds['target'].astype('category').cat.codes
 yo = y_ds.to_numpy()
-#Xo = df_ds['processed']
 
-# if bert == 'bert-base-thai':
-#     Xo = [' '.join(process_text_old(item))  for item in df_ds['text'].apply(str)]
-# else:
-Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
 
-# y_ds = df_ds['target'].astype('category').cat.codes
-# yo = y_ds.to_numpy()
-# Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
-#X_aa, y, Xt_aa, yt = joblib.load(Path.joinpath(root, 'data/processed/toxic_tweet_icdamt.sav'))
+if bert == 'bert-base-thai':
+    Xo = [process_text_old(item) for item in df_ds['text'].apply(str)]
+    tokenizer = AutoTokenizer.from_pretrained(bert)
+    bert_config = AutoConfig.from_pretrained("bert-base-thai", output_hidden_states=True)
+    bert_model = AutoModel.from_pretrained('bert-base-thai',  bert_config)
+    
+elif bert == 'bert-base-th-cased':
+    Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
+    tokenizer = AutoTokenizer.from_pretrained("Geotrend/bert-base-th-cased")
+    bert_config = AutoConfig.from_pretrained("Geotrend/bert-base-th-cased", output_hidden_states=True)
+    bert_model = TFAutoModel.from_pretrained('Geotrend/bert-base-th-cased', bert_config)
+    
+else:
+    Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
+    tokenizer = BertTokenizer.from_pretrained(bert)
+    bert_config = BertConfig.from_pretrained("bert-base-multilingual-cased", output_hidden_states=True)
+    bert_model = TFBertModel.from_pretrained('bert-base-multilingual-cased', bert_config)
+    
 
-tokenizer = tf.keras.preprocessing.text.Tokenizer(lower=True)
-tokenizer.fit_on_texts(Xo)
-sequences_train_num = tokenizer.texts_to_sequences(Xo)
-#max_len = max([len(w) for w in sequences_train_num])
-max_len = 200
+token_karas = tf.keras.preprocessing.text.Tokenizer(lower=True)
+token_karas.fit_on_texts(Xo)
+sequences_train_num = token_karas.texts_to_sequences(Xo)
+max_len = max([len(w) for w in sequences_train_num])
 print("Max length is:", max_len)
-sequences_train_num = tf.keras.preprocessing.sequence.pad_sequences(sequences_train_num, maxlen=max_len )
 
-tokenizer = BertTokenizer.from_pretrained(bert)
-
+# a custom tokenizer function and call the encode_plus method of the selected BERT tokenizer.
 def tokenize(sentences, tokenizer):
     input_ids, input_masks = [],[]
     for sentence in sentences:
@@ -63,8 +72,6 @@ def tokenize(sentences, tokenizer):
 seed_value= 1
 
 # 1. Set `PYTHONHASHSEED` environment variable at a fixed value
-import os
-
 os.environ['PYTHONHASHSEED']=str(seed_value)
 
 # 2. Set `python` built-in pseudo-random generator at a fixed value
@@ -73,8 +80,6 @@ import random
 random.seed(seed_value)
 
 # 3. Set `numpy` pseudo-random generator at a fixed value
-import numpy as np
-
 np.random.seed(seed_value)
 
 # 4. Set the `tensorflow` pseudo-random generator at a fixed value
@@ -85,8 +90,6 @@ import tensorflow as tf
 tf.compat.v1.set_random_seed(seed_value)
 
 # 5. Configure a new global `tensorflow` session
-from keras import backend as K
-
 # for later versions:
 session_conf = tf.compat.v1.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
 sess = tf.compat.v1.Session(graph=tf.compat.v1.get_default_graph(), config=session_conf)
@@ -100,27 +103,20 @@ def init(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
     tf.keras.backend.clear_session()
 
-from transformers import BertConfig, TFBertModel
-
-
-def create_model():
-    config = BertConfig.from_pretrained("bert-base-multilingual-cased", output_hidden_states=True)
-    #transformer_model = AutoModel.from_pretrained('bert-base-multilingual-cased', config=config)
-    transformer_model = TFBertModel.from_pretrained("bert-base-multilingual-cased", config=config)    
+def create_model(bert_model):
     input_ids = tf.keras.layers.Input(shape=(max_len,), name='input_token', dtype=tf.int32)
     attention_mask = tf.keras.layers.Input(shape=(max_len,), name='masked_token', dtype=tf.int32)
 
-    embedding_layer = transformer_model(input_ids, attention_mask=attention_mask)
+    embedding_layer = bert_model(input_ids, attention_mask=attention_mask)
     X = embedding_layer[1] # for classification we only care about the pooler output
     
     X = tf.keras.layers.Dense(32, activation='relu')(X)
     #X = tf.keras.layers.Dropout(0.2)(X)
-    X = tf.keras.layers.Dense(4, activation='softmax')(X)
+    X = tf.keras.layers.Dense(2, activation='softmax')(X)
     model = tf.keras.Model(inputs=[input_ids, attention_mask], outputs = X)
 
     # for layer in model.layers[:3]:
     #   layer.trainable = False
-    
     return model
 
 # Compute 10 repeated
@@ -140,20 +136,21 @@ for item in range(0, 10):
     bert_train = tokenize(XT, tokenizer)
     bert_test = tokenize(X_test, tokenizer)
 
-    model = create_model()    
+    model = create_model(bert_model)
+    
     recall = tf.keras.metrics.Recall()
     precision = tf.keras.metrics.Precision()
-    f1 = tfa.metrics.F1Score(num_classes=4, average='macro')
-    mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=4)
+    f1 = tfa.metrics.F1Score(num_classes=2, average='macro')
+    mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
     auc = tf.keras.metrics.AUC()
-    adam = tf.keras.optimizers.Adam(learning_rate=3e-4)
+    adam = tf.keras.optimizers.Adam(learning_rate=5e-5)
 
     model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['accuracy', recall, precision, mcc, f1, auc])
     model.summary()
 
     init(0)  
-    ep = 30
-    bs = 16
+    ep = 80
+    bs = 120
     #bs = int(len(X_train))
     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
 
@@ -179,8 +176,9 @@ for item in range(0, 10):
     y_pred_bert =  np.zeros_like(bert_pred )
     y_pred_bert[np.arange(len(y_pred_bert)), bert_pred.argmax(1)] = 1
     
-    auc = roc_auc_score(y_test,y_pred_bert,multi_class='ovo',average='macro')
-    #auc = roc_auc_score(y_test,y_pred_bert[:,1])
+
+    #auc = roc_auc_score(y_test,y_pred_bert,multi_class='ovo',average='macro')
+    auc = roc_auc_score(y_test,y_pred_bert[:,1])
 
     # test with test set
     # acc, pre, rec, mcc, auc, f1 = test_bert(clf, bert_test, y_test_c)
