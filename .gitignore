@@ -6,6 +6,7 @@ data/lexicon/
 data/raw/kt4.0/
 data/raw/pretrained/
 data/processed/kt.csv
+data/processed/bert-base-thai/
 
 output-scratch/
 
