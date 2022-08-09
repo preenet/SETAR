@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -25,8 +26,8 @@ root = utils.get_project_root()
 bert = 'bert-base-th-cased'
 #bert = 'bert-base-thai' 
 
-df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_to']))
-df_ds = df_ds[df_ds['processed'].str.len() < 320]
+df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_kt']))
+#df_ds = df_ds[df_ds['processed'].str.len() < 320]
 y_ds = df_ds['target'].astype('category').cat.codes
 yo = y_ds.to_numpy()
 
@@ -48,12 +49,14 @@ else:
     tokenizer = BertTokenizer.from_pretrained(bert)
     bert_config = BertConfig.from_pretrained("bert-base-multilingual-cased", output_hidden_states=True)
     bert_model = TFBertModel.from_pretrained('bert-base-multilingual-cased', bert_config)
-    
+
+joblib.dump((Xo, yo), "kt-bert-new-token.sav")   
 
 token_karas = tf.keras.preprocessing.text.Tokenizer(lower=True)
 token_karas.fit_on_texts(Xo)
 sequences_train_num = token_karas.texts_to_sequences(Xo)
-max_len = max([len(w) for w in sequences_train_num])
+#max_len = max([len(w) for w in sequences_train_num])
+max_len = 128
 print("Max length is:", max_len)
 
 # a custom tokenizer function and call the encode_plus method of the selected BERT tokenizer.
@@ -111,8 +114,8 @@ def create_model(bert_model):
     X = embedding_layer[1] # for classification we only care about the pooler output
     
     X = tf.keras.layers.Dense(32, activation='relu')(X)
-    #X = tf.keras.layers.Dropout(0.2)(X)
-    X = tf.keras.layers.Dense(2, activation='softmax')(X)
+    X = tf.keras.layers.Dropout(0.3)(X)
+    X = tf.keras.layers.Dense(3, activation='softmax')(X)
     model = tf.keras.Model(inputs=[input_ids, attention_mask], outputs = X)
 
     # for layer in model.layers[:3]:
@@ -140,8 +143,8 @@ for item in range(0, 10):
     
     recall = tf.keras.metrics.Recall()
     precision = tf.keras.metrics.Precision()
-    f1 = tfa.metrics.F1Score(num_classes=2, average='macro')
-    mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
+    f1 = tfa.metrics.F1Score(num_classes=3, average='macro')
+    mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=3)
     auc = tf.keras.metrics.AUC()
     adam = tf.keras.optimizers.Adam(learning_rate=5e-5)
 
@@ -149,8 +152,8 @@ for item in range(0, 10):
     model.summary()
 
     init(0)  
-    ep = 80
-    bs = 120
+    ep = 10
+    bs = 20
     #bs = int(len(X_train))
     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
 
@@ -177,8 +180,8 @@ for item in range(0, 10):
     y_pred_bert[np.arange(len(y_pred_bert)), bert_pred.argmax(1)] = 1
     
 
-    #auc = roc_auc_score(y_test,y_pred_bert,multi_class='ovo',average='macro')
-    auc = roc_auc_score(y_test,y_pred_bert[:,1])
+    auc = roc_auc_score(y_test,y_pred_bert,multi_class='ovo',average='macro')
+    #auc = roc_auc_score(y_test,y_pred_bert[:,1])
 
     # test with test set
     # acc, pre, rec, mcc, auc, f1 = test_bert(clf, bert_test, y_test_c)
