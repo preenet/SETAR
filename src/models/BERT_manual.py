@@ -160,7 +160,7 @@ for item in range(0, 10):
     ep = 60
     bs = 128
     #bs = int(len(X_train))
-    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=12)
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=15)
 
     file = open(configs['output_scratch'] +"bert_10repeated_to.csv", "a")
     
