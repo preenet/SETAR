@@ -25,10 +25,10 @@ root = utils.get_project_root()
 bert = 'bert-base-th-cased'
 #bert = 'bert-base-thai' 
 
-df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_kt']))
-#df_ds = df_ds[df_ds['processed'].str.len() < 320]
-y_ds = df_ds['target'].astype('category').cat.codes
-yo = y_ds.to_numpy()
+# df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_kt']))
+# #df_ds = df_ds[df_ds['processed'].str.len() < 320]
+# y_ds = df_ds['target'].astype('category').cat.codes
+# yo = y_ds.to_numpy()
 
 #num_class = np.unique(yo).shape[0]
 # print("Max length is:", max_len)
@@ -99,7 +99,7 @@ def create_model(bert_model):
 
 # Compute 10 repeated
 #FIXME: model keep using the old weight for next loop
-for item in range(3, 10):
+for item in range(9, 10):
     tf.keras.backend.clear_session()
    
     
@@ -113,7 +113,7 @@ for item in range(3, 10):
     
     elif bert == 'bert-base-th-cased':
         #Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
-        Xo, yo = joblib.load('kt-bert.sav')
+        Xo, yo = joblib.load(Path.joinpath(root,'data/processed/kt-bert.sav'))
         tokenizer = AutoTokenizer.from_pretrained("Geotrend/bert-base-th-cased")
         bert_config = AutoConfig.from_pretrained("Geotrend/bert-base-th-cased", output_hidden_states=True)
         bert_model = TFAutoModel.from_pretrained('Geotrend/bert-base-th-cased', bert_config)
