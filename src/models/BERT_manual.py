@@ -22,15 +22,15 @@ configs = utils.read_config()
 root = utils.get_project_root()
 
 #bert = 'bert-base-multilingual-cased'
-#bert = 'bert-base-th-cased'
-bert = 'bert-base-thai' 
+bert = 'bert-base-th-cased'
+#bert = 'bert-base-thai' 
 
-df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_tt']))
+df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_kt']))
 #df_ds = df_ds[df_ds['processed'].str.len() < 320]
 y_ds = df_ds['target'].astype('category').cat.codes
 yo = y_ds.to_numpy()
 
-num_class = np.unique(yo).shape[0]
+#num_class = np.unique(yo).shape[0]
 # print("Max length is:", max_len)
 
 # a custom tokenizer function and call the encode_plus method of the selected BERT tokenizer.
@@ -46,7 +46,7 @@ def tokenize(sentences, tokenizer):
 
 # Seed value
 # Apparently you may use different seed values at each stage
-seed_value= 1
+seed_value= 0
 
 # 1. Set `PYTHONHASHSEED` environment variable at a fixed value
 os.environ['PYTHONHASHSEED']=str(seed_value)
@@ -90,7 +90,7 @@ def create_model(bert_model):
     
     X = tf.keras.layers.Dense(32, activation='relu')(X)
     #X = tf.keras.layers.Dropout(0.1)(X)
-    X = tf.keras.layers.Dense(num_class, activation='softmax')(X)
+    X = tf.keras.layers.Dense(3, activation='softmax')(X)
     model = tf.keras.Model(inputs=[input_ids, attention_mask], outputs = X)
 
     # for layer in model.layers[:3]:
@@ -99,22 +99,25 @@ def create_model(bert_model):
 
 # Compute 10 repeated
 #FIXME: model keep using the old weight for next loop
-for item in range(0, 10):
+for item in range(3, 10):
     tf.keras.backend.clear_session()
    
     
     if bert == 'bert-base-thai':
-        Xo = [process_text_old(item) for item in df_ds['text'].apply(str)]
-        tokenizer = AutoTokenizer.from_pretrained(bert)
-        bert_config = AutoConfig.from_pretrained("bert-base-thai", output_hidden_states=True)
-        bert_model = TFAutoModel.from_pretrained('bert-base-thai',  bert_config)
-        joblib.dump((Xo, yo), "tt-bert-old-token.sav")   
+        Xo = [process_text_old(item) for item in df_ds['text']]
+        print(Xo[:10])
+        tokenizer = AutoTokenizer.from_pretrained("monsoon-nlp/bert-base-thai")
+        bert_config = AutoConfig.from_pretrained("monsoon-nlp/bert-base-thai", output_hidden_states=True)
+        bert_model = TFAutoModel.from_pretrained('monsoon-nlp/bert-base-thai', from_pt=True, config=bert_config)
+          
     
     elif bert == 'bert-base-th-cased':
-        Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
+        #Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
+        Xo, yo = joblib.load('kt-bert.sav')
         tokenizer = AutoTokenizer.from_pretrained("Geotrend/bert-base-th-cased")
         bert_config = AutoConfig.from_pretrained("Geotrend/bert-base-th-cased", output_hidden_states=True)
         bert_model = TFAutoModel.from_pretrained('Geotrend/bert-base-th-cased', bert_config)
+        joblib.dump((Xo, yo), "kt-bert.sav") 
         
     else:
         Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
@@ -123,7 +126,7 @@ for item in range(0, 10):
         bert_model = TFBertModel.from_pretrained('bert-base-multilingual-cased', bert_config)
         
 
-    max_len = 70
+    max_len = 50
     
     X_train, X_tmp, y_train, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, y_val, y_test = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
@@ -143,22 +146,22 @@ for item in range(0, 10):
     
     recall = tf.keras.metrics.Recall()
     precision = tf.keras.metrics.Precision()
-    f1 = tfa.metrics.F1Score(num_classes=num_class, average='macro')
+    f1 = tfa.metrics.F1Score(num_classes=3, average='macro')
     mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=3)
     auc = tf.keras.metrics.AUC()
     
-    adam = tf.keras.optimizers.Adam(learning_rate=5e-5)
+    adam = tf.keras.optimizers.Adam(learning_rate= 5e-5)
 
     model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['accuracy', recall, precision, mcc, f1, auc])
     model.summary()
 
     init(0)  
-    ep = 60
-    bs = 64
+    ep = 10
+    bs = 130
     #bs = int(len(X_train))
-    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
 
-    file = open(configs['output_scratch'] +"bert_10repeated_to.csv", "a")
+    file = open(configs['output_scratch'] +"bert_10repeated_kt.csv", "a")
     
     
     hist = model.fit(bert_train, YT, validation_data=(bert_test, y_test_c),
@@ -182,10 +185,9 @@ for item in range(0, 10):
     y_pred_bert =  np.zeros_like(bert_pred )
     y_pred_bert[np.arange(len(y_pred_bert)), bert_pred.argmax(1)] = 1
     
-    if (num_class > 2):
-        auc = roc_auc_score(y_test,y_pred_bert,multi_class='ovo',average='macro')
-    else:
-        auc = roc_auc_score(y_test,y_pred_bert[:,1])
+    auc = roc_auc_score(y_test,y_pred_bert,multi_class='ovo',average='macro')
+    
+    #auc = roc_auc_score(y_test,y_pred_bert[:,1])
 
     # test with test set
     # acc, pre, rec, mcc, auc, f1 = test_bert(clf, bert_test, y_test_c)
