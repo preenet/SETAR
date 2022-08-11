@@ -117,7 +117,6 @@ for item in range(3, 10):
         tokenizer = AutoTokenizer.from_pretrained("Geotrend/bert-base-th-cased")
         bert_config = AutoConfig.from_pretrained("Geotrend/bert-base-th-cased", output_hidden_states=True)
         bert_model = TFAutoModel.from_pretrained('Geotrend/bert-base-th-cased', bert_config)
-        joblib.dump((Xo, yo), "kt-bert.sav") 
         
     else:
         Xo = [' '.join(process_text(item))  for item in df_ds['text'].apply(str)]
