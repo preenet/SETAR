@@ -15,7 +15,7 @@ from transformers import CamembertTokenizer, RobertaModel
 configs = utils.read_config()
 root = utils.get_project_root()
 
-Xo, yo = joblib.load(Path.joinpath(root, configs['data']['processed_kt_sav']))
+Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_tt']))
 
 
 def test_binary(yp, yt):     
@@ -161,7 +161,7 @@ for iii, item in enumerate(SEED):
                 yval = model(val1_gpu, val2_gpu)
                 valid_correct += (torch.argmax(yval, 1) == tval_gpu).sum().item()
 
-        print("epoch: "+str(epoch)+ " loss: "+str(train_loss/n_train) + "tr acc: "+str(train_correct/n_train) + " val acc: " +str(valid_correct/n_val))
+        print("epoch: "+str(epoch)+ " loss: "+str(train_loss/n_train) + " ,tr_acc: "+str(train_correct/n_train) + " val_acc: " +str(valid_correct/n_val))
 
     from torch.utils.data import DataLoader, TensorDataset
     train_dl = DataLoader(TensorDataset(X1, X2, y), batch_size=32, shuffle=False)
@@ -197,8 +197,9 @@ for iii, item in enumerate(SEED):
             Xt = yp
         else:
             Xt = np.vstack((Xt,yp))
-    
-    torch.save(model.state_dict(), "./model_"+str(item)+".pt")
+            
+    model_file = "./model_"+str(item)+".pt"
+    torch.save(model.state_dict(), model_file)
     y = y.cpu().detach().numpy()
     yv = yv.cpu().detach().numpy()
     yt = yt.cpu().detach().numpy()
@@ -220,7 +221,7 @@ for iii, item in enumerate(SEED):
     
     torch.cuda.empty_cache()
     model = Camembert()
-    model.load_state_dict(torch.load('./model_0.pt'))
+    model.load_state_dict(torch.load(model_file ))
     model.to('cuda')
     with torch.no_grad():
         for i, (input1, input2, targets) in enumerate(val_dl):
@@ -247,7 +248,7 @@ for iii, item in enumerate(SEED):
                 yp = ytmp
             else:
                 yp = np.vstack((yp, ytmp)) 
-    acc, pre, rec, mcc, auc, f1 = test_multi(yp, yv)  
+    acc, pre, rec, mcc, auc, f1 = test_multi(yp, yt)  
     file.write("," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) +"\n") 
        
     del model

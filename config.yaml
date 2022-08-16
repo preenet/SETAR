@@ -10,10 +10,14 @@
 
     # datasets that were executed by make_dataset.py (use joblib to load X, y = joblib.load())
     processed_kt: data/processed/kt.csv
-    processed_kt_sav: data/processed/bert-base-thai/kt-bert-new-token.sav
     processed_ws: data/processed/wisesight.csv
     processed_tt: data/processed/thaitale.csv
     processed_to: data/processed/thai_toxic_tweet.csv
+
+    kaggle_kt: data/processed/bert-base-thai/kt-bert-new-token.sav
+    kaggle_to: data/processed/kaggle/tx.sav
+    kaggle_tt: data/processed/kaggle/tt.sav
+    kaggle_ws: data/processed/kaggle/ws.sav
 
 
 - models: models/
