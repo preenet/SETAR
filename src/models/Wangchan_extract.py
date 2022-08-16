@@ -4,7 +4,12 @@ import joblib
 import numpy as np
 import src.utilities as utils
 import torch
+from sklearn.metrics import matthews_corrcoef  # average == 'macro'.
+from sklearn.metrics import \
+    roc_auc_score  # multiclas 'ovo' average == 'macro'.
+from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
+from src.models.camerbert import Camembert
 from transformers import CamembertTokenizer, RobertaModel
 
 configs = utils.read_config()
@@ -12,50 +17,30 @@ root = utils.get_project_root()
 
 Xo, yo = joblib.load(Path.joinpath(root, configs['data']['processed_kt_sav']))
 
-class Camembert(torch.nn.Module):
-    def __init__(self):
-        super(Camembert, self).__init__()
-        self.l1 = RobertaModel.from_pretrained("airesearch/wangchanberta-base-att-spm-uncased")
-        #for param in self.l1.parameters():
-        #    param.requires_grad = False
-        self.h1 = torch.nn.Linear(768, 50)
-        self.a1 = torch.nn.Sigmoid()
-        self.h2 = torch.nn.Linear(50, 4)
-        #self.hidden_size = self.l1.config.hidden_size
-        #self.LSTM = torch.nn.LSTM(input_size=self.hidden_size, num_layers=2, hidden_size=100, dropout=0.1, bidirectional=True)
-        #self.hidden1 = torch.nn.Linear(200 , 100)
-        #self.act1 = torch.nn.ReLU()
-        #self.dropout = torch.nn.Dropout(0.2)
-        #self.hidden2 = torch.nn.Linear(100, 4)
-        #self.act2 = torch.nn.Softmax(-1)  // CrossEntropy already did it
 
-    def forward(self, input_ids, attention_mask):
-        output_1 = self.l1(input_ids=input_ids, attention_mask=attention_mask)
-        X = output_1[0]
-        X = self.h1(X[:,0])
-        X = self.a1(X)
-        X = self.h2(X)
-        #X, (last_hidden, last_cell) = self.LSTM(X)
-        #X, _ = torch.max(X, 1)
-        #X = self.hidden1(X)
-        #X = self.act1(X)
-        #X = self.dropout(X)
-        #X = self.hidden2(X)
-        return X
+def test_binary(yp, yt):     
+    test_y = yt
+    p = yp.argmax(1)
+    pr = torch.nn.functional.softmax(torch.tensor(yp), dim=1)
+    ACC = accuracy_score(test_y,p)
+    SENS = precision_score(test_y,p)
+    SPEC = recall_score(test_y,p)
+    MCC = matthews_corrcoef(test_y,p)
+    AUC = roc_auc_score(test_y,pr[:,1])
+    F1 = 2*SENS*SPEC/(SENS+SPEC)
+    return ACC, SENS, SPEC, MCC, AUC, F1
 
-    def extract(self, input_ids, attention_mask):
-        output_1 = self.l1(input_ids=input_ids, attention_mask=attention_mask)
-        X = output_1[0]
-        X = self.h1(X[:,0])
-        X = self.a1(X)
-        #X = self.h2(X)
-        #X, (last_hidden, last_cell) = self.LSTM(X)
-        #X, _ = torch.max(X, 1)
-        #X = self.hidden1(X)
-        #X = self.act1(X)
-        #X = self.dropout(X)
-        #X = self.hidden2(X)
-        return X
+def test_multi(yp, yt):     
+    test_y = yt
+    p = yp.argmax(1)
+    pr = torch.nn.functional.softmax(torch.tensor(yp), dim=1)
+    ACC = accuracy_score(test_y,p)
+    SENS = precision_score(test_y,p, average='macro')
+    SPEC = recall_score(test_y,p, average='macro')
+    MCC = matthews_corrcoef(test_y,p)
+    AUC = roc_auc_score(test_y,pr,multi_class='ovo',average='macro')
+    F1 = 2*SENS*SPEC/(SENS+SPEC)
+    return ACC, SENS, SPEC, MCC, AUC, F1
 
 SEED = [3]
 EP = [8]
@@ -231,5 +216,39 @@ for iii, item in enumerate(SEED):
     #X_test_norm =  scaler.transform(Xt_final)
     dump_svmlight_file(Xt_final,yt,'testdata_'+str(item)+'.scl',zero_based=False)
     
+    file = open(configs['output_scratch'] +"wangchan_10repeated_tt.csv", "a")
+    
+    torch.cuda.empty_cache()
+    model = Camembert()
+    model.load_state_dict(torch.load('./model_0.pt'))
+    model.to('cuda')
+    with torch.no_grad():
+        for i, (input1, input2, targets) in enumerate(val_dl):
+            input1_gpu = input1.to('cuda', dtype = torch.long)
+            input2_gpu = input2.to('cuda', dtype = torch.long)
+            targets_gpu = targets.to('cuda', dtype = torch.long)
+            ytmp = model(input1_gpu, input2_gpu).cpu().detach().numpy() 
+            if i == 0:
+                yp = ytmp
+            else:
+                yp = np.vstack((yp, ytmp))
+                
+    acc, pre, rec, mcc, auc, f1 = test_multi(yp, yv)    
+    file.write(str(item) +"," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1))
+    
+    
+    with torch.no_grad():
+        for i, (input1, input2, targets) in enumerate(test_dl):
+            input1_gpu = input1.to('cuda', dtype = torch.long)
+            input2_gpu = input2.to('cuda', dtype = torch.long)
+            targets_gpu = targets.to('cuda', dtype = torch.long)
+            ytmp = model(input1_gpu, input2_gpu).cpu().detach().numpy() 
+            if i == 0:
+                yp = ytmp
+            else:
+                yp = np.vstack((yp, ytmp)) 
+    acc, pre, rec, mcc, auc, f1 = test_multi(yp, yv)  
+    file.write("," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) +"\n") 
+       
     del model
     torch.cuda.empty_cache()
