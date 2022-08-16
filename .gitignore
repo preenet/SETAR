@@ -8,6 +8,7 @@ data/raw/pretrained/
 data/processed/kt.csv
 data/processed/kt-bert.sav
 data/processed/bert-base-thai/
+data/processed/wanchabert/zip/
 
 output-scratch/
 
