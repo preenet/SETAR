@@ -252,7 +252,7 @@ for item in range(0, 9):
                 yp = np.vstack((yp, ytmp)) 
     acc, pre, rec, mcc, auc, f1 = test_multi(yp, yt)  
     #acc, pre, rec, mcc, auc, f1 = test_binary(yp, yt)  
-    file.write("," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) +"\n") 
+    file.write("," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) +"\n") 
        
     del model
     torch.cuda.empty_cache()
