@@ -19,8 +19,19 @@
     kaggle_tt: data/processed/kaggle/tt.sav
     kaggle_ws: data/processed/kaggle/ws.sav
 
+    wangcha_kt: data/processed/wanchabert/kt/
+    wangcha_to: data/processed/wanchabert/to/
+    wangcha_tt: data/processed/wanchabert/tt/
+    wangcha_ws: data/processed/wanchabert/ws/
+
 
 - models: models/
+
+- wangchan_models:
+    kt: models/wangcha_model/kt/
+    tt: models/wangcha_model/tt/
+    to: models/wangcha_model/to/
+    ws: models/wangcha_model/ws/
 
 # feature config
 - feature:

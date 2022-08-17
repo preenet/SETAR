@@ -15,8 +15,10 @@ from transformers import CamembertTokenizer, RobertaModel
 configs = utils.read_config()
 root = utils.get_project_root()
 
-Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_tt']))
-
+Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
+# data = joblib.load(Path.joinpath(root, configs['data']['kaggle_to']))
+# Xo = data[0]
+# yo = data[1]
 
 def test_binary(yp, yt):     
     test_y = yt
@@ -42,9 +44,9 @@ def test_multi(yp, yt):
     F1 = 2*SENS*SPEC/(SENS+SPEC)
     return ACC, SENS, SPEC, MCC, AUC, F1
 
-SEED = [3]
-EP = [8]
-for iii, item in enumerate(SEED):
+EP = 15
+for item in range(0, 9):
+    print("SEED:", item)
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
   
@@ -103,7 +105,7 @@ for iii, item in enumerate(SEED):
         ts_token_type_ids.append(encoding['token_type_ids'])
         ts_attention_mask.append(encoding['attention_mask'])
     
-    model = Camembert()
+    model = Camembert(4)
     model.to("cuda")
     #y, yv, yt = train_wisesight['category'].values, validation_wisesight['category'].values, test_wisesight['category'].values
 
@@ -126,7 +128,7 @@ for iii, item in enumerate(SEED):
     
     # training
     lr = 1e-5
-    n_iters = EP[iii]
+    n_iters = EP
     #eps = 1e-7
     loss = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr = lr)
@@ -161,7 +163,7 @@ for iii, item in enumerate(SEED):
                 yval = model(val1_gpu, val2_gpu)
                 valid_correct += (torch.argmax(yval, 1) == tval_gpu).sum().item()
 
-        print("epoch: "+str(epoch)+ " loss: "+str(train_loss/n_train) + " ,tr_acc: "+str(train_correct/n_train) + " val_acc: " +str(valid_correct/n_val))
+        print("epoch: "+str(epoch)+ " loss: "+str(train_loss/n_train) + " ,tr_acc: "+str(train_correct/n_train) + " ,val_acc: " +str(valid_correct/n_val))
 
     from torch.utils.data import DataLoader, TensorDataset
     train_dl = DataLoader(TensorDataset(X1, X2, y), batch_size=32, shuffle=False)
@@ -217,10 +219,10 @@ for iii, item in enumerate(SEED):
     #X_test_norm =  scaler.transform(Xt_final)
     dump_svmlight_file(Xt_final,yt,'testdata_'+str(item)+'.scl',zero_based=False)
     
-    file = open(configs['output_scratch'] +"wangchan_10repeated_tt.csv", "a")
+    file = open(configs['output_scratch'] +"wangchan_10repeated_ws.csv", "a")
     
     torch.cuda.empty_cache()
-    model = Camembert()
+    model = Camembert(4)
     model.load_state_dict(torch.load(model_file ))
     model.to('cuda')
     with torch.no_grad():
@@ -233,9 +235,9 @@ for iii, item in enumerate(SEED):
                 yp = ytmp
             else:
                 yp = np.vstack((yp, ytmp))
-                
-    acc, pre, rec, mcc, auc, f1 = test_multi(yp, yv)    
-    file.write(str(item) +"," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1))
+    acc, pre, rec, mcc, auc, f1 = test_multi(yp, yv)            
+    #acc, pre, rec, mcc, auc, f1 = test_binary(yp, yv)   
+    file.write(str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1))
     
     
     with torch.no_grad():
@@ -249,6 +251,7 @@ for iii, item in enumerate(SEED):
             else:
                 yp = np.vstack((yp, ytmp)) 
     acc, pre, rec, mcc, auc, f1 = test_multi(yp, yt)  
+    #acc, pre, rec, mcc, auc, f1 = test_binary(yp, yt)  
     file.write("," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) +"\n") 
        
     del model
