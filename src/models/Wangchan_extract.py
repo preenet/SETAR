@@ -15,10 +15,12 @@ from transformers import CamembertTokenizer, RobertaModel
 configs = utils.read_config()
 root = utils.get_project_root()
 
-Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
-# data = joblib.load(Path.joinpath(root, configs['data']['kaggle_to']))
-# Xo = data[0]
-# yo = data[1]
+#Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
+data = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
+Xo = data[0]
+yo = data[1]
+
+num_class = 4
 
 def test_binary(yp, yt):     
     test_y = yt
@@ -44,8 +46,8 @@ def test_multi(yp, yt):
     F1 = 2*SENS*SPEC/(SENS+SPEC)
     return ACC, SENS, SPEC, MCC, AUC, F1
 
-EP = 15
-for item in range(0, 9):
+EP = 14
+for item in range(0, 10):
     print("SEED:", item)
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
@@ -105,7 +107,7 @@ for item in range(0, 9):
         ts_token_type_ids.append(encoding['token_type_ids'])
         ts_attention_mask.append(encoding['attention_mask'])
     
-    model = Camembert(4)
+    model = Camembert(num_class)
     model.to("cuda")
     #y, yv, yt = train_wisesight['category'].values, validation_wisesight['category'].values, test_wisesight['category'].values
 
@@ -222,7 +224,7 @@ for item in range(0, 9):
     file = open(configs['output_scratch'] +"wangchan_10repeated_ws.csv", "a")
     
     torch.cuda.empty_cache()
-    model = Camembert(4)
+    model = Camembert(num_class )
     model.load_state_dict(torch.load(model_file ))
     model.to('cuda')
     with torch.no_grad():
@@ -256,3 +258,4 @@ for item in range(0, 9):
        
     del model
     torch.cuda.empty_cache()
+    file.close()

@@ -1,7 +1,9 @@
 import sys
+from pathlib import Path
 
 import numpy as np  # linear algebra
 import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
+import src.utilities as utils
 
 SEED = [i for i in range(0,10)]
 
@@ -23,10 +25,13 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import MaxAbsScaler
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
+from src.models.PLS import PLS
 from xgboost import XGBClassifier
 
-from PLS import PLS
+configs = utils.read_config()
+root = utils.get_project_root()
 
+data_path = str(Path.joinpath(root, configs['data']['wangcha_tt']))
 
 def test(clf, X, y, Xt, yt):
     train_X, test_X = X, Xt
@@ -45,9 +50,13 @@ def test(clf, X, y, Xt, yt):
 from sklearn.datasets import load_svmlight_file
 
 
-def get_data(iii):
-    data = load_svmlight_file("./traindata_"+str(iii)+".scl", zero_based=False)
-    data1 = load_svmlight_file("./testdata_"+str(iii)+".scl", zero_based=False)
+# def get_data(iii):
+#     data = load_svmlight_file("./traindata_"+str(iii)+".scl", zero_based=False)
+#     data1 = load_svmlight_file("./testdata_"+str(iii)+".scl", zero_based=False)
+#     return data[0].toarray(), data[1], data1[0].toarray(), data1[1]
+def get_data(idx):
+    data = load_svmlight_file(data_path + "\\" + "traindata_"+str(idx)+".scl", zero_based=False)
+    data1 = load_svmlight_file(data_path + "\\" + "testdata_"+str(idx)+".scl", zero_based=False)
     return data[0].toarray(), data[1], data1[0].toarray(), data1[1]
 
 iname = "WANCHAN"
@@ -61,7 +70,7 @@ for item in SEED:
     
     allclf = []
     file = open("12classifier_"+iname+"_res.csv", "a")
-
+    print("SVM..")
     #SVM
     param = [1,2,4,8,16,32]
     acc = np.zeros(len(param)) 
@@ -80,6 +89,7 @@ for item in SEED:
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
     #LinearSVC
+    print("LinearSVC..")
     param = [1,2,4,8,16,32]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -97,6 +107,7 @@ for item in SEED:
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
     #RF
+    print("RF..")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -114,6 +125,7 @@ for item in SEED:
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
     #E-Tree
+    print("E-Tree..")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -131,6 +143,7 @@ for item in SEED:
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
     #XGBoost
+    print("XGB..")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -148,6 +161,7 @@ for item in SEED:
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
     #LightGBM
+    print("LightGBM..")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -165,6 +179,7 @@ for item in SEED:
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
     #MLP
+    print("MLP.")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -182,6 +197,7 @@ for item in SEED:
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
     #NB
+    print("NB..")
     clf = GaussianNB()
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
@@ -190,6 +206,7 @@ for item in SEED:
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
     #1NN
+    print("1NN..")
     clf = KNeighborsClassifier(n_neighbors=1)
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
@@ -198,6 +215,7 @@ for item in SEED:
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
     #DT
+    print("DT..")
     clf = DecisionTreeClassifier(random_state=0)
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
@@ -206,6 +224,7 @@ for item in SEED:
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
     #Logistic
+    print("LR..")
     param = [0.001,0.01,0.1,1,10,100]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -223,6 +242,7 @@ for item in SEED:
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 
     #PLS
+    print("PLS..")
     clf = OneVsRestClassifier(PLS())
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
