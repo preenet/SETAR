@@ -64,10 +64,10 @@ def get_models():
 	models = dict()
 	# models['lr'] = LogisticRegression()
 	#models['knn'] = KNeighborsClassifier()
-	models['rf'] = RandomForestClassifier()
+	# models['rf'] = RandomForestClassifier()
 	# models['svm'] = SVC(probability=True)
 	# models['bayes'] = GaussianNB()
-	#models['blending'] = get_stacking()
+	models['blending'] = get_stacking()
 	return models
 Xa, ya, Xt, yt = get_data(0)
 def evaluate_model(model, X, y):
