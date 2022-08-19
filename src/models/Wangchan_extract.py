@@ -15,12 +15,15 @@ from transformers import CamembertTokenizer, RobertaModel
 configs = utils.read_config()
 root = utils.get_project_root()
 
+##################################################################
 #Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
-data = joblib.load(Path.joinpath(root, configs['data']['kaggle_to']))
+data = joblib.load(Path.joinpath(root, configs['data']['kaggle_tt']))
 Xo = data[0]
 yo = data[1]
 
-num_class = 2
+num_class = 3
+out_file_name = "tt.csv"
+##################################################################
 
 def test_binary(yp, yt):     
     test_y = yt
@@ -222,7 +225,7 @@ for idx, item in enumerate(SEED):
     #X_test_norm =  scaler.transform(Xt_final)
     dump_svmlight_file(Xt_final,yt,'testdata_'+str(item)+'.scl',zero_based=False)
     
-    file = open(configs['output_scratch'] +"wangchan_10repeated_to.csv", "a")
+    file = open(configs['output_scratch'] +"wangchan_10repeated_" + out_file_name ,  "a")
     
     torch.cuda.empty_cache()
     model = Camembert(num_class )
