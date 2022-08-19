@@ -46,8 +46,9 @@ def test_multi(yp, yt):
     F1 = 2*SENS*SPEC/(SENS+SPEC)
     return ACC, SENS, SPEC, MCC, AUC, F1
 
-EP = 14
-for item in range(0, 10):
+EP = 8
+SEED = [1, 3, 9]
+for idx, item in enumerate(SEED):
     print("SEED:", item)
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
@@ -254,7 +255,7 @@ for item in range(0, 10):
                 yp = np.vstack((yp, ytmp)) 
     acc, pre, rec, mcc, auc, f1 = test_multi(yp, yt)  
     #acc, pre, rec, mcc, auc, f1 = test_binary(yp, yt)  
-    file.write("," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) +"\n") 
+    file.write("," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) +"\n") 
        
     del model
     torch.cuda.empty_cache()
