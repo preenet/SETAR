@@ -32,19 +32,24 @@ from xgboost import XGBClassifier
 configs = utils.read_config()
 root = utils.get_project_root()
 
-data_path = str(Path.joinpath(root, configs['data']['wangcha_to']))
+##################################################################
+data_path = str(Path.joinpath(root, configs['data']['wangcha_tt']))
+out_file_name = 'tt.csv' 
+num_class = 3
+##################################################################
 
 def get_blending():
     ''' 
     return: list of models for level 0
     '''
     level0 = list()
-    level0.append(('mlp', MLPClassifier(random_state=0, max_iter = 10000)))
+    level0.append(('mlp', MLPClassifier(random_state=0, max_iter=10000)))
     level0.append(('pls', OneVsRestClassifier(PLS())))
     level0.append(('rf', RandomForestClassifier(random_state=0)))
     level0.append(('svm', SVC(random_state=0, probability=True)))
     level0.append(('mnb', GaussianNB()))
-    level0.append(('xgb', XGBClassifier() ))
+    level0.append(('xgb', XGBClassifier(learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)))
+    level0.append(('lr' , LogisticRegression(random_state=0, max_iter=10000)))
     return level0
 
 def test(clf, X, y, Xt, yt):
@@ -57,8 +62,10 @@ def test(clf, X, y, Xt, yt):
     SENS = precision_score(test_y,p, average='macro')
     SPEC = recall_score(test_y,p, average='macro')
     MCC = matthews_corrcoef(test_y,p)
-    #AUC = roc_auc_score(test_y,pr,multi_class='ovo',average='macro')
-    AUC = roc_auc_score(test_y,pr[:,1]) # for binary classification problem
+    if num_class > 2:
+        AUC = roc_auc_score(test_y,pr,multi_class='ovo',average='macro')
+    else:
+        AUC = roc_auc_score(test_y,pr[:,1]) # for binary classification problem
     F1 = 2*SENS*SPEC/(SENS+SPEC)
     return ACC, SENS, SPEC, MCC, AUC, F1
 
@@ -82,7 +89,7 @@ for item in SEED:
     yv = ya[idx:-1]
     
     allclf = []
-    file = open("13classifier_"+iname+"_res_to.csv", "a")
+    file = open("13classifier_"+iname+"_res_" + out_file_name, "a")
     print("Blending-SVM...")
     #SVM
     param = [1,2,4,8,16,32]
