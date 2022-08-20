@@ -31,6 +31,8 @@ class SelectFeatures:
             tmp = np.take(X_vt, mi_idx.flatten(), axis=1)        
             X_vt_mi = tmp[:, :self.mi_dim]
             return X_vt, vi_scores, X_vt_mi, mi_scores
+    
+        
 
     def plot_feature_scores(self, scores, threshold):
         plt.figure(figsize=(9, 7), dpi=80) 

@@ -1,0 +1,143 @@
+(sciGPU) C:\Users\Pree\Thai_SA_journal>python -m src.models.compare_10repeated_stacking
+Intel(R) Extension for Scikit-learn* enabled (https://github.com/intel/scikit-learn-intelex)
+using: 1 combo(s).
+[('mlp', MLPClassifier(max_iter=10000, random_state=0))]
+Stacking-SVM...
+val_acc: 0.7347549569771792  ,val_f1: 0.619957179538651
+val_acc: 0.7496260284218399 , test_f1: 0.6418582447617616
+Stacking-RF...
+val_acc: 0.732697343808455  ,val_f1: 0.6178556768988513
+val_acc: 0.7466342557965595 , test_f1: 0.646688458273066
+Stacking-MLP...
+val_acc: 0.7319491208380098  ,val_f1: 0.6169644618265393
+val_acc: 0.7481301421091997 , test_f1: 0.6354467322761309
+using: 2 combo(s).
+[('mlp', MLPClassifier(max_iter=10000, random_state=0)), ('pls', OneVsRestClassifier(estimator=PLS()))]
+Stacking-SVM...
+val_acc: 0.7343808454919566  ,val_f1: 0.6189788100683227
+val_acc: 0.74981301421092 , test_f1: 0.6411992730173257
+Stacking-RF...
+val_acc: 0.7282080059857837  ,val_f1: 0.6172738220345269
+val_acc: 0.7479431563201197 , test_f1: 0.648534559669369
+Stacking-MLP...
+val_acc: 0.7338196782641228  ,val_f1: 0.6166516521076502
+val_acc: 0.75 , test_f1: 0.6437532330256195
+using: 3 combo(s).
+[('mlp', MLPClassifier(max_iter=10000, random_state=0)), ('pls', OneVsRestClassifier(estimator=PLS())), ('rf', RandomForestClassifier(random_state=0))]
+Stacking-SVM...
+val_acc: 0.7353161242050131  ,val_f1: 0.6210885566069254
+val_acc: 0.7485041136873598 , test_f1: 0.639006687448344
+Stacking-RF...
+val_acc: 0.7310138421249532  ,val_f1: 0.6216061098086317
+val_acc: 0.75018698578908 , test_f1: 0.649293318909459
+Stacking-MLP...
+val_acc: 0.7351290684624018  ,val_f1: 0.6188594179661077
+val_acc: 0.7490650710545999 , test_f1: 0.6442411961356252
+using: 4 combo(s).
+[('mlp', MLPClassifier(max_iter=10000, random_state=0)), ('pls', OneVsRestClassifier(estimator=PLS())), ('rf', RandomForestClassifier(random_state=0)), ('et', ExtraTreesClassifier(random_state=0))]
+Stacking-SVM...
+val_acc: 0.7353161242050131  ,val_f1: 0.6232669776315113
+val_acc: 0.7490650710545999 , test_f1: 0.64050162160761
+Stacking-RF...
+val_acc: 0.732697343808455  ,val_f1: 0.6265986641876209
+val_acc: 0.75018698578908 , test_f1: 0.649293318909459
+Stacking-MLP...
+val_acc: 0.7366255144032922  ,val_f1: 0.6186849776458362
+val_acc: 0.75 , test_f1: 0.6437532330256195
+using: 5 combo(s).
+[('mlp', MLPClassifier(max_iter=10000, random_state=0)), ('pls', OneVsRestClassifier(estimator=PLS())), ('rf', RandomForestClassifier(random_state=0)), ('et', ExtraTreesClassifier(random_state=0)), ('svm', SVC(probability=True, random_state=0))]
+Stacking-SVM...
+val_acc: 0.7347549569771792  ,val_f1: 0.6206273519846343
+val_acc: 0.7490650710545999 , test_f1: 0.64050162160761
+Stacking-RF...
+val_acc: 0.7334455667789002  ,val_f1: 0.6227728372390702
+val_acc: 0.7479431563201197 , test_f1: 0.648534559669369
+Stacking-MLP...
+val_acc: 0.735877291432847  ,val_f1: 0.6207872411967865
+val_acc: 0.7453253552729993 , test_f1: 0.6353932726432796
+using: 6 combo(s).
+[('mlp', MLPClassifier(max_iter=10000, random_state=0)), ('pls', OneVsRestClassifier(estimator=PLS())), ('rf', RandomForestClassifier(random_state=0)), ('et', ExtraTreesClassifier(random_state=0)), ('svm', SVC(probability=True, random_state=0)), ('lgbm', LGBMClassifier())]
+Stacking-SVM...
+val_acc: 0.7347549569771792  ,val_f1: 0.6212347499328668
+val_acc: 0.7486910994764397 , test_f1: 0.639534799076847
+Stacking-RF...
+val_acc: 0.7332585110362888  ,val_f1: 0.6215609950740979
+val_acc: 0.75018698578908 , test_f1: 0.649293318909459
+Stacking-MLP...
+val_acc: 0.7381219603441825  ,val_f1: 0.623960301687773
+val_acc: 0.75 , test_f1: 0.6437532330256195
+using: 7 combo(s).
+[('mlp', MLPClassifier(max_iter=10000, random_state=0)), ('pls', OneVsRestClassifier(estimator=PLS())), ('rf', RandomForestClassifier(random_state=0)), ('et', ExtraTreesClassifier(random_state=0)), ('svm', SVC(probability=True, random_state=0)), ('lgbm', LGBMClassifier()), ('xgb', XGBClassifier(base_score=None, booster=None, callbacks=None,
+              colsample_bylevel=None, colsample_bynode=None,
+              colsample_bytree=None, early_stopping_rounds=None,
+              enable_categorical=False, eval_metric='logloss', gamma=None,
+              gpu_id=None, grow_policy=None, importance_type=None,
+              interaction_constraints=None, learning_rate=0.1, max_bin=None,
+              max_cat_to_onehot=None, max_delta_step=None, max_depth=None,
+              max_leaves=None, min_child_weight=None, missing=nan,
+              monotone_constraints=None, n_estimators=100, n_jobs=None,
+              num_parallel_tree=None, predictor=None, random_state=0,
+              reg_alpha=None, reg_lambda=None, ...))]
+Stacking-SVM...
+val_acc: 0.7347549569771792  ,val_f1: 0.6205270207958618
+val_acc: 0.7490650710545999 , test_f1: 0.64050162160761
+Stacking-RF...
+val_acc: 0.7338196782641228  ,val_f1: 0.6271292259039146
+val_acc: 0.7479431563201197 , test_f1: 0.648534559669369
+Stacking-MLP...
+val_acc: 0.7371866816311261  ,val_f1: 0.6280899983470295
+val_acc: 0.7490650710545999 , test_f1: 0.6442411961356252
+using: 8 combo(s).
+[('mlp', MLPClassifier(max_iter=10000, random_state=0)), ('pls', OneVsRestClassifier(estimator=PLS())), ('rf', RandomForestClassifier(random_state=0)), ('et', ExtraTreesClassifier(random_state=0)), ('svm', SVC(probability=True, random_state=0)), ('lgbm', LGBMClassifier()), ('xgb', XGBClassifier(base_score=None, booster=None, callbacks=None,
+              colsample_bylevel=None, colsample_bynode=None,
+              colsample_bytree=None, early_stopping_rounds=None,
+              enable_categorical=False, eval_metric='logloss', gamma=None,
+              gpu_id=None, grow_policy=None, importance_type=None,
+              interaction_constraints=None, learning_rate=0.1, max_bin=None,
+              max_cat_to_onehot=None, max_delta_step=None, max_depth=None,
+              max_leaves=None, min_child_weight=None, missing=nan,
+              monotone_constraints=None, n_estimators=100, n_jobs=None,
+              num_parallel_tree=None, predictor=None, random_state=0,
+              reg_alpha=None, reg_lambda=None, ...)), ('lr', LogisticRegression(max_iter=10000, random_state=0))]
+Stacking-SVM...
+val_acc: 0.7343808454919566  ,val_f1: 0.6202483985506865
+val_acc: 0.7496260284218399 , test_f1: 0.6418582447617616
+Stacking-RF...
+val_acc: 0.7341937897493453  ,val_f1: 0.6263898756365954
+val_acc: 0.75018698578908 , test_f1: 0.649293318909459
+Stacking-MLP...
+val_acc: 0.735877291432847  ,val_f1: 0.6174582772762817
+val_acc: 0.7481301421091997 , test_f1: 0.6354467322761309
+using: 9 combo(s).
+[('mlp', MLPClassifier(max_iter=10000, random_state=0)), ('pls', OneVsRestClassifier(estimator=PLS())), ('rf', RandomForestClassifier(random_state=0)), ('et', ExtraTreesClassifier(random_state=0)), ('svm', SVC(probability=True, random_state=0)), ('lgbm', LGBMClassifier()), ('xgb', XGBClassifier(base_score=None, booster=None, callbacks=None,
+              colsample_bylevel=None, colsample_bynode=None,
+              colsample_bytree=None, early_stopping_rounds=None,
+              enable_categorical=False, eval_metric='logloss', gamma=None,
+              gpu_id=None, grow_policy=None, importance_type=None,
+              interaction_constraints=None, learning_rate=0.1, max_bin=None,
+              max_cat_to_onehot=None, max_delta_step=None, max_depth=None,
+              max_leaves=None, min_child_weight=None, missing=nan,
+              monotone_constraints=None, n_estimators=100, n_jobs=None,
+              num_parallel_tree=None, predictor=None, random_state=0,
+              reg_alpha=None, reg_lambda=None, ...)), ('lr', LogisticRegression(max_iter=10000, random_state=0)), ('1nn', KNeighborsClassifier(n_neighbors=1))]
+Stacking-SVM...
+val_acc: 0.7345679012345679  ,val_f1: 0.6199517012955194
+val_acc: 0.7486910994764397 , test_f1: 0.639534799076847
+Stacking-RF...
+val_acc: 0.7351290684624018  ,val_f1: 0.6297778376987611
+val_acc: 0.7466342557965595 , test_f1: 0.646688458273066
+Stacking-MLP...
+val_acc: 0.7349420127197905  ,val_f1: 0.6237437801076491
+val_acc: 0.7481301421091997 , test_f1: 0.6354467322761309
+using: 10 combo(s).
+[('mlp', MLPClassifier(max_iter=10000, random_state=0)), ('pls', OneVsRestClassifier(estimator=PLS())), ('rf', RandomForestClassifier(random_state=0)), ('et', ExtraTreesClassifier(random_state=0)), ('svm', SVC(probability=True, random_state=0)), ('lgbm', LGBMClassifier()), ('xgb', XGBClassifier(base_score=None, booster=None, callbacks=None,
+              colsample_bylevel=None, colsample_bynode=None,
+              colsample_bytree=None, early_stopping_rounds=None,
+              enable_categorical=False, eval_metric='logloss', gamma=None,
+              gpu_id=None, grow_policy=None, importance_type=None,
+              interaction_constraints=None, learning_rate=0.1, max_bin=None,
+              max_cat_to_onehot=None, max_delta_step=None, max_depth=None,
+              max_leaves=None, min_child_weight=None, missing=nan,
+              monotone_constraints=None, n_estimators=100, n_jobs=None,
+              num_parallel_tree=None, predictor=None, random_state=0,
+              reg_alpha=None, reg_lambda=None, ...)), ('lr', LogisticRegression(max_iter=10000, random_state=0)), ('1nn', KNeighborsClassifier(n_neighbors=1)), ('nb', GaussianNB())]
