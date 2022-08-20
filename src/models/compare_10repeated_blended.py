@@ -35,7 +35,7 @@ root = utils.get_project_root()
 
 ##################################################################
 data_path = str(Path.joinpath(root, configs['data']['wangcha_ws']))
-out_file_name = 'ws.csv' 
+out_file_name = 'ws2.csv' 
 num_class = 4
 ##################################################################
 patch_sklearn()
@@ -45,13 +45,21 @@ def get_blending():
     return: list of models for level 0
     '''
     level0 = list()
-    level0.append(('mlp', MLPClassifier(random_state=1, max_iter=10000)))
+    # level0.append(('mlp', MLPClassifier(random_state=1, max_iter=10000)))
+    # level0.append(('pls', OneVsRestClassifier(PLS())))
+    # level0.append(('rf', RandomForestClassifier(random_state=0)))
+    # level0.append(('et', ExtraTreesClassifier(random_state=0)))
+    # level0.append(('svm', SVC(random_state=0, probability=True)))
+    # level0.append(('lgbm', LGBMClassifier()))
+    # #level0.append(('xgb', XGBClassifier(learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)))
+    # level0.append(('lr' , LogisticRegression(random_state=0, max_iter=10000)))
+    
+    level0.append(('mlp', MLPClassifier(random_state=0, max_iter=10000)))
     level0.append(('pls', OneVsRestClassifier(PLS())))
     level0.append(('rf', RandomForestClassifier(random_state=0)))
-    level0.append(('et', ExtraTreesClassifier(random_state=0)))
     level0.append(('svm', SVC(random_state=0, probability=True)))
-    level0.append(('lgbm', LGBMClassifier()))
-    #level0.append(('xgb', XGBClassifier(learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)))
+    level0.append(('mnb', GaussianNB()))
+    level0.append(('xgb', XGBClassifier(learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)))
     level0.append(('lr' , LogisticRegression(random_state=0, max_iter=10000)))
     return level0
 
