@@ -26,6 +26,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import MaxAbsScaler
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
+from sklearnex import patch_sklearn
 from src.models.PLS import PLS
 from xgboost import XGBClassifier
 
@@ -33,22 +34,24 @@ configs = utils.read_config()
 root = utils.get_project_root()
 
 ##################################################################
-data_path = str(Path.joinpath(root, configs['data']['wangcha_tt']))
-out_file_name = 'tt.csv' 
-num_class = 3
+data_path = str(Path.joinpath(root, configs['data']['wangcha_ws']))
+out_file_name = 'ws.csv' 
+num_class = 4
 ##################################################################
+patch_sklearn()
 
 def get_blending():
     ''' 
     return: list of models for level 0
     '''
     level0 = list()
-    level0.append(('mlp', MLPClassifier(random_state=0, max_iter=10000)))
+    level0.append(('mlp', MLPClassifier(random_state=1, max_iter=10000)))
     level0.append(('pls', OneVsRestClassifier(PLS())))
     level0.append(('rf', RandomForestClassifier(random_state=0)))
+    level0.append(('et', ExtraTreesClassifier(random_state=0)))
     level0.append(('svm', SVC(random_state=0, probability=True)))
-    level0.append(('mnb', GaussianNB()))
-    level0.append(('xgb', XGBClassifier(learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)))
+    level0.append(('lgbm', LGBMClassifier()))
+    #level0.append(('xgb', XGBClassifier(learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)))
     level0.append(('lr' , LogisticRegression(random_state=0, max_iter=10000)))
     return level0
 
@@ -90,7 +93,7 @@ for item in SEED:
     
     allclf = []
     file = open("13classifier_"+iname+"_res_" + out_file_name, "a")
-    print("Blending-SVM...")
+    print("Stacking-SVM...")
     #SVM
     param = [1,2,4,8,16,32]
     acc = np.zeros(len(param)) 
@@ -102,7 +105,7 @@ for item in SEED:
     for i in range(0,len(param)):
         level0 = get_blending()
         level1 = SVC(C=param[i], random_state=0, probability=True)
-        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=2, n_jobs=-1)
+        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
     allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
@@ -113,7 +116,7 @@ for item in SEED:
     print("test_f1:", str(f1))
     
     #LinearSVC
-    print("Blending-LinearSVC...")
+    print("Stacking-LinearSVC...")
     param = [1,2,4,8,16,32]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -124,7 +127,7 @@ for item in SEED:
     for i in range(0,len(param)):
         level0 = get_blending()
         level1 =  SVC(C=param[i], kernel='linear',random_state=0, probability=True)
-        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=2, n_jobs=-1)
+        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
     allclf.append(SVC(C=param[choose], kernel='linear',random_state=0, probability=True).fit(X,y))
@@ -135,7 +138,7 @@ for item in SEED:
     print("test_f1:", str(f1))
 
     #RF
-    print("Blending-RF...")
+    print("Stacking-RF...")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -146,7 +149,7 @@ for item in SEED:
     for i in range(0,len(param)):
         level0 = get_blending()
         level1 = RandomForestClassifier(n_estimators=param[i], random_state=0)
-        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=2, n_jobs=-1)
+        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
     allclf.append(RandomForestClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
@@ -157,7 +160,7 @@ for item in SEED:
     print("test_f1:", str(f1))
 
     #E-Tree
-    print("Blending-ExTree...")
+    print("Stacking-ExTree...")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -168,7 +171,7 @@ for item in SEED:
     for i in range(0,len(param)):
         level0 = get_blending()
         level1 = ExtraTreesClassifier(n_estimators=param[i], random_state=0)
-        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=2, n_jobs=-1)
+        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
     allclf.append(ExtraTreesClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
@@ -179,7 +182,7 @@ for item in SEED:
     print("test_f1:", str(f1))
 
     #XGBoost
-    print("Blending-XGBoost...")
+    print("Stacking-XGBoost...")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -190,7 +193,7 @@ for item in SEED:
     for i in range(0,len(param)):
         level0 = get_blending()
         level1 = XGBClassifier(n_estimators=param[i],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)
-        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=2, n_jobs=-1)
+        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)  
     allclf.append(XGBClassifier(n_estimators=param[choose],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0).fit(X,y))
@@ -201,7 +204,7 @@ for item in SEED:
     print("test_f1:", str(f1))
 
     #LightGBM
-    print("Blending-LightGBM...")
+    print("Stacking-LightGBM...")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -212,7 +215,7 @@ for item in SEED:
     for i in range(0,len(param)):
         level0 = get_blending()
         level1 = LGBMClassifier(n_estimators=param[i],learning_rate=0.1, random_state=0)
-        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=2, n_jobs=-1)
+        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)  
     allclf.append(LGBMClassifier(n_estimators=param[choose],learning_rate=0.1, random_state=0).fit(X,y))
@@ -223,7 +226,7 @@ for item in SEED:
     print("test_f1:", str(f1))
     
     #MLP
-    print("Blending-MLP...")
+    print("Stacking-MLP...")
     param = [20, 50, 100, 200]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -234,7 +237,7 @@ for item in SEED:
     for i in range(0,len(param)):
         level0 = get_blending()  
         level1 = MLPClassifier(hidden_layer_sizes=(param[i],),random_state=0, max_iter = 10000)
-        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=2, n_jobs=-1)
+        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
     allclf.append(MLPClassifier(hidden_layer_sizes=(param[choose],),random_state=0, max_iter=10000).fit(X,y))
@@ -245,10 +248,10 @@ for item in SEED:
     print("test_f1:", str(f1))
 
     #NB
-    print("Blending-NB...")
+    print("Stacking-NB...")
     level0 = get_blending()  
     level1 = GaussianNB()
-    clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=2, n_jobs=-1)
+    clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
@@ -258,10 +261,10 @@ for item in SEED:
     print("test_f1:", str(f1))
 
     #1NN
-    print("Blending-1NN...")
+    print("Stacking-1NN...")
     level0 = get_blending()
     level1 = KNeighborsClassifier(n_neighbors=1)
-    clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=2, n_jobs=-1)
+    clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"1NN,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
@@ -271,10 +274,10 @@ for item in SEED:
     print("test_f1:", str(f1))
 
     #DT
-    print("Blending-DT...")
+    print("Stacking-DT...")
     level0 = get_blending()
     level1 = DecisionTreeClassifier(random_state=0)
-    clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=2, n_jobs=-1)
+    clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"DT,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA")) 
@@ -284,7 +287,7 @@ for item in SEED:
     print("test_f1:", str(f1))
     
     #Logistic
-    print("Blending-LR...")
+    print("Stacking-LR...")
     param = [0.001,0.01,0.1,1,10,100]
     acc = np.zeros(len(param)) 
     sens = np.zeros(len(param)) 
@@ -295,7 +298,7 @@ for item in SEED:
     for i in range(0,len(param)):
         level0 = get_blending()
         level1 = LogisticRegression(C=param[i], random_state=0, max_iter=10000)
-        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=2, n_jobs=-1)
+        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
     allclf.append(LogisticRegression(C=param[choose], random_state=0, max_iter=10000).fit(X,y))
@@ -306,10 +309,10 @@ for item in SEED:
     print("test_f1:", str(f1))
     
     #PLS
-    print("Blending-PLS...")
+    print("Stacking-PLS...")
     level0 = get_blending()
     level1 = OneVsRestClassifier(PLS())
-    clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=2, n_jobs=-1)
+    clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
@@ -319,10 +322,10 @@ for item in SEED:
     print("test_f1:", str(f1))
     
     #NB
-    print("Blending-MNB...")
+    print("Stacking-MNB...")
     level0 = get_blending()  
     level1 = MultinomialNB()
-    clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=2, n_jobs=-1)
+    clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"MNB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))

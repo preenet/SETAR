@@ -16,12 +16,12 @@ configs = utils.read_config()
 root = utils.get_project_root()
 
 ######################################################################
-model_path = str(Path.joinpath(root, configs['wangchan_models']['to']))
-num_class = 2
-out_file_name = 'wangcha_10repeated_to.csv'
-#Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_to']))
+model_path = str(Path.joinpath(root, configs['wangchan_models']['ws']))
+num_class = 4
+out_file_name = 'wangcha_10repeated_to_final.csv'
+#Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
 
-data = joblib.load(Path.joinpath(root, configs['data']['kaggle_to']))
+data = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
 Xo = data[0]
 yo = data[1]
 ######################################################################
