@@ -34,8 +34,8 @@ configs = utils.read_config()
 root = utils.get_project_root()
 
 ##################################################################
-data_path = str(Path.joinpath(root, configs['data']['wangcha_ws']))
-out_file_name = 'ws2.csv' 
+data_path = str(Path.joinpath(root, configs['data']['wangcha_ws_2']))
+out_file_name = 'ws2_gridsearch.csv' 
 num_class = 4
 ##################################################################
 
@@ -101,7 +101,11 @@ for item in SEED:
     Xv = Xa[idx:-1, :]
     yv = ya[idx:-1]
     
-    
+    scaler = MaxAbsScaler()
+    scaler.fit(Xa)
+    scaler.fit(Xt)
+    scaler.transform(Xa)
+    scaler.transform(Xt)
 
     allclf = []
     file = open("12classifier_"+iname+"_res_" + out_file_name, "a")
@@ -191,6 +195,14 @@ for item in SEED:
     roc = np.zeros(len(param)) 
     f1 = np.zeros(len(param))
 
+    grid_param = {
+    #'bootstrap': [True],
+    #'max_depth': [80, 90, 100, 110],
+    'max_features': [40, 45, 50],
+
+    'min_samples_split': [3, 6, 9],
+    'n_estimators': [20, 50, 100, 200, 400]
+    }
     level0 = get_stacking()
     level1 = GridSearchCV(ExtraTreesClassifier(n_estimators=param[i], random_state=0), cv=5, n_jobs = -1)
     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
