@@ -93,253 +93,252 @@ def get_data(idx):
     return data[0].toarray(), data[1], data1[0].toarray(), data1[1]
 
 iname = "WANGCHAN-STACKING"
-#for item in SEED:
-#    print("SEED:", item)
-item = 0
-for j in range(len(get_stacking())):
 
-    Xa, ya, Xt, yt = get_data(item)
-    # Xa = feature_selection(Xa, ya)
-    # Xt = feature_selection(Xt, yt)
-    
-    idx = int(round(len(ya)*0.75))
-    X = Xa[0:idx, :]
-    y = ya[0:idx]
-    Xv = Xa[idx:-1, :]
-    yv = ya[idx:-1]
+for item in SEED:
+    print("SEED:", item)
+    for j in range(1, len(get_stacking())):
+        file = open("12classifier_"+iname+"_res_" + out_file_name, "a")
+        print("using:" , j+1 , "combo(s).")
 
-    allclf = []
-    file = open("12classifier_"+iname+"_res_" + out_file_name, "a")
-    print("using:" , j+1 , "combo(s).")
-    print(get_stacking()[:j+1])
-    file.write( str(get_stacking()[:j+1]) )
-    print("Stacking-SVM...")
-    #SVM
-    param = [1,2,4,8,16,32]
-    acc = np.zeros(len(param)) 
-    sens = np.zeros(len(param)) 
-    spec = np.zeros(len(param)) 
-    mcc = np.zeros(len(param)) 
-    roc = np.zeros(len(param)) 
-    f1 = np.zeros(len(param))
-    for i in range(0,len(param)):
-        level0 = get_stacking()[:j+1]
-        level1 = SVC(C=param[i], random_state=0, probability=True)
+        Xa, ya, Xt, yt = get_data(item)
+        # Xa = feature_selection(Xa, ya)
+        # Xt = feature_selection(Xt, yt)
+        
+        idx = int(round(len(ya)*0.75))
+        X = Xa[0:idx, :]
+        y = ya[0:idx]
+        Xv = Xa[idx:-1, :]
+        yv = ya[idx:-1]
+
+        allclf = []
+        
+        print("Stacking-SVM...")
+        #SVM
+        param = [1,2,4,8,16,32]
+        acc = np.zeros(len(param)) 
+        sens = np.zeros(len(param)) 
+        spec = np.zeros(len(param)) 
+        mcc = np.zeros(len(param)) 
+        roc = np.zeros(len(param)) 
+        f1 = np.zeros(len(param))
+        for i in range(0,len(param)):
+            level0 = get_stacking()[:j+1]
+            level1 = SVC(C=param[i], random_state=0, probability=True)
+            clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
+            acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+        choose = np.argmax(acc)
+        allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
+        file.write(str(item)+"SVMRBF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+        print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+        acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+        file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+        print("test_acc:", str(acc), ", test_f1:", str(f1))
+        
+        #LinearSVC
+        print("Stacking-LinearSVC...")
+        param = [1,2,4,8,16,32]
+        acc = np.zeros(len(param)) 
+        sens = np.zeros(len(param)) 
+        spec = np.zeros(len(param)) 
+        mcc = np.zeros(len(param)) 
+        roc = np.zeros(len(param))
+        f1 = np.zeros(len(param)) 
+        for i in range(0,len(param)):
+            level0 =  get_stacking()[:j+1]
+            level1 =  SVC(C=param[i], kernel='linear',random_state=0, probability=True)
+            clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
+            acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+        choose = np.argmax(acc)
+        allclf.append(SVC(C=param[choose], kernel='linear',random_state=0, probability=True).fit(X,y))
+        file.write(str(item)+"SVMLN,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+        print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+        acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+        file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+        print("test_acc:", str(acc), ", test_f1:", str(f1))
+
+        #RF
+        print("Stacking-RF...")
+        param = [20, 50, 100, 200]
+        acc = np.zeros(len(param)) 
+        sens = np.zeros(len(param)) 
+        spec = np.zeros(len(param)) 
+        mcc = np.zeros(len(param)) 
+        roc = np.zeros(len(param)) 
+        f1 = np.zeros(len(param))
+        for i in range(0,len(param)):
+            level0 = get_stacking()[:j+1]
+            level1 = RandomForestClassifier(n_estimators=param[i], random_state=0)
+            clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
+            acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+        choose = np.argmax(acc)
+        allclf.append(RandomForestClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
+        file.write(str(item)+"RF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+        print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+        acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+        file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+        print("test_acc:", str(acc), ", test_f1:", str(f1))
+
+        #E-Tree
+        print("Stacking-ExTree...")
+        param = [20, 50, 100, 200]
+        acc = np.zeros(len(param)) 
+        sens = np.zeros(len(param)) 
+        spec = np.zeros(len(param)) 
+        mcc = np.zeros(len(param)) 
+        roc = np.zeros(len(param)) 
+        f1 = np.zeros(len(param))
+        for i in range(0,len(param)):
+            level0 = get_stacking()[:j+1]
+            level1 = ExtraTreesClassifier(n_estimators=param[i], random_state=0)
+            clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
+            acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+        choose = np.argmax(acc)
+        allclf.append(ExtraTreesClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
+        file.write(str(item)+"ET,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+        print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+        acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+        file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+        print("test_acc:", str(acc), ", test_f1:", str(f1))
+
+        #XGBoost
+        print("Stacking-XGBoost...")
+        param = [20, 50, 100, 200]
+        acc = np.zeros(len(param)) 
+        sens = np.zeros(len(param)) 
+        spec = np.zeros(len(param)) 
+        mcc = np.zeros(len(param)) 
+        roc = np.zeros(len(param)) 
+        f1 = np.zeros(len(param)) 
+        for i in range(0,len(param)):
+            level0 = get_stacking()[:j+1]
+            level1 = XGBClassifier(n_estimators=param[i],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)
+            clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
+            acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+        choose = np.argmax(acc)  
+        allclf.append(XGBClassifier(n_estimators=param[choose],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0).fit(X,y))
+        file.write(str(item)+"XGB,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+        print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+        acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+        file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+        print("test_acc:", str(acc), ", test_f1:", str(f1))
+
+        #LightGBM
+        print("Stacking-LightGBM...")
+        param = [20, 50, 100, 200]
+        acc = np.zeros(len(param)) 
+        sens = np.zeros(len(param)) 
+        spec = np.zeros(len(param)) 
+        mcc = np.zeros(len(param)) 
+        roc = np.zeros(len(param)) 
+        f1 = np.zeros(len(param)) 
+        for i in range(0,len(param)):
+            level0 = get_stacking()[:j+1]
+            level1 = LGBMClassifier(n_estimators=param[i],learning_rate=0.1, random_state=0)
+            clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
+            acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+        choose = np.argmax(acc)  
+        allclf.append(LGBMClassifier(n_estimators=param[choose],learning_rate=0.1, random_state=0).fit(X,y))
+        file.write(str(item)+"LGBM,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+        print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+        acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+        file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+        print("test_acc:", str(acc), ", test_f1:", str(f1))
+        
+        #MLP
+        print("Stacking-MLP...")
+        param = [20, 50, 100, 200]
+        acc = np.zeros(len(param)) 
+        sens = np.zeros(len(param)) 
+        spec = np.zeros(len(param)) 
+        mcc = np.zeros(len(param)) 
+        roc = np.zeros(len(param)) 
+        f1 = np.zeros(len(param))
+        for i in range(0,len(param)):
+            level0 = get_stacking()[:j+1]
+            level1 = MLPClassifier(hidden_layer_sizes=(param[i],),random_state=0, max_iter = 10000)
+            clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
+            acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+        choose = np.argmax(acc)
+        allclf.append(MLPClassifier(hidden_layer_sizes=(param[choose],),random_state=0, max_iter=10000).fit(X,y))
+        file.write(str(item)+"MLP,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose])) 
+        print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+        acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+        file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+        print("test_acc:", str(acc), ", test_f1:", str(f1))
+
+        #NB
+        print("Stacking-NB...")
+        level0 = get_stacking()[:j+1] 
+        level1 = GaussianNB()
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    choose = np.argmax(acc)
-    allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
-    file.write(str(item)+"SVMRBF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("val_acc:", str(acc), ", test_f1:", str(f1))
-    
-    # #LinearSVC
-    # print("Stacking-LinearSVC...")
-    # param = [1,2,4,8,16,32]
-    # acc = np.zeros(len(param)) 
-    # sens = np.zeros(len(param)) 
-    # spec = np.zeros(len(param)) 
-    # mcc = np.zeros(len(param)) 
-    # roc = np.zeros(len(param))
-    # f1 = np.zeros(len(param)) 
-    # for i in range(0,len(param)):
-    #     level0 = get_blending()
-    #     level1 =  SVC(C=param[i], kernel='linear',random_state=0, probability=True)
-    #     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    # choose = np.argmax(acc)
-    # allclf.append(SVC(C=param[choose], kernel='linear',random_state=0, probability=True).fit(X,y))
-    # file.write(str(item)+"SVMLN,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    # print("val_acc:", str(acc), ", test_f1:", str(f1))
+        acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
+        allclf.append(clf)
+        file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
+        print("val_acc:", str(acc), " ,val_f1:", str(f1))
+        acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+        file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+        print("test_acc:", str(acc), ", test_f1:", str(f1))
 
-    #RF
-    print("Stacking-RF...")
-    param = [20, 50, 100, 200]
-    acc = np.zeros(len(param)) 
-    sens = np.zeros(len(param)) 
-    spec = np.zeros(len(param)) 
-    mcc = np.zeros(len(param)) 
-    roc = np.zeros(len(param)) 
-    f1 = np.zeros(len(param))
-    for i in range(0,len(param)):
+        #1NN
+        print("Stacking-1NN...")
         level0 = get_stacking()[:j+1]
-        level1 = RandomForestClassifier(n_estimators=param[i], random_state=0)
+        level1 = KNeighborsClassifier(n_neighbors=1)
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    choose = np.argmax(acc)
-    allclf.append(RandomForestClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
-    file.write(str(item)+"RF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("val_acc:", str(acc), ", test_f1:", str(f1))
+        acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
+        allclf.append(clf)
+        file.write(str(item)+"1NN,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
+        print("val_acc:", str(acc), " ,val_f1:", str(f1))
+        acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+        file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+        print("test_acc:", str(acc), ", test_f1:", str(f1))
 
-    # #E-Tree
-    # print("Stacking-ExTree...")
-    # param = [20, 50, 100, 200]
-    # acc = np.zeros(len(param)) 
-    # sens = np.zeros(len(param)) 
-    # spec = np.zeros(len(param)) 
-    # mcc = np.zeros(len(param)) 
-    # roc = np.zeros(len(param)) 
-    # f1 = np.zeros(len(param))
-    # for i in range(0,len(param)):
-    #     level0 = get_blending()
-    #     level1 = ExtraTreesClassifier(n_estimators=param[i], random_state=0)
-    #     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    # choose = np.argmax(acc)
-    # allclf.append(ExtraTreesClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
-    # file.write(str(item)+"ET,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    # print("val_acc:", str(acc), ", test_f1:", str(f1))
-
-    # #XGBoost
-    # print("Stacking-XGBoost...")
-    # param = [20, 50, 100, 200]
-    # acc = np.zeros(len(param)) 
-    # sens = np.zeros(len(param)) 
-    # spec = np.zeros(len(param)) 
-    # mcc = np.zeros(len(param)) 
-    # roc = np.zeros(len(param)) 
-    # f1 = np.zeros(len(param)) 
-    # for i in range(0,len(param)):
-    #     level0 = get_blending()
-    #     level1 = XGBClassifier(n_estimators=param[i],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)
-    #     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    # choose = np.argmax(acc)  
-    # allclf.append(XGBClassifier(n_estimators=param[choose],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0).fit(X,y))
-    # file.write(str(item)+"XGB,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    # print("val_acc:", str(acc), ", test_f1:", str(f1))
-
-    # #LightGBM
-    # print("Stacking-LightGBM...")
-    # param = [20, 50, 100, 200]
-    # acc = np.zeros(len(param)) 
-    # sens = np.zeros(len(param)) 
-    # spec = np.zeros(len(param)) 
-    # mcc = np.zeros(len(param)) 
-    # roc = np.zeros(len(param)) 
-    # f1 = np.zeros(len(param)) 
-    # for i in range(0,len(param)):
-    #     level0 = get_blending()
-    #     level1 = LGBMClassifier(n_estimators=param[i],learning_rate=0.1, random_state=0)
-    #     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    # choose = np.argmax(acc)  
-    # allclf.append(LGBMClassifier(n_estimators=param[choose],learning_rate=0.1, random_state=0).fit(X,y))
-    # file.write(str(item)+"LGBM,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    # print("val_acc:", str(acc), ", test_f1:", str(f1))
-    
-    #MLP
-    print("Stacking-MLP...")
-    param = [20, 50, 100, 200]
-    acc = np.zeros(len(param)) 
-    sens = np.zeros(len(param)) 
-    spec = np.zeros(len(param)) 
-    mcc = np.zeros(len(param)) 
-    roc = np.zeros(len(param)) 
-    f1 = np.zeros(len(param))
-    for i in range(0,len(param)):
+        #DT
+        print("Stacking-DT...")
         level0 = get_stacking()[:j+1]
-        level1 = MLPClassifier(hidden_layer_sizes=(param[i],),random_state=0, max_iter = 10000)
+        level1 = DecisionTreeClassifier(random_state=0)
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    choose = np.argmax(acc)
-    allclf.append(MLPClassifier(hidden_layer_sizes=(param[choose],),random_state=0, max_iter=10000).fit(X,y))
-    file.write(str(item)+"MLP,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose])) 
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("val_acc:", str(acc), ", test_f1:", str(f1))
-
-    #NB
-    # print("Stacking-NB...")
-    # level0 = get_blending()  
-    # level1 = GaussianNB()
-    # clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-    # acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
-    # allclf.append(clf)
-    # file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
-    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    # print("val_acc:", str(acc), ", test_f1:", str(f1))
-
-    # #1NN
-    # print("Stacking-1NN...")
-    # level0 = get_blending()
-    # level1 = KNeighborsClassifier(n_neighbors=1)
-    # clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-    # acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
-    # allclf.append(clf)
-    # file.write(str(item)+"1NN,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
-    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    # print("val_acc:", str(acc), ", test_f1:", str(f1))
-
-    # #DT
-    # print("Stacking-DT...")
-    # level0 = get_blending()
-    # level1 = DecisionTreeClassifier(random_state=0)
-    # clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-    # acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
-    # allclf.append(clf)
-    # file.write(str(item)+"DT,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA")) 
-    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    # print("val_acc:", str(acc), ", test_f1:", str(f1))
-    
-    # #Logistic
-    # print("Stacking-LR...")
-    # param = [0.001,0.01,0.1,1,10,100]
-    # acc = np.zeros(len(param)) 
-    # sens = np.zeros(len(param)) 
-    # spec = np.zeros(len(param)) 
-    # mcc = np.zeros(len(param)) 
-    # roc = np.zeros(len(param)) 
-    # f1 = np.zeros(len(param))
-    # for i in range(0,len(param)):
-    #     level0 = get_blending()
-    #     level1 = LogisticRegression(C=param[i], random_state=0, max_iter=10000)
-    #     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    # choose = np.argmax(acc)
-    # allclf.append(LogisticRegression(C=param[choose], random_state=0, max_iter=10000).fit(X,y))
-    # file.write(str(item)+"LR,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))   
-    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    # print("val_acc:", str(acc), ", test_f1:", str(f1))
-    
-    # #PLS
-    # print("Stacking-PLS...")
-    # level0 = get_blending()
-    # level1 = OneVsRestClassifier(PLS())
-    # clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-    # acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
-    # allclf.append(clf)
-    # file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
-    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    # print("val_acc:", str(acc), ", test_f1:", str(f1))
+        acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
+        allclf.append(clf)
+        file.write(str(item)+"DT,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA")) 
+        print("val_acc:", str(acc), " ,val_f1:", str(f1))
+        acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+        file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+        print("test_acc:", str(acc), ", test_f1:", str(f1))
+        
+        #Logistic
+        print("Stacking-LR...")
+        param = [0.001,0.01,0.1,1,10,100]
+        acc = np.zeros(len(param)) 
+        sens = np.zeros(len(param)) 
+        spec = np.zeros(len(param)) 
+        mcc = np.zeros(len(param)) 
+        roc = np.zeros(len(param)) 
+        f1 = np.zeros(len(param))
+        for i in range(0,len(param)):
+            level0 = get_stacking()[:j+1]
+            level1 = LogisticRegression(C=param[i], random_state=0, max_iter=10000)
+            clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
+            acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+        choose = np.argmax(acc)
+        allclf.append(LogisticRegression(C=param[choose], random_state=0, max_iter=10000).fit(X,y))
+        file.write(str(item)+"LR,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))   
+        print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+        acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+        file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+        print("test_acc:", str(acc), ", test_f1:", str(f1))
+        
+        #PLS
+        print("Stacking-PLS...")
+        level0 = get_stacking()[:j+1]
+        level1 = OneVsRestClassifier(PLS())
+        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
+        acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
+        allclf.append(clf)
+        file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
+        print("val_acc:", str(acc), " ,val_f1:", str(f1))
+        acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+        file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+        print("test_acc:", str(acc), ", test_f1:", str(f1))
     
 
     file.close()
