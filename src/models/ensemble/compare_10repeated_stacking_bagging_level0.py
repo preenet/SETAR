@@ -7,8 +7,8 @@ import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
 import src.utilities as utils
 from daal4py.sklearn.svm import SVC
 from lightgbm import LGBMClassifier
-from sklearn.ensemble import (ExtraTreesClassifier, RandomForestClassifier,
-                              StackingClassifier)
+from sklearn.ensemble import (BaggingClassifier, ExtraTreesClassifier,
+                              RandomForestClassifier, StackingClassifier)
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import matthews_corrcoef  # average == 'macro'.
@@ -65,26 +65,21 @@ def get_stacking():
     # level0.append(('nb' , GaussianNB()))
     # level0.append(('dt' , DecisionTreeClassifier()))
     
-    pipe_mlp = make_pipeline(resample(n_samples=5, random_state=0), StandardScaler(), MLPClassifier(random_state=0, max_iter=10000))
-    boost_mlp = ('boost-mlp', pipe_mlp )
+    pipe_mlp = make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=MLPClassifier(random_state=0, max_iter=10000), n_estimators=5, random_state=0))
+    pipe_pls = make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=OneVsRestClassifier(PLS()), n_estimators=5, random_state=0))
+    pipe_rf = make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=RandomForestClassifier(random_state=0), n_estimators=5, random_state=0))
+    pipe_et = make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=ExtraTreesClassifier(random_state=0), n_estimators=5, random_state=0)) 
+    pipe_svm = make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=SVC(random_state=0, probability=True), n_estimators=5, random_state=0)) 
+    pipe_lgbm =  make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=LGBMClassifier(), n_estimators=5, random_state=0)) 
+    pipe_lr =  make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=LogisticRegression(random_state=0, max_iter=10000), n_estimators=5, random_state=0)) 
     
-    pipe_pls = make_pipeline(resample(n_samples=5, random_state=0), StandardScaler(),  OneVsRestClassifier(PLS())) 
-    boost_pls = ('boost-pls', pipe_pls )
-    
-    pipe_rf = make_pipeline(resample(n_samples=5, random_state=0), StandardScaler(), RandomForestClassifier(random_state=0)) 
-    boost_rf = ('boost-rf', pipe_rf)
-    
-    pipe_et = make_pipeline(resample(n_samples=5, random_state=0), StandardScaler(), ExtraTreesClassifier(random_state=0)) 
-    boost_et = ('boost-et', pipe_et)
-    
-    pipe_svm = make_pipeline(resample(n_samples=5, random_state=0), StandardScaler(), SVC(random_state=0, probability=True)) 
-    boost_svm = ('boost-svm', pipe_svm)
-    
-    pipe_lgbm =  make_pipeline(resample(n_samples=5, random_state=0), StandardScaler(), LGBMClassifier()) 
-    boost_lgbm = ('boost-lgbm', pipe_lgbm) 
-    
-    pipe_lr =  make_pipeline(resample(n_samples=5, random_state=0), StandardScaler(), LogisticRegression(random_state=0, max_iter=10000)) 
-    boost_lr = ('boost-lr', pipe_lr) 
+    boost_mlp = ('bagging-mlp', pipe_mlp )
+    boost_pls = ('bagging-pls', pipe_pls )
+    boost_rf = ('bagging-rf', pipe_rf)
+    boost_et = ('bagging-et', pipe_et)
+    boost_svm = ('bagging-svm', pipe_svm)
+    boost_lgbm = ('bagging-lgbm', pipe_lgbm) 
+    boost_lr = ('bagging-lr', pipe_lr) 
     
     level0.append(boost_mlp)
     level0.append(boost_pls)
@@ -145,7 +140,7 @@ for item in SEED:
     yv = ya[idx:-1]
 
     allclf = []
-    file = open("12classifier_"+iname+"_res_" + out_file_name, "a")
+    file = open("11classifier_"+iname+"_res_" + out_file_name, "a")
     print("Boosting-Stacking-SVM...")
     #SVM
     param = [1,2,4,8,16,32]
@@ -168,27 +163,27 @@ for item in SEED:
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("val_acc:", str(acc), ", test_f1:", str(f1))
     
-    #LinearSVC
-    print("Boosting-Stacking-LinearSVC...")
-    param = [1,2,4,8,16,32]
-    acc = np.zeros(len(param)) 
-    sens = np.zeros(len(param)) 
-    spec = np.zeros(len(param)) 
-    mcc = np.zeros(len(param)) 
-    roc = np.zeros(len(param))
-    f1 = np.zeros(len(param)) 
-    for i in range(0,len(param)):
-        level0 = get_stacking()
-        level1 =  SVC(C=param[i], kernel='linear',random_state=0, probability=True)
-        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    choose = np.argmax(acc)
-    allclf.append(SVC(C=param[choose], kernel='linear',random_state=0, probability=True).fit(X,y))
-    file.write(str(item)+"SVMLN,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("val_acc:", str(acc), ", test_f1:", str(f1))
+    # #LinearSVC
+    # print("Boosting-Stacking-LinearSVC...")
+    # param = [1,2,4,8,16,32]
+    # acc = np.zeros(len(param)) 
+    # sens = np.zeros(len(param)) 
+    # spec = np.zeros(len(param)) 
+    # mcc = np.zeros(len(param)) 
+    # roc = np.zeros(len(param))
+    # f1 = np.zeros(len(param)) 
+    # for i in range(0,len(param)):
+    #     level0 = get_stacking()
+    #     level1 =  SVC(C=param[i], kernel='linear',random_state=0, probability=True)
+    #     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
+    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+    # choose = np.argmax(acc)
+    # allclf.append(SVC(C=param[choose], kernel='linear',random_state=0, probability=True).fit(X,y))
+    # file.write(str(item)+"SVMLN,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    # print("val_acc:", str(acc), ", test_f1:", str(f1))
 
     #RF
     print("Boosting-Stacking-RF...")
