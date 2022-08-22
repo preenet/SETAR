@@ -16,9 +16,8 @@ from transformers import (BertConfig, BertTokenizer,
 
 configs = utils.read_config()
 root = utils.get_project_root()
-from wandb.keras import WandbCallback
-
 import wandb
+from wandb.keras import WandbCallback
 
 wandb.init(settings=wandb.Settings(_disable_stats=True))
 config = wandb.config

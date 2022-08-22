@@ -16,13 +16,13 @@ configs = utils.read_config()
 root = utils.get_project_root()
 
 ##################################################################
-Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
+Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_kt']))
 # data = joblib.load(Path.joinpath(root, configs['data']['kaggle_to']))
 # Xo = data[0]
 # yo = data[1]
 
-num_class = 4
-out_file_name = "ws_100.csv"
+num_class = 3
+out_file_name = "kt_seed7.csv"
 ##################################################################
 
 def test_binary(yp, yt):     
@@ -50,7 +50,7 @@ def test_multi(yp, yt):
     return ACC, SENS, SPEC, MCC, AUC, F1
 
 EP = 8
-SEED = [i for i in range(0,10)]
+SEED = [i for i in range(7, 9)]
 for idx, item in enumerate(SEED):
     print("SEED:", item)
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
