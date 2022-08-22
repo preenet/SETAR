@@ -10,7 +10,7 @@ data/processed/kt-bert.sav
 data/processed/bert-base-thai/
 data/processed/wanchabert/
 
-output-scratch/
+#output-scratch/
 
 # ignore w2v large files
 data/final/train-val-test/train_text_w2v_tfidf_kt.pkl
