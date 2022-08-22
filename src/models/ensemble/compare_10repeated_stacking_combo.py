@@ -35,6 +35,7 @@ root = utils.get_project_root()
 
 ##################################################################
 data_path = str(Path.joinpath(root, configs['data']['wangcha_ws']))
+
 out_file_name = 'ws_combo.csv' 
 num_class = 4
 ##################################################################
@@ -97,7 +98,7 @@ iname = "WANGCHAN-STACKING"
 for item in SEED:
     print("SEED:", item)
     for j in range(1, len(get_stacking())):
-        file = open("12classifier_"+iname+"_res_" + out_file_name, "a")
+        file = open(configs['output_scratch_propose']+"12classifier_"+iname+"_res_" + out_file_name, "a")
         print("using:" , j+1 , "combo(s).")
 
         Xa, ya, Xt, yt = get_data(item)

@@ -46,3 +46,4 @@
 
 # temp. output, for rapid testing
 - output_scratch: output-scratch/
+- output_scratch_propose: output-scratch/PROPOSE/
