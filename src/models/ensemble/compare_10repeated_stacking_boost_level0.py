@@ -65,23 +65,26 @@ def get_stacking():
     # level0.append(('nb' , GaussianNB()))
     # level0.append(('dt' , DecisionTreeClassifier()))
     
-    pipe_mlp = make_pipeline(resample(n_samples=5, random_state=0), MaxAbsScaler(), MLPClassifier(random_state=0, max_iter=10000))
+    pipe_mlp = make_pipeline(resample(n_samples=5, random_state=0), StandardScaler(), MLPClassifier(random_state=0, max_iter=10000))
     boost_mlp = ('boost-mlp', pipe_mlp )
     
-    pipe_pls = make_pipeline(resample(n_samples=5, random_state=0), MaxAbsScaler(),  OneVsRestClassifier(PLS())) 
+    pipe_pls = make_pipeline(resample(n_samples=5, random_state=0), StandardScaler(),  OneVsRestClassifier(PLS())) 
     boost_pls = ('boost-pls', pipe_pls )
     
-    pipe_rf = make_pipeline(resample(n_samples=5, random_state=0), MaxAbsScaler(), RandomForestClassifier(random_state=0)) 
+    pipe_rf = make_pipeline(resample(n_samples=5, random_state=0), StandardScaler(), RandomForestClassifier(random_state=0)) 
     boost_rf = ('boost-rf', pipe_rf)
     
-    pipe_et = make_pipeline(resample(n_samples=5, random_state=0), MaxAbsScaler(), ExtraTreesClassifier(random_state=0)) 
+    pipe_et = make_pipeline(resample(n_samples=5, random_state=0), StandardScaler(), ExtraTreesClassifier(random_state=0)) 
     boost_et = ('boost-et', pipe_et)
     
-    pipe_svm = make_pipeline(resample(n_samples=5, random_state=0), MaxAbsScaler(), SVC(random_state=0, probability=True)) 
+    pipe_svm = make_pipeline(resample(n_samples=5, random_state=0), StandardScaler(), SVC(random_state=0, probability=True)) 
     boost_svm = ('boost-svm', pipe_svm)
     
-    pipe_lgbm =  make_pipeline(resample(n_samples=5, random_state=0), MaxAbsScaler(), LGBMClassifier()) 
+    pipe_lgbm =  make_pipeline(resample(n_samples=5, random_state=0), StandardScaler(), LGBMClassifier()) 
     boost_lgbm = ('boost-lgbm', pipe_lgbm) 
+    
+    pipe_lr =  make_pipeline(resample(n_samples=5, random_state=0), StandardScaler(), LogisticRegression(random_state=0, max_iter=10000)) 
+    boost_lr = ('boost-lr', pipe_lr) 
     
     level0.append(boost_mlp)
     level0.append(boost_pls)
@@ -89,6 +92,7 @@ def get_stacking():
     level0.append(boost_et)
     level0.append(boost_svm)
     level0.append(boost_lgbm)
+    level0.append(boost_lr)
     return level0
 
 def test(clf, X, y, Xt, yt):
