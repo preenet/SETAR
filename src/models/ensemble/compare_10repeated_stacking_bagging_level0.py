@@ -126,12 +126,7 @@ for item in SEED:
     print(Xa.shape)
     # Xa = feature_selection(Xa, ya)
     # Xt = feature_selection(Xt, yt)
-    
-    # scaler = MaxAbsScaler()
-    # scaler.fit(Xa)
-    # scaler.fit(Xt)
-    # scaler.transform(Xa)
-    # scaler.transform(Xt)
+
     
     idx = int(round(len(ya)*0.75))
     X = Xa[0:idx, :]
@@ -163,27 +158,27 @@ for item in SEED:
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("val_acc:", str(acc), ", test_f1:", str(f1))
     
-    # #LinearSVC
-    # print("Boosting-Stacking-LinearSVC...")
-    # param = [1,2,4,8,16,32]
-    # acc = np.zeros(len(param)) 
-    # sens = np.zeros(len(param)) 
-    # spec = np.zeros(len(param)) 
-    # mcc = np.zeros(len(param)) 
-    # roc = np.zeros(len(param))
-    # f1 = np.zeros(len(param)) 
-    # for i in range(0,len(param)):
-    #     level0 = get_stacking()
-    #     level1 =  SVC(C=param[i], kernel='linear',random_state=0, probability=True)
-    #     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    # choose = np.argmax(acc)
-    # allclf.append(SVC(C=param[choose], kernel='linear',random_state=0, probability=True).fit(X,y))
-    # file.write(str(item)+"SVMLN,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    # print("val_acc:", str(acc), ", test_f1:", str(f1))
+    #LinearSVC
+    print("Boosting-Stacking-LinearSVC...")
+    param = [1,2,4,8,16,32]
+    acc = np.zeros(len(param)) 
+    sens = np.zeros(len(param)) 
+    spec = np.zeros(len(param)) 
+    mcc = np.zeros(len(param)) 
+    roc = np.zeros(len(param))
+    f1 = np.zeros(len(param)) 
+    for i in range(0,len(param)):
+        level0 = get_stacking()
+        level1 =  make_pipeline(StandardScaler(), SVC(C=param[i], kernel='linear',random_state=0, probability=True))
+        clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
+        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+    choose = np.argmax(acc)
+    allclf.append(SVC(C=param[choose], kernel='linear',random_state=0, probability=True).fit(X,y))
+    file.write(str(item)+"SVMLN,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("val_acc:", str(acc), ", test_f1:", str(f1))
 
     #RF
     print("Boosting-Stacking-RF...")
@@ -309,31 +304,31 @@ for item in SEED:
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("val_acc:", str(acc), ", test_f1:", str(f1))
 
-    # #1NN
-    # print("Boosting-Stacking-1NN...")
-    # level0 = get_stacking()
-    # level1 = KNeighborsClassifier(n_neighbors=1)
-    # clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-    # acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
-    # allclf.append(clf)
-    # file.write(str(item)+"1NN,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
-    # print("val_acc:", acc, " ,val_f1:", str(f1))
-    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    # print("val_acc:", str(acc), ", test_f1:", str(f1))
+    #1NN
+    print("Boosting-Stacking-1NN...")
+    level0 = get_stacking()
+    level1 =  make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=1))
+    clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
+    acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
+    allclf.append(clf)
+    file.write(str(item)+"1NN,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
+    print("val_acc:", acc, " ,val_f1:", str(f1))
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("val_acc:", str(acc), ", test_f1:", str(f1))
 
-    # #DT
-    # print("Boosting-Stacking-DT...")
-    # level0 = get_stacking()
-    # level1 = DecisionTreeClassifier(random_state=0)
-    # clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
-    # acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
-    # allclf.append(clf)
-    # file.write(str(item)+"DT,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA")) 
-    # print("val_acc:", acc, " ,val_f1:", str(f1))
-    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    # print("val_acc:", str(acc), ", test_f1:", str(f1))
+    #DT
+    print("Boosting-Stacking-DT...")
+    level0 = get_stacking()
+    level1 =   make_pipeline(StandardScaler(), DecisionTreeClassifier(random_state=0))
+    clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
+    acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
+    allclf.append(clf)
+    file.write(str(item)+"DT,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA")) 
+    print("val_acc:", acc, " ,val_f1:", str(f1))
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("val_acc:", str(acc), ", test_f1:", str(f1))
     
     #Logistic
     print("Boosting-Stacking-LR...")
