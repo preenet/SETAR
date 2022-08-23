@@ -52,6 +52,7 @@ def get_stacking():
     ''' 
     return: list of models for level 0
     '''
+    level0 = list()
     level0.append(('svm', SVC(random_state=0, probability=True)))
     level0.append(('pls', OneVsRestClassifier(PLS())))
     level0.append(('mlp', MLPClassifier(random_state=0, max_iter=10000)))
