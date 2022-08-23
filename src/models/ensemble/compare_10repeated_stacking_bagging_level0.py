@@ -378,7 +378,7 @@ for item in SEED:
     f1 = np.zeros(len(param))
     for i in range(0,len(param)):
         level0 = get_stacking()
-        level1 = make_pipeline(MaxAbsScaler(), LogisticRegression(random_state=0, max_iter=10000)
+        level1 = make_pipeline(MaxAbsScaler(), LogisticRegression(random_state=0, max_iter=10000))
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
