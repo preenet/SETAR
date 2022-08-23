@@ -184,7 +184,7 @@ for item in SEED:
     f1 = np.zeros(len(param))
     for i in range(0,len(param)):
         level0 = get_stacking()
-        level1 = make_pipeline(StandardScaler(), SVC(random_state=0, probability=True), n_estimators=5, random_state=0) 
+        level1 = make_pipeline(MaxAbsScaler(), SVC(random_state=0, probability=True))
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
@@ -206,7 +206,7 @@ for item in SEED:
     f1 = np.zeros(len(param)) 
     for i in range(0,len(param)):
         level0 = get_stacking()
-        level1 =  make_pipeline(StandardScaler(), SVC(C=param[i], kernel='linear',random_state=0, probability=True))
+        level1 =  make_pipeline(MaxAbsScaler(), SVC(C=param[i], kernel='linear',random_state=0, probability=True))
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
@@ -228,7 +228,7 @@ for item in SEED:
     f1 = np.zeros(len(param))
     for i in range(0,len(param)):
         level0 = get_stacking()
-        level1 = make_pipeline(StandardScaler(), RandomForestClassifier(n_estimators=param[i], random_state=0))
+        level1 = make_pipeline(MaxAbsScaler(), RandomForestClassifier(n_estimators=param[i], random_state=0))
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
@@ -250,7 +250,7 @@ for item in SEED:
     f1 = np.zeros(len(param))
     for i in range(0,len(param)):
         level0 = get_stacking()
-        level1 = make_pipeline(StandardScaler(), ExtraTreesClassifier(n_estimators=param[i], random_state=0))
+        level1 = make_pipeline(MaxAbsScaler(), ExtraTreesClassifier(n_estimators=param[i], random_state=0))
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
@@ -272,7 +272,7 @@ for item in SEED:
     f1 = np.zeros(len(param)) 
     for i in range(0,len(param)):
         level0 = get_stacking()
-        level1 = make_pipeline(StandardScaler(), XGBClassifier(n_estimators=param[i],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0))
+        level1 = make_pipeline(MaxAbsScaler(), XGBClassifier(n_estimators=param[i],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0))
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)  
@@ -294,7 +294,7 @@ for item in SEED:
     f1 = np.zeros(len(param)) 
     for i in range(0,len(param)):
         level0 = get_stacking()
-        level1 = make_pipeline(StandardScaler(), LGBMClassifier(n_estimators=param[i],learning_rate=0.1, random_state=0))
+        level1 = make_pipeline(MaxAbsScaler(), LGBMClassifier(n_estimators=param[i],learning_rate=0.1, random_state=0))
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)  
@@ -316,7 +316,7 @@ for item in SEED:
     f1 = np.zeros(len(param))
     for i in range(0,len(param)):
         level0 = get_stacking()
-        level1 = make_pipeline(StandardScaler(), MLPClassifier(random_state=0, max_iter=10000), n_estimators=5, random_state=0)
+        level1 = make_pipeline(MaxAbsScaler(), MLPClassifier(random_state=0, max_iter=10000))
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
@@ -331,7 +331,7 @@ for item in SEED:
     print("Boosting-Stacking-NB...")
     level0 = get_stacking()  
     level1 = GaussianNB()
-    level1 = make_pipeline(StandardScaler(), GaussianNB(), n_estimators=5, random_state=0)
+    level1 = make_pipeline(MaxAbsScaler(), GaussianNB(), n_estimators=5, random_state=0)
     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
@@ -344,7 +344,7 @@ for item in SEED:
     #1NN
     print("Boosting-Stacking-1NN...")
     level0 = get_stacking()
-    level1 =  make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=1))
+    level1 =  make_pipeline(MaxAbsScaler(), KNeighborsClassifier(n_neighbors=1))
     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
@@ -357,7 +357,7 @@ for item in SEED:
     #DT
     print("Boosting-Stacking-DT...")
     level0 = get_stacking()
-    level1 =   make_pipeline(StandardScaler(), DecisionTreeClassifier(random_state=0))
+    level1 =   make_pipeline(MaxAbsScaler(), DecisionTreeClassifier(random_state=0))
     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
@@ -378,7 +378,7 @@ for item in SEED:
     f1 = np.zeros(len(param))
     for i in range(0,len(param)):
         level0 = get_stacking()
-        level1 = make_pipeline(StandardScaler(), LogisticRegression(random_state=0, max_iter=10000), n_estimators=5, random_state=0) 
+        level1 = make_pipeline(MaxAbsScaler(), LogisticRegression(random_state=0, max_iter=10000)
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
