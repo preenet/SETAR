@@ -65,29 +65,66 @@ def get_stacking():
     # level0.append(('nb' , GaussianNB()))
     # level0.append(('dt' , DecisionTreeClassifier()))
     
-    pipe_mlp = make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=MLPClassifier(random_state=0, max_iter=10000), n_estimators=5, random_state=0))
-    pipe_pls = make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=OneVsRestClassifier(PLS()), n_estimators=5, random_state=0))
-    pipe_rf = make_pipeline(StandardScaler(), RandomForestClassifier(random_state=0))
-    pipe_et = make_pipeline(StandardScaler(), ExtraTreesClassifier(random_state=0)) 
-    pipe_svm = make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=SVC(random_state=0, probability=True), n_estimators=5, random_state=0)) 
-    pipe_lgbm =  make_pipeline(StandardScaler(), LGBMClassifier()) 
-    pipe_lr =  make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=LogisticRegression(random_state=0, max_iter=10000), n_estimators=5, random_state=0)) 
+    pipe_mlp1 = make_pipeline(MaxAbsScaler(), BaggingClassifier(base_estimator=MLPClassifier(random_state=0, max_iter=10000), n_estimators=5, random_state=0))
+    pipe_mlp2 = make_pipeline(MaxAbsScaler(), BaggingClassifier(base_estimator=MLPClassifier(random_state=0, max_iter=10000), n_estimators=5, random_state=1))
+    pipe_mlp3 = make_pipeline(MaxAbsScaler(), BaggingClassifier(base_estimator=MLPClassifier(random_state=0, max_iter=10000), n_estimators=5, random_state=2))
     
-    boost_mlp = ('bagging-mlp', pipe_mlp )
-    boost_pls = ('bagging-pls', pipe_pls )
-    boost_rf = ('rf', pipe_rf)
-    boost_et = ('et', pipe_et)
-    boost_svm = ('bagging-svm', pipe_svm)
-    boost_lgbm = ('lgbm', pipe_lgbm) 
-    boost_lr = ('bagging-lr', pipe_lr) 
+
+    pipe_svm1 = make_pipeline(MaxAbsScaler(), BaggingClassifier(base_estimator=SVC(random_state=0, probability=True), n_estimators=5, random_state=0))
+    pipe_svm2 = make_pipeline(MaxAbsScaler(), BaggingClassifier(base_estimator=SVC(random_state=0, probability=True), n_estimators=5, random_state=1)) 
+    pipe_svm3 = make_pipeline(MaxAbsScaler(), BaggingClassifier(base_estimator=SVC(random_state=0, probability=True), n_estimators=5, random_state=2))  
     
-    level0.append(boost_mlp)
-    level0.append(boost_pls)
-    level0.append(boost_rf)
-    level0.append(boost_et)
-    level0.append(boost_svm)
-    level0.append(boost_lgbm)
-    level0.append(boost_lr)
+    pipe_lr1 =  make_pipeline(MaxAbsScaler(), BaggingClassifier(base_estimator=LogisticRegression(random_state=0, max_iter=10000), n_estimators=5, random_state=0))
+    pipe_lr2 =  make_pipeline(MaxAbsScaler(), BaggingClassifier(base_estimator=LogisticRegression(random_state=0, max_iter=10000), n_estimators=5, random_state=1)) 
+    pipe_lr3 =  make_pipeline(MaxAbsScaler(), BaggingClassifier(base_estimator=LogisticRegression(random_state=0, max_iter=10000), n_estimators=5, random_state=2))
+    
+    pipe_nb1 =  make_pipeline(MaxAbsScaler(), BaggingClassifier(base_estimator=GaussianNB(), n_estimators=5, random_state=0))
+    pipe_nb2 =  make_pipeline(MaxAbsScaler(), BaggingClassifier(base_estimator=GaussianNB(), n_estimators=5, random_state=1)) 
+    pipe_nb3 =  make_pipeline(MaxAbsScaler(), BaggingClassifier(base_estimator=GaussianNB(), n_estimators=5, random_state=2))    
+    
+    pipe_pls = make_pipeline(MaxAbsScaler(), OneVsRestClassifier(PLS()))
+    pipe_rf = make_pipeline(MaxAbsScaler(), RandomForestClassifier(random_state=0))
+    pipe_et = make_pipeline(MaxAbsScaler(), ExtraTreesClassifier(random_state=0)) 
+    pipe_lgbm =  make_pipeline(MaxAbsScaler(), LGBMClassifier()) 
+    
+    bagged_mlp1 = ('bagging-mlp1', pipe_mlp1)
+    bagged_mlp2 = ('bagging-mlp2', pipe_mlp2)
+    bagged_mlp3 = ('bagging-mlp3', pipe_mlp3)
+
+    bagged_svm1 = ('bagging-svm1', pipe_svm1)
+    bagged_svm2 = ('bagging-svm2', pipe_svm2)
+    bagged_svm3 = ('bagging-svm3', pipe_svm3)
+    
+    bagged_lr1 = ('bagging-lr1', pipe_lr1)
+    bagged_lr2 = ('bagging-lr2', pipe_lr2)
+    bagged_lr3 = ('bagging-lr3', pipe_lr3)
+    
+    bagged_nb1 = ('bagging-nb1', pipe_nb1)
+    bagged_nb2 = ('bagging-nb2', pipe_nb2)
+    bagged_nb3 = ('bagging-nb3', pipe_nb3)
+    
+    lgbm = ('lgbm', pipe_lgbm) 
+    pls = ('pls', pipe_pls )
+    rf = ('rf', pipe_rf)
+    et = ('et', pipe_et)
+    
+    level0.append(bagged_mlp1)
+    level0.append(bagged_mlp2)
+    level0.append(bagged_mlp3)
+    level0.append(bagged_svm1)
+    level0.append(bagged_svm2)
+    level0.append(bagged_svm3)
+    level0.append(bagged_lr1)
+    level0.append(bagged_lr2)
+    level0.append(bagged_lr3)
+    level0.append(bagged_nb1)
+    level0.append(bagged_nb2)
+    level0.append(bagged_nb3)
+    
+    level0.append(lgbm)
+    level0.append(pls)
+    level0.append(et)
+    level0.append(rf)
     return level0
 
 def test(clf, X, y, Xt, yt):
@@ -147,7 +184,7 @@ for item in SEED:
     f1 = np.zeros(len(param))
     for i in range(0,len(param)):
         level0 = get_stacking()
-        level1 = make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=SVC(random_state=0, probability=True), n_estimators=5, random_state=0)) 
+        level1 = make_pipeline(StandardScaler(), SVC(random_state=0, probability=True), n_estimators=5, random_state=0) 
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
@@ -279,7 +316,7 @@ for item in SEED:
     f1 = np.zeros(len(param))
     for i in range(0,len(param)):
         level0 = get_stacking()
-        level1 = make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=MLPClassifier(random_state=0, max_iter=10000), n_estimators=5, random_state=0))
+        level1 = make_pipeline(StandardScaler(), MLPClassifier(random_state=0, max_iter=10000), n_estimators=5, random_state=0)
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
@@ -294,7 +331,7 @@ for item in SEED:
     print("Boosting-Stacking-NB...")
     level0 = get_stacking()  
     level1 = GaussianNB()
-    level1 = make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=GaussianNB(), n_estimators=5, random_state=0))
+    level1 = make_pipeline(StandardScaler(), GaussianNB(), n_estimators=5, random_state=0)
     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
@@ -341,7 +378,7 @@ for item in SEED:
     f1 = np.zeros(len(param))
     for i in range(0,len(param)):
         level0 = get_stacking()
-        level1 = make_pipeline(StandardScaler(), BaggingClassifier(base_estimator=LogisticRegression(random_state=0, max_iter=10000), n_estimators=5, random_state=0)) 
+        level1 = make_pipeline(StandardScaler(), LogisticRegression(random_state=0, max_iter=10000), n_estimators=5, random_state=0) 
         clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
@@ -355,7 +392,7 @@ for item in SEED:
     #PLS
     print("Boosting-Stacking-PLS...")
     level0 = get_stacking()
-    level1 = make_pipeline( StandardScaler(), OneVsRestClassifier(PLS()) )
+    level1 = make_pipeline(StandardScaler(), OneVsRestClassifier(PLS()) )
     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)

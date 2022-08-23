@@ -5,7 +5,7 @@ import numpy as np  # linear algebra
 import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
 import src.utilities as utils
 
-SEED = [i for i in range(0,1)]
+SEED = [i for i in range(0, 10)]
 
 
 from daal4py.sklearn.svm import SVC
@@ -53,17 +53,19 @@ def get_stacking():
     return: list of models for level 0
     '''
     level0 = list()
-    level0.append(('mlp', MLPClassifier(random_state=0, max_iter=10000)))
-    level0.append(('pls', OneVsRestClassifier(PLS())))
-    level0.append(('rf', RandomForestClassifier(random_state=0)))
-    level0.append(('et', ExtraTreesClassifier(random_state=0)))
     level0.append(('svm', SVC(random_state=0, probability=True)))
-    level0.append(('lgbm', LGBMClassifier()))
+    level0.append(('pls', OneVsRestClassifier(PLS())))
+    level0.append(('mlp', MLPClassifier(random_state=0, max_iter=10000)))
     level0.append(('xgb', XGBClassifier(learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)))
-    level0.append(('lr' , LogisticRegression(random_state=0, max_iter=10000)))
-    level0.append(('1nn' , KNeighborsClassifier(n_neighbors=1)))
+    level0.append(('rf', RandomForestClassifier(random_state=0)))
+    level0.append(('lgbm', LGBMClassifier()))
+    level0.append(('et', ExtraTreesClassifier(random_state=0)))
     level0.append(('nb' , GaussianNB()))
-    level0.append(('dt' , DecisionTreeClassifier()))
+    
+    # level0.append(('lr' , LogisticRegression(random_state=0, max_iter=10000)))
+    # level0.append(('1nn' , KNeighborsClassifier(n_neighbors=1)))
+    
+    # level0.append(('dt' , DecisionTreeClassifier()))
 
     return level0
 
@@ -93,13 +95,16 @@ def get_data(idx):
     data1 = load_svmlight_file(data_path + "\\" + "testdata_"+str(idx)+".scl", zero_based=False)
     return data[0].toarray(), data[1], data1[0].toarray(), data1[1]
 
-iname = "WANGCHAN-STACKING"
+iname = "WC-STACKING-CB-Ranking"
 
 for item in SEED:
+    file = open(configs['output_scratch_propose']+"12classifier_"+iname+"_res_" + out_file_name, "a")
     print("SEED:", item)
+    file.write("SEED"+ str(item) +"\n")
     for j in range(1, len(get_stacking())):
-        file = open(configs['output_scratch_propose']+"12classifier_"+iname+"_res_" + out_file_name, "a")
+       
         print("using:" , j+1 , "combo(s).")
+        file.write("using"+ str(j+1) +"combo(s)\n")
 
         Xa, ya, Xt, yt = get_data(item)
         # Xa = feature_selection(Xa, ya)
