@@ -35,9 +35,9 @@ configs = utils.read_config()
 root = utils.get_project_root()
 
 ##################################################################
-data_path = str(Path.joinpath(root, configs['data']['wangcha_ws_2']))
-out_file_name = 'ws_new_extract.csv' 
-num_class = 4
+data_path = str(Path.joinpath(root, configs['data']['wangcha_kt']))
+out_file_name = 'ws50D_kt.csv' 
+num_class = 3
 ##################################################################
 
 patch_sklearn()
@@ -52,18 +52,15 @@ def get_stacking():
     ''' 
     return: list of models for level 0
     '''
-    make_pipeline()
-    level0.append(('mlp', MLPClassifier(random_state=0, max_iter=10000)))
-    level0.append(('pls', OneVsRestClassifier(PLS())))
-    level0.append(('rf', RandomForestClassifier(random_state=0)))
-    level0.append(('et', ExtraTreesClassifier(random_state=0)))
     level0.append(('svm', SVC(random_state=0, probability=True)))
+    level0.append(('pls', OneVsRestClassifier(PLS())))
+    level0.append(('mlp', MLPClassifier(random_state=0, max_iter=10000)))
+    level0.append(('xgb', XGBClassifier(learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)))
+    level0.append(('rf', RandomForestClassifier(random_state=0)))
     level0.append(('lgbm', LGBMClassifier()))
-    #level0.append(('xgb', XGBClassifier(learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)))
-    # level0.append(('1nn' , KNeighborsClassifier(n_neighbors=1)))
-    level0.append(('lr' , LogisticRegression(random_state=0, max_iter=10000)))
-    # level0.append(('nb' , GaussianNB()))
-    # level0.append(('dt' , DecisionTreeClassifier()))
+    level0.append(('et', ExtraTreesClassifier(random_state=0)))
+    level0.append(('nb' , GaussianNB()))
+    
 
     return level0
 

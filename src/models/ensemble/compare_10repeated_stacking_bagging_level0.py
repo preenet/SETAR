@@ -331,7 +331,7 @@ for item in SEED:
     print("Boosting-Stacking-NB...")
     level0 = get_stacking()  
     level1 = GaussianNB()
-    level1 = make_pipeline(MaxAbsScaler(), GaussianNB(), n_estimators=5, random_state=0)
+    level1 = make_pipeline(MaxAbsScaler(), GaussianNB())
     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
@@ -392,7 +392,7 @@ for item in SEED:
     #PLS
     print("Boosting-Stacking-PLS...")
     level0 = get_stacking()
-    level1 = make_pipeline(StandardScaler(), OneVsRestClassifier(PLS()) )
+    level1 = make_pipeline(StandardScaler(), OneVsRestClassifier(PLS()))
     clf = StackingClassifier(estimators=level0, final_estimator=level1, cv=5, n_jobs=-1)
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
