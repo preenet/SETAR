@@ -53,38 +53,20 @@ def get_stacking():
     ''' 
     return: list of models for level 0
     '''
+
     level0 = list()
-    
-    scaler = MaxAbsScaler()
-    pipe_svm = make_pipeline(scaler, SVC(C=4, kernel='rbf', random_state=0, probability=True))
-    pipe_pls =  make_pipeline(scaler, OneVsRestClassifier(PLS()))
-    pipe_mlp = make_pipeline(scaler, MLPClassifier(random_state=0, max_iter=10000))
-    pipe_xgb = make_pipeline(scaler, XGBClassifier(learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0))
-    pipe_rf = make_pipeline(scaler, RandomForestClassifier(random_state=0))
-    pipe_lgmb = make_pipeline(scaler, LGBMClassifier())
-    pipe_et = make_pipeline(scaler, ExtraTreesClassifier(random_state=0))
-    pipe_nb = make_pipeline(scaler, GaussianNB())
-    
-    grid_param = {'C': [2,4,8,16,32], 'gamma': [1,0.1,0.01,0.001]}
-    
-    level0.append(GridSearchCV (pipe_svm, param_grid=grid_param, n_jobs=-1))
-    level0.append(pipe_pls)
-    
-    grid_param = {'hidden_layer_sizes': [10, 20, 50, 100, 200]}
-    level0.append(GridSearchCV (pipe_mlp, param_grid=grid_param, n_jobs=-1))
-    
-    grid_param = {'n_estimators': [10, 20, 50, 100, 200]}
-    level0.append(GridSearchCV (pipe_xgb, param_grid=grid_param, n_jobs=-1))
-    
-    grid_param = {'n_estimators': [20, 50, 100, 200, 400]}
-    level0.append(GridSearchCV (pipe_rf, param_grid=grid_param, n_jobs=-1))
-    level0.append(GridSearchCV (pipe_et, param_grid=grid_param, n_jobs=-1))
-    
-    grid_param = {'n_estimators': [20, 50, 100, 200]}
-    level0.append(GridSearchCV (pipe_lgmb, param_grid=grid_param, n_jobs=-1))
-    level0.append(pipe_nb)
+    level0.append(('svm', SVC(random_state=0, probability=True)))
+    level0.append(('pls', OneVsRestClassifier(PLS())))
+    level0.append(('mlp', MLPClassifier(random_state=0, max_iter=10000)))
+    level0.append(('xgb', XGBClassifier(learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)))
+    level0.append(('rf', RandomForestClassifier(random_state=0)))
+    level0.append(('lgbm', LGBMClassifier()))
+    level0.append(('et', ExtraTreesClassifier(random_state=0)))
+    level0.append(('nb' , GaussianNB()))
     
     return level0
+
+
 
 def test(clf, X, y, Xt, yt):
     train_X, test_X = X, Xt
