@@ -149,7 +149,7 @@ print("val_acc:", str(acc), ", test_f1:", str(f1))
 #LinearSVC
 print("Stacking-LinearSVC...")
 level0 = get_stacking()
-lsvc = SVC(C=param[i], kernel='linear',random_state=0, probability=True)
+lsvc = SVC(kernel='linear',random_state=0, probability=True)
 clfs = StackingClassifier(estimators=level0, final_estimator=make_pipeline(MaxAbsScaler(), lsvc), cv=5, n_jobs=-1)
 level1 =  GridSearchCV(estimator=clfs, param_grid=grid_param, cv=5, n_jobs=-1)
 level1.fit(X, y)
