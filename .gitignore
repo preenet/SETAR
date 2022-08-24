@@ -26,5 +26,6 @@ data/final/train-val-test/train_text_w2v_tfidf_ws.pkl
 
 wandb
 src/models/wandb
+src/feature/feature_selection
 models/best_model_h5
 models/wangcha_model/
