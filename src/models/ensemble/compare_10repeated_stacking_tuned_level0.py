@@ -125,7 +125,7 @@ roc = np.zeros(len(param))
 f1 = np.zeros(len(param))
 
 grid_param = {
-'svm__C': [1,2,4,8,16,32], 'svm__gamma': [1,0.1,0.01,0.001],
+'svm__C': [1,2,4,8,16,32],
 'mlp__hidden_layer_sizes': [10, 20, 50, 100, 200],
 'xgb__n_estimators': [10, 20, 50, 100, 200],
 'rf__n_estimators': [20, 50, 100, 200, 400],
@@ -142,7 +142,7 @@ best_clf = level1.best_estimator_
 acc, sens, spec, mcc, roc, f1 = test(best_clf,X,y,Xv,yv)
 file.write(str(item)+"SVMRBF,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str(param))  
 print("val_acc:", acc, " ,val_f1:", str(f1))
-acc, sens, spec, mcc, roc, f1 = test(clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+acc, sens, spec, mcc, roc, f1 = test(best_clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
 file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 print("val_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -157,7 +157,7 @@ best_clf = level1.best_estimator_
 acc, sens, spec, mcc, roc, f1 = test(best_clf,X,y,Xv,yv)
 file.write(str(item)+"SVMLN,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str(param))  
 print("val_acc:", acc, " ,val_f1:", str(f1))
-acc, sens, spec, mcc, roc, f1 = test(clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+acc, sens, spec, mcc, roc, f1 = test(best_clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
 file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 print("val_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -172,7 +172,7 @@ best_clf = level1.best_estimator_
 acc, sens, spec, mcc, roc, f1 = test(best_clf,X,y,Xv,yv)
 file.write(str(item)+"RF,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str(param))  
 print("val_acc:", acc, " ,val_f1:", str(f1))
-acc, sens, spec, mcc, roc, f1 = test(clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+acc, sens, spec, mcc, roc, f1 = test(best_clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
 file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 print("val_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -187,7 +187,7 @@ best_clf = level1.best_estimator_
 acc, sens, spec, mcc, roc, f1 = test(best_clf,X,y,Xv,yv)
 file.write(str(item)+"ET,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str(param))  
 print("val_acc:", acc, " ,val_f1:", str(f1))
-acc, sens, spec, mcc, roc, f1 = test(clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+acc, sens, spec, mcc, roc, f1 = test(best_clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
 file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 print("val_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -202,7 +202,7 @@ best_clf = level1.best_estimator_
 acc, sens, spec, mcc, roc, f1 = test(best_clf,X,y,Xv,yv)
 file.write(str(item)+"XGB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str(param))  
 print("val_acc:", acc, " ,val_f1:", str(f1))
-acc, sens, spec, mcc, roc, f1 = test(clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+acc, sens, spec, mcc, roc, f1 = test(best_clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
 file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 print("val_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -217,7 +217,7 @@ best_clf = level1.best_estimator_
 acc, sens, spec, mcc, roc, f1 = test(best_clf,X,y,Xv,yv)
 file.write(str(item)+"LGBM,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str(param))  
 print("val_acc:", acc, " ,val_f1:", str(f1))
-acc, sens, spec, mcc, roc, f1 = test(clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+acc, sens, spec, mcc, roc, f1 = test(best_clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
 file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 print("val_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -232,7 +232,7 @@ best_clf = level1.best_estimator_
 acc, sens, spec, mcc, roc, f1 = test(best_clf,X,y,Xv,yv)
 file.write(str(item)+"MLP,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str(param))  
 print("val_acc:", acc, " ,val_f1:", str(f1))
-acc, sens, spec, mcc, roc, f1 = test(clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+acc, sens, spec, mcc, roc, f1 = test(best_clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
 file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 print("val_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -246,7 +246,7 @@ level1.fit(X, y)
 best_clf = level1.best_estimator_
 file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str(param))  
 print("val_acc:", acc, " ,val_f1:", str(f1))
-acc, sens, spec, mcc, roc, f1 = test(clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+acc, sens, spec, mcc, roc, f1 = test(best_clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
 file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 print("val_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -261,7 +261,7 @@ best_clf = level1.best_estimator_
 acc, sens, spec, mcc, roc, f1 = test(best_clf,X,y,Xv,yv)
 file.write(str(item)+"1NN,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str(param))  
 print("val_acc:", acc, " ,val_f1:", str(f1))
-acc, sens, spec, mcc, roc, f1 = test(clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+acc, sens, spec, mcc, roc, f1 = test(best_clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
 file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 print("val_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -276,7 +276,7 @@ best_clf = level1.best_estimator_
 acc, sens, spec, mcc, roc, f1 = test(best_clf,X,y,Xv,yv)
 file.write(str(item)+"DT,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str(param))  
 print("val_acc:", acc, " ,val_f1:", str(f1))
-acc, sens, spec, mcc, roc, f1 = test(clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+acc, sens, spec, mcc, roc, f1 = test(best_clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
 file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 print("val_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -291,7 +291,7 @@ best_clf = level1.best_estimator_
 acc, sens, spec, mcc, roc, f1 = test(best_clf,X,y,Xv,yv)
 file.write(str(item)+"LR,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str(param))  
 print("val_acc:", acc, " ,val_f1:", str(f1))
-acc, sens, spec, mcc, roc, f1 = test(clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+acc, sens, spec, mcc, roc, f1 = test(best_clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
 file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 print("val_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -306,7 +306,7 @@ best_clf = level1.best_estimator_
 acc, sens, spec, mcc, roc, f1 = test(best_clf,X,y,Xv,yv)
 file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str(param))  
 print("val_acc:", acc, " ,val_f1:", str(f1))
-acc, sens, spec, mcc, roc, f1 = test(clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+acc, sens, spec, mcc, roc, f1 = test(best_clf, np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
 file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
 print("val_acc:", str(acc), ", test_f1:", str(f1))
 
