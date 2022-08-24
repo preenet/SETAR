@@ -26,9 +26,8 @@ yo = data[1]
 ######################################################################
 
 
-SEED = [i for i in range(0,10)]
 
-for iii, item in enumerate([0]):
+for item in range(0, 10):
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
 
