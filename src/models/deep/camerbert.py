@@ -33,12 +33,13 @@ class Camembert(torch.nn.Module):
         #X = self.dropout(X)
         #X = self.hidden2(X)
         return X
+        #return X[:,0]
 
     def extract(self, input_ids, attention_mask):
         output_1 = self.l1(input_ids=input_ids, attention_mask=attention_mask)
         X = output_1[0]
-        X = self.h1(X[:,0])
-        X = self.a1(X)
+        #X = self.h1(X[:,0])
+        # X = self.a1(X)
         #X = self.h2(X)
         #X, (last_hidden, last_cell) = self.LSTM(X)
         #X, _ = torch.max(X, 1)
@@ -46,4 +47,5 @@ class Camembert(torch.nn.Module):
         #X = self.act1(X)
         #X = self.dropout(X)
         #X = self.hidden2(X)
-        return X
+        #return X
+        return X[:,0]
