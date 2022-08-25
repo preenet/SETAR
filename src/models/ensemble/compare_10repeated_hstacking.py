@@ -92,14 +92,10 @@ for item in SEED:
 
     scaler = MaxAbsScaler()
     scaler.fit(Xa)
-    scaler.fit(Xt)
     scaler.transform(Xa)
-    scaler.transform(Xt)
     
     X, X_tmp, y, y_tmp = train_test_split(Xa, ya, test_size=0.4, random_state=item, stratify=ya)
     Xv, Xt, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
-    
-
     
     allclf = []
     file = open("12classifier_"+iname+"_res_" + out_file_name, "a")
