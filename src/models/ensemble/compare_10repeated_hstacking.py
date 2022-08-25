@@ -71,13 +71,15 @@ def get_data_fe(idx):
     tr3 = load_svmlight_file(data_path + "\\" + "traindata_" + str(fe[2]) +"_"+ str(idx)+ ".scl", zero_based=False)
     tr4 = load_svmlight_file(data_path + "\\" + "traindata_" + str(fe[3]) +"_"+ str(idx)+ ".scl", zero_based=False)
 
-    data = np.hstack((tr1[0].toarray(), tr2[0].toarray(), tr3[0].toarray(), tr4[0].toarray()))
+    print(tr1[0].toarray().shape, tr2[0].toarray().shape, tr3[0].toarray().shape, tr4[0].toarray().shape)
+    data = np.hstack(( tr1[0].toarray(), tr2[0].toarray(), tr3[0].toarray(), tr4[0].toarray()))
 
     t1 = load_svmlight_file(data_path + "\\" + "testdata_" + str(fe[0]) +"_"+ str(idx)+ ".scl", zero_based=False)
     t2 = load_svmlight_file(data_path + "\\" + "testdata_" + str(fe[1]) +"_"+ str(idx)+ ".scl", zero_based=False)
     t3 = load_svmlight_file(data_path + "\\" + "testdata_" + str(fe[2]) +"_"+ str(idx)+ ".scl", zero_based=False)
     t4 = load_svmlight_file(data_path + "\\" + "testdata_" + str(fe[3]) +"_"+ str(idx)+ ".scl", zero_based=False)
-    data1 = np.hstack((tr1[0].toarray(), t2[0].toarray(), t3[0].toarray(), t4[0].toarray()))
+    print(t1[0].toarray().shape, t2[0].toarray().shape, t3[0].toarray().shape, t4[0].toarray().shape)
+    data1 = np.hstack((t1[0].toarray(), t2[0].toarray(), t3[0].toarray(), t4[0].toarray()))
     return data, tr4[1], data1, t4[1]
 
 iname = "WANGCHAN-FeatureStacked"
@@ -114,7 +116,7 @@ for item in SEED:
     allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
     file.write(str(item)+"SVMRBF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
     print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -135,7 +137,7 @@ for item in SEED:
     allclf.append(SVC(C=param[i], kernel='linear',random_state=0, probability=True).fit(X,y))
     file.write(str(item)+"SVMLN,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
     print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
     
@@ -156,7 +158,7 @@ for item in SEED:
     allclf.append(RandomForestClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
     file.write(str(item)+"RF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
     print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -176,7 +178,7 @@ for item in SEED:
     allclf.append(ExtraTreesClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
     file.write(str(item)+"ET,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
     print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -196,7 +198,7 @@ for item in SEED:
     allclf.append(XGBClassifier(n_estimators=param[i],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0).fit(X,y))
     file.write(str(item)+"XGB,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
     print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -216,7 +218,7 @@ for item in SEED:
     allclf.append(LGBMClassifier(n_estimators=param[i],learning_rate=0.1, random_state=0).fit(X,y))
     file.write(str(item)+"LGBM,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
     print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -236,7 +238,7 @@ for item in SEED:
     allclf.append(MLPClassifier(hidden_layer_sizes=(param[choose],),random_state=0, max_iter=10000).fit(X,y))
     file.write(str(item)+"MLP,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose])) 
     print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -247,7 +249,7 @@ for item in SEED:
     allclf.append(clf)
     file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
     print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -258,7 +260,7 @@ for item in SEED:
     allclf.append(clf)
     file.write(str(item)+"1NN,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
     print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -269,7 +271,7 @@ for item in SEED:
     allclf.append(clf)
     file.write(str(item)+"DT,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA")) 
     print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -289,7 +291,7 @@ for item in SEED:
     allclf.append(LogisticRegression(C=param[choose], random_state=0, max_iter=10000).fit(X,y))
     file.write(str(item)+"LR,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))   
     print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
 
@@ -300,7 +302,7 @@ for item in SEED:
     allclf.append(clf)
     file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
     print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
+    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
 
