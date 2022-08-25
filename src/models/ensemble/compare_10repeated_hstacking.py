@@ -99,6 +99,8 @@ for item in SEED:
     X, X_tmp, y, y_tmp = train_test_split(Xa, ya, test_size=0.4, random_state=item, stratify=ya)
     Xv, Xt, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
     
+
+    
     allclf = []
     file = open("12classifier_"+iname+"_res_" + out_file_name, "a")
     #SVM
@@ -246,10 +248,10 @@ for item in SEED:
     #NB
     print("NB...")
     clf = GaussianNB()
-    acc, sens, spec, mcc, roc, f1 = test(clf,X,y,XML_ERROR_INVALID_TOKEN,yv)
+    acc, sens, spec, mcc, roc, f1 = test(clf,X,y,yv)
     allclf.append(clf)
     file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+    print("val_acc:", str(acc), " ,val_f1:", str(f1))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
@@ -260,7 +262,7 @@ for item in SEED:
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"1NN,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+    print("val_acc:", str(acc), " ,val_f1:", str(f1))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
@@ -271,7 +273,7 @@ for item in SEED:
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"DT,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA")) 
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+        print("val_acc:", str(acc), " ,val_f1:", str(f1))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
@@ -302,7 +304,7 @@ for item in SEED:
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+    print("val_acc:", str(acc), " ,val_f1:", str(f1))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
