@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np  # linear algebra
 import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
 import src.utilities as utils
+from pyexpat.errors import XML_ERROR_INVALID_TOKEN
 from sklearn.preprocessing import MinMaxScaler
 
 SEED = [i for i in range(0,10)]
@@ -245,7 +246,7 @@ for item in SEED:
     #NB
     print("NB...")
     clf = GaussianNB()
-    acc, sens, spec, mcc, roc, f1 = test(clf,X.toarray(),y,Xv.toarray(),yv)
+    acc, sens, spec, mcc, roc, f1 = test(clf,X,y,XML_ERROR_INVALID_TOKEN,yv)
     allclf.append(clf)
     file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
     print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
@@ -298,7 +299,7 @@ for item in SEED:
     #PLS
     print("PLS...")
     clf = OneVsRestClassifier(PLS())
-    acc, sens, spec, mcc, roc, f1 = test(clf,X.toarray(),y,Xv.toarray(),yv)
+    acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
     print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
