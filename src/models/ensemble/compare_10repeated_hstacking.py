@@ -66,43 +66,36 @@ def test(clf, X, y, Xt, yt):
 def get_data_fe(idx):
     fe = ['WANCHAN', 'BOW1' , 'TF1', 'W2V']
     #for j in enumerate(fe):
-    #tr1 = load_svmlight_file(data_path + "\\" + "traindata_" + str(fe[0]) +"_"+ str(idx)+ ".scl", zero_based=False)
+    tr1 = load_svmlight_file(data_path + "\\" + "traindata_" + str(fe[0]) +"_"+ str(idx)+ ".scl", zero_based=False)
     tr2 = load_svmlight_file(data_path + "\\" + "traindata_" + str(fe[1]) +"_"+ str(idx)+ ".scl", zero_based=False)
     tr3 = load_svmlight_file(data_path + "\\" + "traindata_" + str(fe[2]) +"_"+ str(idx)+ ".scl", zero_based=False)
     tr4 = load_svmlight_file(data_path + "\\" + "traindata_" + str(fe[3]) +"_"+ str(idx)+ ".scl", zero_based=False)
 
-    data = np.hstack((tr2[0].toarray(), tr3[0].toarray(), tr4[0].toarray()))
+    data = np.hstack((tr1[0].toarray(), tr2[0].toarray(), tr3[0].toarray(), tr4[0].toarray()))
 
-    #t1 = load_svmlight_file(data_path + "\\" + "testdata_" + str(fe[0]) +"_"+ str(idx)+ ".scl", zero_based=False)
+    t1 = load_svmlight_file(data_path + "\\" + "testdata_" + str(fe[0]) +"_"+ str(idx)+ ".scl", zero_based=False)
     t2 = load_svmlight_file(data_path + "\\" + "testdata_" + str(fe[1]) +"_"+ str(idx)+ ".scl", zero_based=False)
     t3 = load_svmlight_file(data_path + "\\" + "testdata_" + str(fe[2]) +"_"+ str(idx)+ ".scl", zero_based=False)
     t4 = load_svmlight_file(data_path + "\\" + "testdata_" + str(fe[3]) +"_"+ str(idx)+ ".scl", zero_based=False)
-    data1 = np.hstack((t2[0].toarray(), t3[0].toarray(), t4[0].toarray()))
+    data1 = np.hstack((tr1[0].toarray(), t2[0].toarray(), t3[0].toarray(), t4[0].toarray()))
     return data, tr4[1], data1, t4[1]
 
 iname = "WANGCHAN-FeatureStacked"
-X ,y , Xt, yt = get_data_fe(0)
-print(X.shape)
-
 
 for item in SEED:
     print("SEED:", item)
-    Xa, ya, Xt, yt = get_data(item)
+    Xa, ya, Xt, yt = get_data_fe(item)
     print(Xa.shape)
 
-    
     scaler = MaxAbsScaler()
     scaler.fit(Xa)
     scaler.fit(Xt)
     scaler.transform(Xa)
     scaler.transform(Xt)
     
-    idx = int(round(len(ya)*0.75))
-    X = Xa[0:idx, :]
-    y = ya[0:idx]
-    Xv = Xa[idx:, :]
-    yv = ya[idx:]
-
+    X, X_tmp, y, y_tmp = train_test_split(Xa, ya, test_size=0.4, random_state=item, stratify=ya)
+    Xv, Xt, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
+    
     allclf = []
     file = open("12classifier_"+iname+"_res_" + out_file_name, "a")
     #SVM
@@ -120,8 +113,10 @@ for item in SEED:
     choose = np.argmax(acc)
     allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
     file.write(str(item)+"SVMRBF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("test_acc:", str(acc), ", test_f1:", str(f1))
 
     #LinearSVC
     print("Linear-SVM..")
@@ -139,8 +134,10 @@ for item in SEED:
     choose = np.argmax(acc)
     allclf.append(SVC(C=param[i], kernel='linear',random_state=0, probability=True).fit(X,y))
     file.write(str(item)+"SVMLN,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("test_acc:", str(acc), ", test_f1:", str(f1))
     
 
     #RF
@@ -158,8 +155,10 @@ for item in SEED:
     choose = np.argmax(acc)
     allclf.append(RandomForestClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
     file.write(str(item)+"RF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("test_acc:", str(acc), ", test_f1:", str(f1))
 
     #E-Tree
     print("E-tree...")
@@ -176,8 +175,10 @@ for item in SEED:
     choose = np.argmax(acc)
     allclf.append(ExtraTreesClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
     file.write(str(item)+"ET,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("test_acc:", str(acc), ", test_f1:", str(f1))
 
     #XGBoost
     print("XGBoost...")
@@ -194,8 +195,10 @@ for item in SEED:
     choose = np.argmax(acc)  
     allclf.append(XGBClassifier(n_estimators=param[i],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0).fit(X,y))
     file.write(str(item)+"XGB,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("test_acc:", str(acc), ", test_f1:", str(f1))
 
     #LightGBM
     print("LightGBM...")
@@ -212,8 +215,10 @@ for item in SEED:
     choose = np.argmax(acc)  
     allclf.append(LGBMClassifier(n_estimators=param[i],learning_rate=0.1, random_state=0).fit(X,y))
     file.write(str(item)+"LGBM,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("test_acc:", str(acc), ", test_f1:", str(f1))
 
     #MLP
     print("MLP...")
@@ -230,8 +235,10 @@ for item in SEED:
     choose = np.argmax(acc)
     allclf.append(MLPClassifier(hidden_layer_sizes=(param[choose],),random_state=0, max_iter=10000).fit(X,y))
     file.write(str(item)+"MLP,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose])) 
+    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("test_acc:", str(acc), ", test_f1:", str(f1))
 
     #NB
     print("NB...")
@@ -239,8 +246,10 @@ for item in SEED:
     acc, sens, spec, mcc, roc, f1 = test(clf,X.toarray(),y,Xv.toarray(),yv)
     allclf.append(clf)
     file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
+    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("test_acc:", str(acc), ", test_f1:", str(f1))
 
     #1NN
     print("1NN...")
@@ -248,8 +257,10 @@ for item in SEED:
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"1NN,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
+    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("test_acc:", str(acc), ", test_f1:", str(f1))
 
     #DT
     print("DT...")
@@ -257,8 +268,10 @@ for item in SEED:
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"DT,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA")) 
+    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("test_acc:", str(acc), ", test_f1:", str(f1))
 
     #Logistic
     print("LR...")
@@ -275,8 +288,10 @@ for item in SEED:
     choose = np.argmax(acc)
     allclf.append(LogisticRegression(C=param[choose], random_state=0, max_iter=10000).fit(X,y))
     file.write(str(item)+"LR,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))   
+    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("test_acc:", str(acc), ", test_f1:", str(f1))
 
     #PLS
     print("PLS...")
@@ -284,7 +299,9 @@ for item in SEED:
     acc, sens, spec, mcc, roc, f1 = test(clf,X.toarray(),y,Xv.toarray(),yv)
     allclf.append(clf)
     file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
+    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X.toarray(),Xv.toarray())), np.hstack((y,yv)), Xt.toarray(), yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    print("test_acc:", str(acc), ", test_f1:", str(f1))
 
     file.close()

@@ -5,7 +5,7 @@ import numpy as np  # linear algebra
 import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
 import src.utilities as utils
 
-SEED = [i for i in range(0, 10)]
+SEED = [i for i in range(8, 10)]
 
 
 from daal4py.sklearn.svm import SVC
