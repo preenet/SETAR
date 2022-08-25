@@ -35,7 +35,7 @@ root = utils.get_project_root()
 
 ##################################################################
 data_path = str(Path.joinpath(root, configs['data']['wangcha_ws_feature']))
-out_file_name = 'ws_hstack.csv' 
+out_file_name = 'ws_hstack_try_.csv' 
 num_class = 4
 ##################################################################
 
@@ -81,9 +81,10 @@ def get_data_fe(idx):
     t4 = load_svmlight_file(data_path + "\\" + "testdata_" + str(fe[3]) +"_"+ str(idx)+ ".scl", zero_based=False)
     print(t1[0].toarray().shape, t2[0].toarray().shape, t3[0].toarray().shape, t4[0].toarray().shape)
     data1 = np.hstack((t1[0].toarray(), t2[0].toarray(), t3[0].toarray(), t4[0].toarray()))
+
     return data, tr4[1], data1, t4[1]
 
-iname = "WANGCHAN-FeatureStacked"
+iname = "WANGCHAN-FEATURE-STACKING"
 
 for item in SEED:
     print("SEED:", item)
@@ -93,12 +94,17 @@ for item in SEED:
     scaler = MaxAbsScaler()
     scaler.fit(Xa)
     scaler.transform(Xa)
-    
-    X, X_tmp, y, y_tmp = train_test_split(Xa, ya, test_size=0.4, random_state=item, stratify=ya)
-    Xv, Xt, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
+
+    Xa, ya, Xt, yt = get_data_fe(item)
+    idx = int(round(len(ya)*0.75))
+    X = Xa[0:idx, :]
+    y = ya[0:idx]
+    Xv = Xa[idx:-1, :]
+    yv = ya[idx:-1]
     
     allclf = []
     file = open("12classifier_"+iname+"_res_" + out_file_name, "a")
+
     #SVM
     print("Stacking-SVM...")
     param = [1,2,4,8,16, 32]
@@ -118,6 +124,7 @@ for item in SEED:
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
+
 
     #LinearSVC
     print("Linear-SVM..")
