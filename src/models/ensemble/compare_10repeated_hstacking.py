@@ -244,7 +244,7 @@ for item in SEED:
     #NB
     print("NB...")
     clf = GaussianNB()
-    acc, sens, spec, mcc, roc, f1 = test(clf,X,y,yv)
+    acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
     print("val_acc:", str(acc), " ,val_f1:", str(f1))
