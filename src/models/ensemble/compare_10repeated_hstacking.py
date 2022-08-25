@@ -273,7 +273,7 @@ for item in SEED:
     acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
     allclf.append(clf)
     file.write(str(item)+"DT,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA")) 
-        print("val_acc:", str(acc), " ,val_f1:", str(f1))
+    print("val_acc:", str(acc), " ,val_f1:", str(f1))
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     print("test_acc:", str(acc), ", test_f1:", str(f1))
