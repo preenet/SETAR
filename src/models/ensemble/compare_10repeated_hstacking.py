@@ -99,8 +99,8 @@ for item in SEED:
     idx = int(round(len(ya)*0.75))
     X = Xa[0:idx, :]
     y = ya[0:idx]
-    Xv = Xa[idx:-1, :]
-    yv = ya[idx:-1]
+    Xv = Xa[idx:, :]
+    yv = ya[idx:]
     
     allclf = []
     file = open("12classifier_"+iname+"_res_" + out_file_name, "a")
