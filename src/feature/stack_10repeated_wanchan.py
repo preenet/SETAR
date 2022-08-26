@@ -14,7 +14,7 @@ from scipy import sparse
 configs = utils.read_config()
 root = utils.get_project_root()
 
-data_path = str(Path.joinpath(root, configs['data']['wangcha_kt']))
+data_path = str(Path.joinpath(root, configs['data']['wangcha_tt']))
 # Testing Only 
 #idx1 = list(np.random.choice(np.where(yo==0)[0], 20, replace=False))
 #idx2 = list(np.random.choice(np.where(yo==1)[0], 20, replace=False))
@@ -252,7 +252,7 @@ for item in SEED:
         feat = pr
         featx = np.concatenate((featx,feat),axis=1)
 
-        clf = LogisticRegression(random_state=0,  max_iter=10000)
+        clf = LogisticRegression(random_state=0,  max_iter=25000)
         clf.fit(Xs, y)
         allclf.append(clf)
         pr = clf.predict_proba(Xts)
