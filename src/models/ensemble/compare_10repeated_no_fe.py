@@ -234,10 +234,10 @@ for item in SEED:
     roc = np.zeros(len(param)) 
     f1 = np.zeros(len(param))
     for i in range(0,len(param)):
-        clf = LogisticRegression(C=param[i], random_state=0, max_iter=10000)
+        clf = LogisticRegression(C=param[i], random_state=0, max_iter=25000)
         acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)
-    allclf.append(LogisticRegression(C=param[choose], random_state=0, max_iter=10000).fit(X,y))
+    allclf.append(LogisticRegression(C=param[choose], random_state=0, max_iter=25000).fit(X,y))
     file.write(str(item)+"LR,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))   
     acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
