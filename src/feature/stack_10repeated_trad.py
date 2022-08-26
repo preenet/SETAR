@@ -2,15 +2,20 @@
 #y_ds = df_ds['target'].astype('category').cat.codes
 #Xo = [' '.join(process_text(item))  for item in df_ds['text']]
 #yo = y_ds.to_numpy()
-#import joblib
 #joblib.dump((Xo, yo), "ws.sav")
-from scipy import sparse
-import numpy as np # linear algebra
-import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
-import sys
+from pathlib import Path
+
 import joblib
-PATH = "."
-Xo, yo = joblib.load(PATH+"/ws.sav")
+import numpy as np  # linear algebra
+import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
+import src.utilities as utils
+from scipy import sparse
+
+configs = utils.read_config()
+root = utils.get_project_root()
+
+Xo, yo = joblib.load(configs['data']['kaggle_kt'])
+# Testing Only 
 # Testing Only 
 #idx1 = list(np.random.choice(np.where(yo==0)[0], 20, replace=False))
 #idx2 = list(np.random.choice(np.where(yo==1)[0], 20, replace=False))
@@ -20,7 +25,7 @@ Xo, yo = joblib.load(PATH+"/ws.sav")
 #Xo = np.array(Xo)
 #Xo = Xo[idx]
 #yo = yo[idx]
-SEED = [item for item in range(0,8)]
+SEED = [item for item in range(0,10)]
 file = open('PLS.py','w')
 file.write('import numpy as np'+"\n")
 file.write('from sklearn.cross_decomposition import PLSRegression'+"\n")
@@ -42,30 +47,28 @@ file.write('        p_all.append(ptmp)'+"\n")
 file.write('        return np.transpose(np.array(p_all))'+"\n")
 file.close()
 
-from PLS import PLS
+import gensim
 #from sklearn.svm import SVC
 from daal4py.sklearn.svm import SVC
-from sklearn.svm import LinearSVC
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import ExtraTreesClassifier
-from xgboost import XGBClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.naive_bayes import GaussianNB
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.linear_model import LogisticRegression
 from lightgbm import LGBMClassifier
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.preprocessing import MaxAbsScaler
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import precision_score
-from sklearn.metrics import recall_score
-from sklearn.metrics import matthews_corrcoef # average == 'macro'.
-from sklearn.metrics import roc_auc_score # multiclas 'ovo' average == 'macro'.
+from PLS import PLS
+from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-import gensim
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import matthews_corrcoef  # average == 'macro'.
+from sklearn.metrics import \
+    roc_auc_score  # multiclas 'ovo' average == 'macro'.
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.model_selection import train_test_split
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.naive_bayes import GaussianNB, MultinomialNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import MaxAbsScaler
+from sklearn.svm import LinearSVC
+from sklearn.tree import DecisionTreeClassifier
+from xgboost import XGBClassifier
+
 
 def test(clf, X, y, Xt, yt):
     train_X, test_X = X, Xt
@@ -81,12 +84,15 @@ def test(clf, X, y, Xt, yt):
     F1 = 2*SENS*SPEC/(SENS+SPEC)
     return ACC, SENS, SPEC, MCC, AUC, F1
 
-posdict = pd.read_csv('./pos.txt', header=None)[0].tolist()
-negdict = pd.read_csv('./neg.txt', header=None)[0].tolist()
-dict = np.unique(posdict + negdict)
+# posdict = pd.read_csv('./pos.txt', header=None)[0].tolist()
+# negdict = pd.read_csv('./neg.txt', header=None)[0].tolist()
+# dict = np.unique(posdict + negdict)
+
+from collections import Counter, defaultdict
 
 from sklearn.feature_extraction.text import TfidfVectorizer
-from collections import Counter, defaultdict
+
+
 class EmbeddingVectorizer(object):
     def __init__(self, type="mean", size=300, window=5, min_count=1, seed=0):
         self.type = type
@@ -121,7 +127,7 @@ class EmbeddingVectorizer(object):
 for item in SEED:
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
-    iname = sys.argv[-1]
+    iname = 'BOW1'
     fe = {'BOW1': CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(1, 1), min_df=20),
           'BOW12': CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(1, 2), min_df=20),
           'BOW2': CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(2, 2), min_df=20),
@@ -144,7 +150,7 @@ for item in SEED:
     Xt = scaler.transform(X_test_val)
 
     print(str(len(y)))
-"""
+
     featx = []
     ix = []
     nr_fold = 5
@@ -154,7 +160,7 @@ for item in SEED:
 
     for i in range(1):
         Xs = X
-        feat = np.zeros((X.shape[0],4),dtype=float)
+        feat = np.zeros((X.shape[0],3),dtype=float)
         for j in range(0, nr_fold):
             train_ix = ((ix % nr_fold) != j)
             test_ix = ((ix % nr_fold) == j)
@@ -169,7 +175,7 @@ for item in SEED:
         else:
             featx = np.concatenate((featx,feat),axis=1)
 
-        feat = np.zeros((X.shape[0],4),dtype=float)
+        feat = np.zeros((X.shape[0],3),dtype=float)
         for j in range(0, nr_fold):
             train_ix = ((ix % nr_fold) != j)
             test_ix = ((ix % nr_fold) == j)
@@ -181,7 +187,7 @@ for item in SEED:
             feat[test_ix] = pr
         featx = np.concatenate((featx,feat),axis=1)
 
-        feat = np.zeros((X.shape[0],4),dtype=float)
+        feat = np.zeros((X.shape[0],3),dtype=float)
         for j in range(0, nr_fold):
             train_ix = ((ix % nr_fold) != j)
             test_ix = ((ix % nr_fold) == j)
@@ -193,7 +199,7 @@ for item in SEED:
             feat[test_ix] = pr
         featx = np.concatenate((featx,feat),axis=1)
 
-        feat = np.zeros((X.shape[0],4),dtype=float)
+        feat = np.zeros((X.shape[0],3),dtype=float)
         for j in range(0, nr_fold):
             train_ix = ((ix % nr_fold) != j)
             test_ix = ((ix % nr_fold) == j)
@@ -205,7 +211,7 @@ for item in SEED:
             feat[test_ix] = pr
         featx = np.concatenate((featx,feat),axis=1)
 
-        feat = np.zeros((X.shape[0],4),dtype=float)
+        feat = np.zeros((X.shape[0],3),dtype=float)
         for j in range(0, nr_fold):
             train_ix = ((ix % nr_fold) != j)
             test_ix = ((ix % nr_fold) == j)
@@ -217,7 +223,7 @@ for item in SEED:
             feat[test_ix] = pr
         featx = np.concatenate((featx,feat),axis=1)
 
-        feat = np.zeros((X.shape[0],4),dtype=float)
+        feat = np.zeros((X.shape[0],3),dtype=float)
         for j in range(0, nr_fold):
             train_ix = ((ix % nr_fold) != j)
             test_ix = ((ix % nr_fold) == j)
@@ -229,7 +235,7 @@ for item in SEED:
             feat[test_ix] = pr
         featx = np.concatenate((featx,feat),axis=1)
 
-        feat = np.zeros((X.shape[0],4),dtype=float)
+        feat = np.zeros((X.shape[0],3),dtype=float)
         for j in range(0, nr_fold):
             train_ix = ((ix % nr_fold) != j)
             test_ix = ((ix % nr_fold) == j)
@@ -289,7 +295,7 @@ for item in SEED:
         feat = pr
         featx = np.concatenate((featx,feat),axis=1)
 
-        clf = LogisticRegression(random_state=0)
+        clf = LogisticRegression(random_state=0,  max_iter=25000)
         clf.fit(Xs, y)
         allclf.append(clf)
         pr = clf.predict_proba(Xts)
@@ -307,4 +313,4 @@ for item in SEED:
     dump_svmlight_file(featx,yt,'testdata_'+str(iname)+'_'+str(item)+'.scl',zero_based=False)
 
 
-"""
+
