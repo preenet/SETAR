@@ -127,7 +127,7 @@ class EmbeddingVectorizer(object):
 for item in SEED:
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
-    iname = 'BOW1'
+    iname = 'TF1'
     fe = {'BOW1': CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(1, 1), min_df=20),
           'BOW12': CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(1, 2), min_df=20),
           'BOW2': CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(2, 2), min_df=20),

@@ -26,6 +26,7 @@
     wangcha_ws_2: data/processed/wanchabert/ws_v2/ # new feature extract from wanchan with sigmoid
     wangcha_ws_feature: data/processed/wanchabert/ws_feature/
     wangcha_tt_feature: data/processed/wanchabert/tt_feature/
+    wangcha_to_feature: data/processed/wanchabert/to_feature/
 
 
 - models: models/

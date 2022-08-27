@@ -34,8 +34,8 @@ configs = utils.read_config()
 root = utils.get_project_root()
 
 ##################################################################
-data_path = str(Path.joinpath(root, configs['data']['wangcha_tt_feature']))
-out_file_name = 'tt_hstack.csv' 
+data_path = str(Path.joinpath(root, configs['data']['wangcha_to_feature']))
+out_file_name = 'to_hstack2.csv' 
 num_class = 4
 ##################################################################
 
