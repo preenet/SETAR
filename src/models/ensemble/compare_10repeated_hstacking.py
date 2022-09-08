@@ -1,3 +1,7 @@
+"""_summary_
+
+The SETAR model level-1
+    """
 import sys
 from pathlib import Path
 
@@ -10,6 +14,7 @@ from sklearn.preprocessing import MinMaxScaler
 SEED = [i for i in range(0,1)]
 
 
+import joblib
 from lightgbm import LGBMClassifier
 from sklearn.datasets import load_svmlight_file
 from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
@@ -204,17 +209,18 @@ for item in SEED:
     allclf.append(XGBClassifier(n_estimators=param[choose],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0).fit(X,y))
     
     acc, sens, spec, mcc, roc, f1, pr = test(allclf[-1], X,y,Xv,yv)
-    res = pd.DataFrame(pr)
-    res.to_csv("train_pred_prob.csv")
+    # res = pd.DataFrame(pr)
+    # res.to_csv("train_pred_prob.csv")
     
     # file.write(str(item)+"XGB,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
     # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
     acc, sens, spec, mcc, roc, f1, pr = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
     # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
     # print("test_acc:", str(acc), ", test_f1:", str(f1))
-    res = pd.DataFrame(pr)
-    res.to_csv("test_pred_prob.csv")
+    # res = pd.DataFrame(pr)
+    # res.to_csv("test_pred_prob.csv")
 
+    joblib.dump(allclf[-1], 'SETAR-KT.model')
     #LightGBM
     # print("LightGBM...")
     # param = [20, 50, 100, 200]

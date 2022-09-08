@@ -1,0 +1,53 @@
+# file paths
+- data:
+    name: ['kt', 'ws', 'tt', 'to'] # available dataset for benchmarking
+
+    # don't touch
+    raw_kt: data/raw/kt4.0/pantip_cleaned_1.csv
+    raw_ws: data/raw/wisesight/
+    raw_tt: data/raw/thaitale/tale_data.csv
+    raw_dict: data/raw/dict/
+
+    # datasets that were executed by make_dataset.py (use joblib to load X, y = joblib.load())
+    processed_kt: data/processed/kt.csv
+    processed_ws: data/processed/wisesight.csv
+    processed_tt: data/processed/thaitale.csv
+    processed_to: data/processed/thai_toxic_tweet.csv
+
+    kaggle_kt: data/processed/bert-base-thai/kt-bert-new-token.sav
+    kaggle_to: data/processed/kaggle/tx.sav
+    kaggle_tt: data/processed/kaggle/tt.sav
+    kaggle_ws: data/processed/kaggle/ws.sav
+
+    wangcha_kt: data/processed/wanchabert/kt/
+    wangcha_to: data/processed/wanchabert/to/
+    wangcha_tt: data/processed/wanchabert/tt/
+    wangcha_ws: data/processed/wanchabert/ws/
+    wangcha_ws_2: data/processed/wanchabert/ws_v2/ # new feature extract from wanchan with sigmoid
+    wangcha_ws_feature: data/processed/wanchabert/ws_feature/
+    wangcha_tt_feature: data/processed/wanchabert/tt_feature/
+    wangcha_to_feature: data/processed/wanchabert/to_feature/
+    wangcha_kt_feature: data/processed/wanchabert/kt_feature/
+
+
+- models: models/
+
+- wangchan_models:
+    kt: models/wangcha_model/kt/
+    tt: models/wangcha_model/tt/
+    to: models/wangcha_model/to/
+    ws: models/wangcha_model/ws/
+
+# feature config
+- feature:
+    build_method: ['BOW', 'TFIDF', 'W2VTFIDF', 'W2VAVG', 'POSBOW', 'POSBOWCONCAT', 'POSBOWFLAT', 'POSMEAN', 'POSW2V', 'POSTFIDF', 'DICTBOW', 'DICTTFIDF', 'ALL']
+    selection:
+        vi_dim: 1500
+        mi_dim: 700
+        
+# output folders
+- output: output/
+
+# temp. output, for rapid testing
+- output_scratch: output-scratch/
+- output_scratch_propose: output-scratch/PROPOSE/
