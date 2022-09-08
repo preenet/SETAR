@@ -28,6 +28,7 @@ def test(clf, X, y, Xt, yt):
     AUC = roc_auc_score(test_y,pr,multi_class='ovo',average='macro')
     #AUC = roc_auc_score(test_y,pr[:,1]) # for binary classification problem
     F1 = 2*SENS*SPEC/(SENS+SPEC)
+
     return ACC, SENS, SPEC, MCC, AUC, F1
 
 from sklearn.metrics import precision_recall_fscore_support

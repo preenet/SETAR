@@ -105,8 +105,8 @@ class EmbeddingVectorizer(object):
 
     def fit(self, X):
         tok_train = [text.split() for text in X]
-        model = gensim.models.Word2Vec(tok_train, size=self.dim, window=self.window, min_count=self.min_count,seed=self.seed, iter=100)
-        self.word2vec = {w: vec for w, vec in zip(model.wv.index2word, model.wv.vectors)}
+        model = gensim.models.Word2Vec(tok_train, vector_size=self.dim, window=self.window, min_count=self.min_count,seed=self.seed, epochs=100)
+        self.word2vec = {w: vec for w, vec in zip(model.wv.index_to_key , model.wv.vectors)}
         self.word2weight = None
         self.dim = model.vector_size
 
@@ -127,7 +127,7 @@ class EmbeddingVectorizer(object):
 for item in SEED:
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
-    iname = 'TF1'
+    iname = 'W2V'
     fe = {'BOW1': CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(1, 1), min_df=20),
           'BOW12': CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(1, 2), min_df=20),
           'BOW2': CountVectorizer(tokenizer=lambda x:x.split(), ngram_range=(2, 2), min_df=20),

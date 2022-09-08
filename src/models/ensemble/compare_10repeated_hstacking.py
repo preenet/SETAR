@@ -7,7 +7,7 @@ import src.utilities as utils
 from pyexpat.errors import XML_ERROR_INVALID_TOKEN
 from sklearn.preprocessing import MinMaxScaler
 
-SEED = [i for i in range(0,10)]
+SEED = [i for i in range(0,1)]
 
 
 from lightgbm import LGBMClassifier
@@ -34,9 +34,9 @@ configs = utils.read_config()
 root = utils.get_project_root()
 
 ##################################################################
-data_path = str(Path.joinpath(root, configs['data']['wangcha_to_feature']))
-out_file_name = 'to_hstack2.csv' 
-num_class = 4
+data_path = str(Path.joinpath(root, configs['data']['wangcha_kt_feature']))
+out_file_name = 'kt_hstack_getprob.csv' 
+num_class = 3
 ##################################################################
 
 patch_sklearn()
@@ -62,7 +62,7 @@ def test(clf, X, y, Xt, yt):
     else:
         AUC = roc_auc_score(test_y,pr[:,1]) # for binary classification problem
     F1 = 2*SENS*SPEC/(SENS+SPEC)
-    return ACC, SENS, SPEC, MCC, AUC, F1
+    return ACC, SENS, SPEC, MCC, AUC, F1, pr
 
 def get_data_fe(idx):
     fe = ['WANCHAN', 'BOW1' , 'TF1', 'W2V']
@@ -107,86 +107,86 @@ for item in SEED:
 
     #SVM
     print("Stacking-SVM...")
-    param = [1,2,4,8,16, 32]
-    acc = np.zeros(len(param)) 
-    sens = np.zeros(len(param)) 
-    spec = np.zeros(len(param)) 
-    mcc = np.zeros(len(param)) 
-    roc = np.zeros(len(param)) 
-    f1 = np.zeros(len(param))
-    for i in range(0,len(param)):
-        clf = SVC(C=param[i], random_state=0, probability=True)
-        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    choose = np.argmax(acc)
-    allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
-    file.write(str(item)+"SVMRBF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("test_acc:", str(acc), ", test_f1:", str(f1))
+    # param = [1,2,4,8,16, 32]
+    # acc = np.zeros(len(param)) 
+    # sens = np.zeros(len(param)) 
+    # spec = np.zeros(len(param)) 
+    # mcc = np.zeros(len(param)) 
+    # roc = np.zeros(len(param)) 
+    # f1 = np.zeros(len(param))
+    # for i in range(0,len(param)):
+    #     clf = SVC(C=param[i], random_state=0, probability=True)
+    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+    # choose = np.argmax(acc)
+    # allclf.append(SVC(C=param[choose], random_state=0, probability=True).fit(X,y))
+    # file.write(str(item)+"SVMRBF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    # print("test_acc:", str(acc), ", test_f1:", str(f1))
 
 
-    #LinearSVC
-    print("Linear-SVM..")
-    param = [1,2,4,8,16 ,32]
-    acc = np.zeros(len(param)) 
-    sens = np.zeros(len(param)) 
-    spec = np.zeros(len(param)) 
-    mcc = np.zeros(len(param)) 
-    roc = np.zeros(len(param))
-    f1 = np.zeros(len(param)) 
+    # #LinearSVC
+    # print("Linear-SVM..")
+    # param = [1,2,4,8,16 ,32]
+    # acc = np.zeros(len(param)) 
+    # sens = np.zeros(len(param)) 
+    # spec = np.zeros(len(param)) 
+    # mcc = np.zeros(len(param)) 
+    # roc = np.zeros(len(param))
+    # f1 = np.zeros(len(param)) 
     
-    for i in range(0,len(param)):
-        clf =  SVC(C=param[i], kernel='linear',random_state=0, probability=True)
-        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    choose = np.argmax(acc)
-    allclf.append(SVC(C=param[i], kernel='linear',random_state=0, probability=True).fit(X,y))
-    file.write(str(item)+"SVMLN,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("test_acc:", str(acc), ", test_f1:", str(f1))
+    # for i in range(0,len(param)):
+    #     clf =  SVC(C=param[i], kernel='linear',random_state=0, probability=True)
+    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+    # choose = np.argmax(acc)
+    # allclf.append(SVC(C=param[choose], kernel='linear',random_state=0, probability=True).fit(X,y))
+    # file.write(str(item)+"SVMLN,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    # print("test_acc:", str(acc), ", test_f1:", str(f1))
     
 
-    #RF
-    print("RF...")
-    param = [20, 50, 100, 200]
-    acc = np.zeros(len(param)) 
-    sens = np.zeros(len(param)) 
-    spec = np.zeros(len(param)) 
-    mcc = np.zeros(len(param)) 
-    roc = np.zeros(len(param)) 
-    f1 = np.zeros(len(param))
-    for i in range(0,len(param)):
-        clf = RandomForestClassifier(n_estimators=param[i], random_state=0)
-        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    choose = np.argmax(acc)
-    allclf.append(RandomForestClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
-    file.write(str(item)+"RF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("test_acc:", str(acc), ", test_f1:", str(f1))
+    # #RF
+    # print("RF...")
+    # param = [20, 50, 100, 200]
+    # acc = np.zeros(len(param)) 
+    # sens = np.zeros(len(param)) 
+    # spec = np.zeros(len(param)) 
+    # mcc = np.zeros(len(param)) 
+    # roc = np.zeros(len(param)) 
+    # f1 = np.zeros(len(param))
+    # for i in range(0,len(param)):
+    #     clf = RandomForestClassifier(n_estimators=param[i], random_state=0)
+    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+    # choose = np.argmax(acc)
+    # allclf.append(RandomForestClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
+    # file.write(str(item)+"RF,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    # print("test_acc:", str(acc), ", test_f1:", str(f1))
 
-    #E-Tree
-    print("E-tree...")
-    param = [20, 50, 100, 200]
-    acc = np.zeros(len(param)) 
-    sens = np.zeros(len(param)) 
-    spec = np.zeros(len(param)) 
-    mcc = np.zeros(len(param)) 
-    roc = np.zeros(len(param)) 
-    f1 = np.zeros(len(param))
-    for i in range(0,len(param)):
-        clf = ExtraTreesClassifier(n_estimators=param[i], random_state=0)
-        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    choose = np.argmax(acc)
-    allclf.append(ExtraTreesClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
-    file.write(str(item)+"ET,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("test_acc:", str(acc), ", test_f1:", str(f1))
+    # #E-Tree
+    # print("E-tree...")
+    # param = [20, 50, 100, 200]
+    # acc = np.zeros(len(param)) 
+    # sens = np.zeros(len(param)) 
+    # spec = np.zeros(len(param)) 
+    # mcc = np.zeros(len(param)) 
+    # roc = np.zeros(len(param)) 
+    # f1 = np.zeros(len(param))
+    # for i in range(0,len(param)):
+    #     clf = ExtraTreesClassifier(n_estimators=param[i], random_state=0)
+    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+    # choose = np.argmax(acc)
+    # allclf.append(ExtraTreesClassifier(n_estimators=param[choose], random_state=0).fit(X,y))
+    # file.write(str(item)+"ET,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    # print("test_acc:", str(acc), ", test_f1:", str(f1))
 
     #XGBoost
     print("XGBoost...")
@@ -199,117 +199,124 @@ for item in SEED:
     f1 = np.zeros(len(param)) 
     for i in range(0,len(param)):
         clf = XGBClassifier(n_estimators=param[i],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0)
-        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i], _ = test(clf,X,y,Xv,yv)
     choose = np.argmax(acc)  
-    allclf.append(XGBClassifier(n_estimators=param[i],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0).fit(X,y))
-    file.write(str(item)+"XGB,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("test_acc:", str(acc), ", test_f1:", str(f1))
+    allclf.append(XGBClassifier(n_estimators=param[choose],learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=0).fit(X,y))
+    
+    acc, sens, spec, mcc, roc, f1, pr = test(allclf[-1], X,y,Xv,yv)
+    res = pd.DataFrame(pr)
+    res.to_csv("train_pred_prob.csv")
+    
+    # file.write(str(item)+"XGB,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+    acc, sens, spec, mcc, roc, f1, pr = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    # print("test_acc:", str(acc), ", test_f1:", str(f1))
+    res = pd.DataFrame(pr)
+    res.to_csv("test_pred_prob.csv")
 
     #LightGBM
-    print("LightGBM...")
-    param = [20, 50, 100, 200]
-    acc = np.zeros(len(param)) 
-    sens = np.zeros(len(param)) 
-    spec = np.zeros(len(param)) 
-    mcc = np.zeros(len(param)) 
-    roc = np.zeros(len(param)) 
-    f1 = np.zeros(len(param)) 
-    for i in range(0,len(param)):
-        clf = LGBMClassifier(n_estimators=param[i],learning_rate=0.1, random_state=0)
-        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    choose = np.argmax(acc)  
-    allclf.append(LGBMClassifier(n_estimators=param[i],learning_rate=0.1, random_state=0).fit(X,y))
-    file.write(str(item)+"LGBM,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("test_acc:", str(acc), ", test_f1:", str(f1))
+    # print("LightGBM...")
+    # param = [20, 50, 100, 200]
+    # acc = np.zeros(len(param)) 
+    # sens = np.zeros(len(param)) 
+    # spec = np.zeros(len(param)) 
+    # mcc = np.zeros(len(param)) 
+    # roc = np.zeros(len(param)) 
+    # f1 = np.zeros(len(param)) 
+    # for i in range(0,len(param)):
+    #     clf = LGBMClassifier(n_estimators=param[i],learning_rate=0.1, random_state=0)
+    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+    # choose = np.argmax(acc)  
+    # allclf.append(LGBMClassifier(n_estimators=param[choose],learning_rate=0.1, random_state=0).fit(X,y))
+    # file.write(str(item)+"LGBM,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))  
+    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    # print("test_acc:", str(acc), ", test_f1:", str(f1))
 
-    #MLP
-    print("MLP...")
-    param = [20, 50, 100, 200]
-    acc = np.zeros(len(param)) 
-    sens = np.zeros(len(param)) 
-    spec = np.zeros(len(param)) 
-    mcc = np.zeros(len(param)) 
-    roc = np.zeros(len(param)) 
-    f1 = np.zeros(len(param))
-    for i in range(0,len(param)):  
-        clf = MLPClassifier(hidden_layer_sizes=(param[i],),random_state=0, max_iter = 10000)
-        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    choose = np.argmax(acc)
-    allclf.append(MLPClassifier(hidden_layer_sizes=(param[choose],),random_state=0, max_iter=10000).fit(X,y))
-    file.write(str(item)+"MLP,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose])) 
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("test_acc:", str(acc), ", test_f1:", str(f1))
+    # #MLP
+    # print("MLP...")
+    # param = [20, 50, 100, 200]
+    # acc = np.zeros(len(param)) 
+    # sens = np.zeros(len(param)) 
+    # spec = np.zeros(len(param)) 
+    # mcc = np.zeros(len(param)) 
+    # roc = np.zeros(len(param)) 
+    # f1 = np.zeros(len(param))
+    # for i in range(0,len(param)):  
+    #     clf = MLPClassifier(hidden_layer_sizes=(param[i],),random_state=0, max_iter = 10000)
+    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+    # choose = np.argmax(acc)
+    # allclf.append(MLPClassifier(hidden_layer_sizes=(param[choose],),random_state=0, max_iter=10000).fit(X,y))
+    # file.write(str(item)+"MLP,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose])) 
+    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    # print("test_acc:", str(acc), ", test_f1:", str(f1))
 
-    #NB
-    print("NB...")
-    clf = GaussianNB()
-    acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
-    allclf.append(clf)
-    file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
-    print("val_acc:", str(acc), " ,val_f1:", str(f1))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("test_acc:", str(acc), ", test_f1:", str(f1))
+    # #NB
+    # print("NB...")
+    # clf = GaussianNB()
+    # acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
+    # allclf.append(clf)
+    # file.write(str(item)+"NB,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
+    # print("val_acc:", str(acc), " ,val_f1:", str(f1))
+    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    # print("test_acc:", str(acc), ", test_f1:", str(f1))
 
-    #1NN
-    print("1NN...")
-    clf = KNeighborsClassifier(n_neighbors=1)
-    acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
-    allclf.append(clf)
-    file.write(str(item)+"1NN,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
-    print("val_acc:", str(acc), " ,val_f1:", str(f1))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("test_acc:", str(acc), ", test_f1:", str(f1))
+    # #1NN
+    # print("1NN...")
+    # clf = KNeighborsClassifier(n_neighbors=1)
+    # acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
+    # allclf.append(clf)
+    # file.write(str(item)+"1NN,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
+    # print("val_acc:", str(acc), " ,val_f1:", str(f1))
+    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    # print("test_acc:", str(acc), ", test_f1:", str(f1))
 
-    #DT
-    print("DT...")
-    clf = DecisionTreeClassifier(random_state=0)
-    acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
-    allclf.append(clf)
-    file.write(str(item)+"DT,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA")) 
-    print("val_acc:", str(acc), " ,val_f1:", str(f1))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("test_acc:", str(acc), ", test_f1:", str(f1))
+    # #DT
+    # print("DT...")
+    # clf = DecisionTreeClassifier(random_state=0)
+    # acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
+    # allclf.append(clf)
+    # file.write(str(item)+"DT,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA")) 
+    # print("val_acc:", str(acc), " ,val_f1:", str(f1))
+    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    # print("test_acc:", str(acc), ", test_f1:", str(f1))
 
-    #Logistic
-    print("LR...")
-    param = [0.001,0.01,0.1,1,10,100]
-    acc = np.zeros(len(param)) 
-    sens = np.zeros(len(param)) 
-    spec = np.zeros(len(param)) 
-    mcc = np.zeros(len(param)) 
-    roc = np.zeros(len(param)) 
-    f1 = np.zeros(len(param))
-    for i in range(0,len(param)):
-        clf = LogisticRegression(C=param[i], random_state=0, max_iter=10000)
-        acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
-    choose = np.argmax(acc)
-    allclf.append(LogisticRegression(C=param[choose], random_state=0, max_iter=10000).fit(X,y))
-    file.write(str(item)+"LR,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))   
-    print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("test_acc:", str(acc), ", test_f1:", str(f1))
+    # #Logistic
+    # print("LR...")
+    # param = [0.001,0.01,0.1,1,10,100]
+    # acc = np.zeros(len(param)) 
+    # sens = np.zeros(len(param)) 
+    # spec = np.zeros(len(param)) 
+    # mcc = np.zeros(len(param)) 
+    # roc = np.zeros(len(param)) 
+    # f1 = np.zeros(len(param))
+    # for i in range(0,len(param)):
+    #     clf = LogisticRegression(C=param[i], random_state=0, max_iter=10000)
+    #     acc[i], sens[i], spec[i], mcc[i], roc[i], f1[i] = test(clf,X,y,Xv,yv)
+    # choose = np.argmax(acc)
+    # allclf.append(LogisticRegression(C=param[choose], random_state=0, max_iter=10000).fit(X,y))
+    # file.write(str(item)+"LR,"+str(acc[choose])+","+str(sens[choose])+","+str(spec[choose])+","+str(mcc[choose])+","+str(roc[choose])+","+str(f1[choose])+","+str(param[choose]))   
+    # print("val_acc:", acc[choose], " ,val_f1:", str(f1[choose]))
+    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    # print("test_acc:", str(acc), ", test_f1:", str(f1))
 
-    #PLS
-    print("PLS...")
-    clf = OneVsRestClassifier(PLS())
-    acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
-    allclf.append(clf)
-    file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
-    print("val_acc:", str(acc), " ,val_f1:", str(f1))
-    acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
-    file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
-    print("test_acc:", str(acc), ", test_f1:", str(f1))
+    # #PLS
+    # print("PLS...")
+    # clf = OneVsRestClassifier(PLS())
+    # acc, sens, spec, mcc, roc, f1 = test(clf,X,y,Xv,yv)
+    # allclf.append(clf)
+    # file.write(str(item)+"PLS,"+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+","+str("NA"))
+    # print("val_acc:", str(acc), " ,val_f1:", str(f1))
+    # acc, sens, spec, mcc, roc, f1 = test(allclf[-1], np.vstack((X,Xv)), np.hstack((y,yv)), Xt, yt)
+    # file.write(","+str(acc)+","+str(sens)+","+str(spec)+","+str(mcc)+","+str(roc)+","+str(f1)+"\n")
+    # print("test_acc:", str(acc), ", test_f1:", str(f1))
 
     file.close()
