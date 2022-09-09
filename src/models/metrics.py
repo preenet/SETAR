@@ -68,8 +68,8 @@ def test_deep(clf, Xt, yt):
     SENS = precision_score(yt, y_pred, average='macro')
     SPEC = recall_score(yt, y_pred, average='macro')
     MCC = matthews_corrcoef(yt, y_pred)
-    #AUC = roc_auc_score(yt, y_pred_prob,multi_class='ovo',average='macro')
-    AUC = roc_auc_score(yt, y_pred_prob[:,1]) # for binary classification problem
+    AUC = roc_auc_score(yt, y_pred_prob,multi_class='ovo',average='macro')
+    #AUC = roc_auc_score(yt, y_pred_prob[:,1]) # for binary classification problem
     F1 = 2*SENS*SPEC/(SENS+SPEC)
     return ACC, SENS, SPEC, MCC, AUC, F1
 

@@ -1,11 +1,12 @@
 """
-1. run wandb <sweep name> sweep.yaml for hyperparam tuning at the src.model directory
-2. run the link from wandb
-3. get the best model from api or local and run CNN_10repeated.py
+This script response to find the optimal hyper-parameters of CNN 
+1. run wandb sweep [sweep.yaml] for hyperparam tuning at the src/models directory
+2. run the link that generated from wandb
+3. get the best model from api or local and run the script deep_10repeated.py
 4. run generate_report_10repeated_deepbaseline from src.utilities
-5. copy results to the output folder
+5. copy results to the output folder.
 
-# best model can be repoduced at lunar-valley-33: https://wandb.ai/rapry60/cnn-ws-medium/runs/2cqr685w
+# best model of each seed stored in the models folder at root folder.
 pree.t@cmu.ac.th
 """
 def main():
@@ -38,7 +39,7 @@ def main():
 
     MAX_SEQUENCE_LENGTH = 500
 
-    df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_to']))
+    df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_tt']))
 
     y_ds = df_ds['target'].astype('category').cat.codes
     yo = y_ds.to_numpy()
@@ -57,7 +58,7 @@ def main():
     # Word2Vec.save(w2v, model_path+ '/' + 'tt_thwiki300.word2vec')
 
    # make sure to load a proper word2vec model according to the dataset.
-    w2v = Word2Vec.load(model_path+ '/' + 'ws_thwiki300.word2vec')
+    w2v = Word2Vec.load(model_path+ '/' + 'w2v_tt_thwiki300_300.word2vec')
 
     #get weight from word2vec as a keras embedding metric
     keyed_vectors = w2v.wv  
@@ -79,11 +80,11 @@ def main():
         )
 
     resume = sys.argv[-1] == "--resume"
-    wandb.init(project="cnn-to-new_w2vbuild", config=defaults, resume=resume, settings=wandb.Settings(_disable_stats=True))
+    wandb.init(project="cnn-tt-seed1", config=defaults, resume=resume, settings=wandb.Settings(_disable_stats=True))
     config = wandb.config
 
-    X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=0, stratify=yo)
-    X_val, X_test, yv, _ = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=0, stratify=y_tmp)
+    X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=2, stratify=yo)
+    X_val, X_test, yv, _ = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=2, stratify=y_tmp)
     num_class = np.unique(y).shape[0]
 
     recall = tf.keras.metrics.Recall()
