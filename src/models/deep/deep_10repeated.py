@@ -6,11 +6,11 @@ for WangchanBERTa, use wangchan_predict.py
 
 import os
 import random
+import sys
 from pathlib import Path
 
 import joblib
 import numpy as np
-import pandas as pd
 import src.utilities as utils
 import tensorflow as tf
 import tensorflow_addons as tfa
@@ -30,7 +30,7 @@ EMBEDDING_DIM= 300
 MAX_SEQUENCE_LENGTH = 500
 
 #########################################################################
-dataset_name = 'ws'
+dataset_name = 'kt'
 if dataset_name == 'ws':
     Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
 elif dataset_name == 'kt':
@@ -56,7 +56,7 @@ def init(seed):
     print(f"Random seed set as {seed}")
     
 init(0)
-for item in range(1, 2):
+for item in range(0, 10):
     file = open(configs['output_scratch'] + "cnn_10repeated_" + str(dataset_name) + "_final.csv" , "a")
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)

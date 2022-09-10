@@ -30,7 +30,6 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
 from pythainlp import word_vector
 from sklearn.model_selection import train_test_split
-from src.feature.process_thai_text import process_text
 from tensorflow.keras.utils import to_categorical
 from wandb.keras import WandbCallback
 
@@ -53,7 +52,7 @@ MAX_SEQUENCE_LENGTH = 500
 
 #########################################################################
 
-dataset_name = 'to'
+dataset_name = 'kt'
 if dataset_name == 'ws':
     Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
 elif dataset_name == 'kt':
@@ -67,7 +66,7 @@ elif dataset_name == 'to':
 else: 
     print("No such dataset.")
     sys.exit(-1)
-seed = 0
+seed = 1
 #########################################################################
 
 
@@ -96,14 +95,6 @@ w2v_keras_layer = Embedding(
     trainable=True
 )
 
-defaults = dict(
-    dropout=0.5,
-    hidden_layer_size=128,
-    layer_1_size=64,
-    learn_rate=0.001,
-    batch_size = 64,
-    epochs=80,
-    )
 wandb.init(settings=wandb.Settings(_disable_stats=True))
 config = wandb.config
 

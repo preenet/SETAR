@@ -1,7 +1,7 @@
 #course search
 program: CNN_wandb.py
-project: cnn-ws-seed1_test
-name: cnn-ws-seed1_test
+project: cnn-ws-seed2
+name: cnn-ws-seed2
 entity: rapry60
 
 method: bayes
@@ -10,14 +10,14 @@ metric:
   name: val_loss
 parameters:
   dropout:
-    values: [0.2, 0.3, 0.4, 0.5]
+    values: [0.5]
   hidden_layer_size:
-    values: [16, 32, 64, 128]
+    values: [128]
   layer_1_size:
-    values: [16, 32, 64, 128]
+    values: [64]
   learn_rate:
     values: [1e-3] 
   batch_size:
-    values: [32, 64, 128]
+    values: [64]
   epochs:
     value: 50
