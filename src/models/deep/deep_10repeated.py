@@ -4,8 +4,11 @@ for BERT, use BERT_manaul.py
 for WangchanBERTa, use wangchan_predict.py
 """
 
+import os
+import random
 from pathlib import Path
 
+import joblib
 import numpy as np
 import pandas as pd
 import src.utilities as utils
@@ -27,26 +30,31 @@ EMBEDDING_DIM= 300
 MAX_SEQUENCE_LENGTH = 500
 
 #########################################################################
-df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_tt']))
-dataset_name = 'tt'
-num_class = 3
+Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
+dataset_name = 'ws'
 #########################################################################
 
-y_ds = df_ds['target'].astype('category').cat.codes
-yo = y_ds.to_numpy()
-Xo = df_ds['processed']
 
-recall = tf.keras.metrics.Recall()
-precision = tf.keras.metrics.Precision()
-mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=num_class)
-auc = tf.keras.metrics.AUC()
-f1 = tfa.metrics.F1Score(num_classes=num_class, average='macro')
-
-
-for item in range(0, 3):
+def init(seed):
+    tf.random.set_seed(seed)
+    tf.experimental.numpy.random.seed(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    print(f"Random seed set as {seed}")
+    
+init(0)
+for item in range(1, 2):
     file = open(configs['output_scratch'] + "cnn_10repeated_" + str(dataset_name) + "_final.csv" , "a")
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
+    num_class = np.unique(y).shape[0]
+    
+    recall = tf.keras.metrics.Recall()
+    precision = tf.keras.metrics.Precision()
+    mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=num_class)
+    auc = tf.keras.metrics.AUC()
+    f1 = tfa.metrics.F1Score(num_classes=num_class, average='macro')
     
     tokenizer  = Tokenizer(num_words = MAX_SEQUENCE_LENGTH)
     tokenizer.fit_on_texts(X_train)
@@ -67,9 +75,11 @@ for item in range(0, 3):
     y_c = to_categorical(y)
     yv_c = to_categorical(yv)
     yt_c = to_categorical(yt)
+ 
     
     # getting training performance
     best_model = load_model(model_path + '/best_model_h5/' + 'cnn_' + str(dataset_name) + '_best_model_' +str(item)+'.h5', custom_objects={"F1Score": f1})
+    best_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy', precision, recall, mcc, auc, f1])
 
     acc, pre, rec, mcc, auc, f1 = test_deep(best_model, X_val_ps, yv)
     file.write(str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1))

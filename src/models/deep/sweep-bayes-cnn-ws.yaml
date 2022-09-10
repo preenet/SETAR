@@ -1,7 +1,7 @@
 #course search
 program: CNN_wandb.py
-project: cnn-ws-new-w2vmodel
-name: cnn-base-ws-new-w2vmodel
+project: cnn-ws-seed1_test
+name: cnn-ws-seed1_test
 entity: rapry60
 
 method: bayes
@@ -16,7 +16,7 @@ parameters:
   layer_1_size:
     values: [16, 32, 64, 128]
   learn_rate:
-    values: [1e-4, 1e-3] 
+    values: [1e-3] 
   batch_size:
     values: [32, 64, 128]
   epochs:
