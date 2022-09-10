@@ -30,7 +30,7 @@ EMBEDDING_DIM= 300
 MAX_SEQUENCE_LENGTH = 500
 
 #########################################################################
-dataset_name = 'kt'
+dataset_name = 'to'
 if dataset_name == 'ws':
     Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
 elif dataset_name == 'kt':

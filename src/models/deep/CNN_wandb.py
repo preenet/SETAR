@@ -52,7 +52,7 @@ MAX_SEQUENCE_LENGTH = 500
 
 #########################################################################
 
-dataset_name = 'kt'
+dataset_name = 'to'
 if dataset_name == 'ws':
     Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
 elif dataset_name == 'kt':
@@ -66,7 +66,7 @@ elif dataset_name == 'to':
 else: 
     print("No such dataset.")
     sys.exit(-1)
-seed = 1
+seed = 0
 #########################################################################
 
 
@@ -80,10 +80,10 @@ seed = 1
 # w2v.wv.intersect_word2vec_format(model_path+ '/' + 'thai2vec.bin', binary=True, lockf=1.0)
 # w2v.train(tok_train, total_examples=w2v.corpus_count, epochs=100)
 
-# Word2Vec.save(w2v, model_path+ '/' + 'tt_thwiki300.word2vec')
+# Word2Vec.save(w2v, model_path+ '/' + 't0_thwiki300.word2vec')
 
 # make sure to load a proper word2vec model according to the dataset.
-w2v = Word2Vec.load(model_path+ '/' + 'w2v_ws_thwiki300_300.word2vec')
+w2v = Word2Vec.load(model_path+ '/' + 'to_thwiki300.word2vec')
 
 #get weight from word2vec as a keras embedding metric
 keyed_vectors = w2v.wv  
