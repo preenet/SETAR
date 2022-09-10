@@ -30,8 +30,20 @@ EMBEDDING_DIM= 300
 MAX_SEQUENCE_LENGTH = 500
 
 #########################################################################
-Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
 dataset_name = 'ws'
+if dataset_name == 'ws':
+    Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
+elif dataset_name == 'kt':
+    Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_kt']))
+elif dataset_name == 'tt':
+    Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_tt']))
+elif dataset_name == 'to':
+    data = joblib.load(Path.joinpath(root, configs['data']['kaggle_to']))
+    Xo = data[0]
+    yo = data[1]
+else: 
+    print("No such dataset.")
+    sys.exit(-1)
 #########################################################################
 
 
@@ -76,7 +88,6 @@ for item in range(1, 2):
     yv_c = to_categorical(yv)
     yt_c = to_categorical(yt)
  
-    
     # getting training performance
     best_model = load_model(model_path + '/best_model_h5/' + 'cnn_' + str(dataset_name) + '_best_model_' +str(item)+'.h5', custom_objects={"F1Score": f1})
     best_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy', precision, recall, mcc, auc, f1])

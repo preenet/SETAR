@@ -2,8 +2,8 @@
 This script response to find the optimal hyper-parameters of CNN 
 1. run wandb sweep [sweep.yaml] for hyperparam tuning at the src/models directory
 2. run the link that generated from wandb
-3. get the best model from api or local and run the script deep_10repeated.py
-4. run generate_report_10repeated_deepbaseline from src.utilities
+3. get the best model from api or local and run the script deep_10repeated.py for each fold.
+4. run the script to generate_report_10repeated_deepbaseline from src.utilities
 5. copy results to the output folder.
 
 # best model of each seed stored in the models folder at root folder.
@@ -51,7 +51,24 @@ model_path = str(Path.joinpath(root, configs['models']))
 
 MAX_SEQUENCE_LENGTH = 500
 
-Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
+#########################################################################
+
+dataset_name = 'to'
+if dataset_name == 'ws':
+    Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
+elif dataset_name == 'kt':
+    Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_kt']))
+elif dataset_name == 'tt':
+    Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_tt']))
+elif dataset_name == 'to':
+    data = joblib.load(Path.joinpath(root, configs['data']['kaggle_to']))
+    Xo = data[0]
+    yo = data[1]
+else: 
+    print("No such dataset.")
+    sys.exit(-1)
+seed = 0
+#########################################################################
 
 
 # print("Building w2v model...")
@@ -91,8 +108,8 @@ wandb.init(settings=wandb.Settings(_disable_stats=True))
 config = wandb.config
 
 init(0)
-X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=1, stratify=yo)
-X_val, X_test, yv, _ = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=1, stratify=y_tmp)
+X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=seed, stratify=yo)
+X_val, X_test, yv, _ = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=seed, stratify=y_tmp)
 num_class = np.unique(y).shape[0]
 
 recall = tf.keras.metrics.Recall()
@@ -119,7 +136,7 @@ yv_c = to_categorical(yv)
 
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
 
-
+# construct basic CNN arch based on the paper.
 model = Sequential()
 model.add(Input(shape=(MAX_SEQUENCE_LENGTH,)))
 model.add(w2v_keras_layer)
