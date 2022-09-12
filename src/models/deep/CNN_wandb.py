@@ -55,18 +55,22 @@ MAX_SEQUENCE_LENGTH = 500
 dataset_name = 'to'
 if dataset_name == 'ws':
     Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
+    w2v = Word2Vec.load(model_path+ '/' + 'w2v_ws_thwiki300.word2vec')
 elif dataset_name == 'kt':
     Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_kt']))
+    w2v = Word2Vec.load(model_path+ '/' + 'w2v_kt_thwiki300.word2vec')
 elif dataset_name == 'tt':
     Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_tt']))
+    w2v = Word2Vec.load(model_path+ '/' + 'w2v_tt_thwiki300.word2vec')
 elif dataset_name == 'to':
     data = joblib.load(Path.joinpath(root, configs['data']['kaggle_to']))
     Xo = data[0]
     yo = data[1]
+    w2v = Word2Vec.load(model_path+ '/' + 'to_thwiki300.word2vec')
 else: 
     print("No such dataset.")
     sys.exit(-1)
-seed = 0
+seed = 1
 #########################################################################
 
 
@@ -83,7 +87,7 @@ seed = 0
 # Word2Vec.save(w2v, model_path+ '/' + 't0_thwiki300.word2vec')
 
 # make sure to load a proper word2vec model according to the dataset.
-w2v = Word2Vec.load(model_path+ '/' + 'to_thwiki300.word2vec')
+
 
 #get weight from word2vec as a keras embedding metric
 keyed_vectors = w2v.wv  
@@ -125,7 +129,7 @@ print(X_train_ps.shape, X_val_ps.shape, X_test_ps.shape)
 y_c = to_categorical(y)
 yv_c = to_categorical(yv)
 
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=20)
 
 # construct basic CNN arch based on the paper.
 model = Sequential()
@@ -145,5 +149,5 @@ model.fit(X_train_ps, y_c,  validation_data=(X_val_ps, yv_c),
         epochs=config.epochs,
         batch_size=config.batch_size,
         initial_epoch=wandb.run.step,  # for resumed runs
-        callbacks=[WandbCallback(save_model=True, monitor="loss"), es])
+        callbacks=[WandbCallback(save_model=True, monitor="loss")])
 

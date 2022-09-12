@@ -1,7 +1,7 @@
 """
 1. run wandb <sweep name> sweep.yaml for hyperparam tuning at the src.model directory
 2. run the link from wandb
-3. get the best model from api or local and run CNN_10repeated.py
+3. get the best model from api or local or cloud, and run CNN_10repeated.py
 4. run generate_report_10repeated_deepbaseline from src.utilities
 5. copy results to the output folder
 pree.t@cmu.ac.th
@@ -35,12 +35,28 @@ model_path = str(Path.joinpath(root, configs['models']))
 
 EMBEDDING_DIM= 300
 MAX_SEQUENCE_LENGTH = 500
+#########################################################################
 
-df_ds = pd.read_csv(Path.joinpath(root, configs['data']['processed_ws']))
-
-y_ds = df_ds['target'].astype('category').cat.codes
-yo = y_ds.to_numpy()
-Xo = df_ds['processed']
+dataset_name = 'to'
+if dataset_name == 'ws':
+    Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
+    w2v = Word2Vec.load(model_path+ '/' + 'w2v_ws_thwiki300.word2vec')
+elif dataset_name == 'kt':
+    Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_kt']))
+    w2v = Word2Vec.load(model_path+ '/' + 'w2v_kt_thwiki300.word2vec')
+elif dataset_name == 'tt':
+    Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_tt']))
+    w2v = Word2Vec.load(model_path+ '/' + 'w2v_tt_thwiki300.word2vec')
+elif dataset_name == 'to':
+    data = joblib.load(Path.joinpath(root, configs['data']['kaggle_to']))
+    Xo = data[0]
+    yo = data[1]
+    w2v = Word2Vec.load(model_path+ '/' + 'to_thwiki300.word2vec')
+else: 
+    print("No such dataset.")
+    sys.exit(-1)
+seed = 1
+#########################################################################
 
 # print("Building w2v model...")
 
@@ -53,8 +69,6 @@ Xo = df_ds['processed']
 # w2v.wv.vectors_lockf = np.ones(len(w2v.wv))
 # w2v.wv.intersect_word2vec_format(model_path+ '/' + 'thai2vec.bin', binary=True, lockf=1.0)
 
-
-w2v = Word2Vec.load(model_path+ '/' + 'w2v_ws_thwiki300_300.word2vec')
 
 # get weight from word2vec as a keras embedding metric
 keyed_vectors = w2v.wv  
