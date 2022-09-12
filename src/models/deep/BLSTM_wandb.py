@@ -80,21 +80,12 @@ w2v_keras_layer = Embedding(
     trainable=True # (false for fixed)
 )
 
-defaults = dict(
-    dropout=0.5,
-    hidden_layer_size=128,
-    layer_1_size=16,
-    learn_rate=0.001,
-    batch_size = 64,
-    epochs=64,
-    )
-
-resume = sys.argv[-1] == "--resume"
-wandb.init(project="cnn-ws", config=defaults, resume=resume, settings=wandb.Settings(_disable_stats=True))
+wandb.init(settings=wandb.Settings(_disable_stats=True))
 config = wandb.config
 
-X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=0, stratify=yo)
-X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=0, stratify=y_tmp)
+
+X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=seed, stratify=yo)
+X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=seed, stratify=y_tmp)
 
 num_class = np.unique(y).shape[0]
 recall = tf.keras.metrics.Recall()
@@ -124,24 +115,19 @@ y_c = to_categorical(y)
 yv_c = to_categorical(yv)
 yt_c = to_categorical(yt)
 
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
-# build model
-if wandb.run.resumed:
-    print("RESUMING")
-    # restore the best model
-    model = load_model(wandb.restore("model-best.h5").name)
-else:
-    model = Sequential()
-    model.add(Input(shape=(MAX_SEQUENCE_LENGTH,)))
-    model.add(w2v_keras_layer)
-    model.add(Bidirectional(LSTM(config.layer_1_size, return_sequences = True)))
-    model.add(Dropout(config.dropout))
-    model.add(Flatten()) 
-    model.add(Dense(config.hidden_layer_size, activation='relu')) 
-    model.add(Dense(num_class, activation='softmax'))
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=12)
 
-    model.compile(
-        loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy' , precision, recall, mcc, auc, f1])
+model = Sequential()
+model.add(Input(shape=(MAX_SEQUENCE_LENGTH,)))
+model.add(w2v_keras_layer)
+model.add(Bidirectional(LSTM(config.layer_1_size, return_sequences = True)))
+model.add(Dropout(config.dropout))
+model.add(Flatten()) 
+model.add(Dense(config.hidden_layer_size, activation='relu')) 
+model.add(Dense(num_class, activation='softmax'))
+
+model.compile(
+    loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy' , precision, recall, mcc, auc, f1])
 
 model.fit(X_train_ps, y_c,  validation_data=(X_val_ps, yv_c),
           epochs=config.epochs,
