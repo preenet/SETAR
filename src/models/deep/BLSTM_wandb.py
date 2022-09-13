@@ -10,6 +10,7 @@ pree.t@cmu.ac.th
 import sys
 from pathlib import Path
 
+import joblib
 import numpy as np
 import pandas as pd
 import src.utilities as utils
@@ -37,13 +38,13 @@ EMBEDDING_DIM= 300
 MAX_SEQUENCE_LENGTH = 500
 #########################################################################
 
-dataset_name = 'to'
+dataset_name = 'kt'
 if dataset_name == 'ws':
     Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
     w2v = Word2Vec.load(model_path+ '/' + 'w2v_ws_thwiki300.word2vec')
 elif dataset_name == 'kt':
     Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_kt']))
-    w2v = Word2Vec.load(model_path+ '/' + 'w2v_kt_thwiki300.word2vec')
+    w2v = Word2Vec.load(model_path+ '/' + 'w2v_kt_thwiki300_300.word2vec')
 elif dataset_name == 'tt':
     Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_tt']))
     w2v = Word2Vec.load(model_path+ '/' + 'w2v_tt_thwiki300.word2vec')
@@ -55,7 +56,7 @@ elif dataset_name == 'to':
 else: 
     print("No such dataset.")
     sys.exit(-1)
-seed = 1
+seed = 0
 #########################################################################
 
 # print("Building w2v model...")

@@ -1,6 +1,6 @@
 program: BLSTM_wandb.py
-project: blstm-to-seed0
-name: blstm-to-seed0
+project: blstm-kt-seed0
+name: blstm-kt-seed0
 entity: rapry60
 
 method: bayes
