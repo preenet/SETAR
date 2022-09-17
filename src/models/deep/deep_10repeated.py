@@ -58,7 +58,7 @@ def init(seed):
     print(f"Random seed set as {seed}")
     
 init(0)
-for item in range(0, 1):
+for item in range(0, 10):
     file = open(configs['output_scratch'] + method + "_10repeated_" + str(dataset_name) + "_final1.csv" , "a")
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
@@ -89,10 +89,10 @@ for item in range(0, 1):
     y_c = to_categorical(y)
     yv_c = to_categorical(yv)
     yt_c = to_categorical(yt)
+    
  
     # getting training performance
     best_model = load_model(model_path + '/best_model_h5/cnn_tt/' + method +'_' + str(dataset_name) + '_best_model_' +str(item)+'.h5', custom_objects={"F1Score": f1})
-    best_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy', precision, recall, mcc, auc, f1])
 
     acc, pre, rec, mcc, auc, f1 = test_deep(best_model, X_val_ps, yv)
     file.write(str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1))
@@ -102,7 +102,6 @@ for item in range(0, 1):
     with open(model_path + '/best_model_h5/cnn_tt/' + method +'_' + str(dataset_name) + '_best_model_' +str(item)+'.yaml', 'r') as f:
         config = yaml.safe_load(f)
         
-    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=12)
     best_model.fit(np.vstack((X_train_ps, X_val_ps)), np.vstack((y_c, yv_c)),
                                     batch_size= config['batch_size']['value'],
                                     epochs= config['epochs']['value'],
