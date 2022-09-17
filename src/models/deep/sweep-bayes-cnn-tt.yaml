@@ -1,6 +1,6 @@
 program: CNN_wandb.py
-project: cnn-tt-seed0
-name: cnn-tt-seed0
+project: cnn-tt-seed2
+name: cnn-tt-seed2
 entity: rapry60
 
 method: bayes
