@@ -1,6 +1,6 @@
 program: CNN_wandb.py
-project: cnn-tt-seed1_test
-name: cnn-tt-seed1_test
+project: cnn-tt-seed0
+name: cnn-tt-seed0
 entity: rapry60
 
 method: bayes
@@ -9,7 +9,7 @@ metric:
   name: val_loss
 parameters:
   dropout:
-    values: [0.3, 0.4, 0.5]
+    values: [0.1, 0.2, 0.3, 0.4, 0.5]
   hidden_layer_size:
     values: [16, 32, 64, 128]
   layer_1_size:

@@ -22,8 +22,8 @@
 #     value: 80
 
 program: BLSTM_wandb.py
-project: blstm-kt-seed0
-name: blstm-kt-seed0
+project: blstm-kt-seed5
+name: blstm-kt-seed5
 entity: rapry60
 
 method: bayes

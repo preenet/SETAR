@@ -1,10 +1,10 @@
 #course search
 program: BLSTM_wandb.py
-project: blstm-ws-seed0
-name: blstm-ws-seed0
+project: blstm-kt-seed9
+name: blstm-kt-seed9
 entity: rapry60
 
-method: bayes
+method: random
 metric:
   goal: minimize
   name: val_loss

@@ -46,7 +46,6 @@ else:
     sys.exit(-1)
 #########################################################################
 
-
 def init(seed):
     tf.random.set_seed(seed)
     tf.experimental.numpy.random.seed(seed)
@@ -56,7 +55,7 @@ def init(seed):
     print(f"Random seed set as {seed}")
     
 init(0)
-for item in range(0, 10):
+for item in range(0, 1):
     file = open(configs['output_scratch'] + "blstm_10repeated_" + str(dataset_name) + "_final.csv" , "a")
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
@@ -96,12 +95,12 @@ for item in range(0, 10):
     file.write(str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1))
     
     # for the final model, we train with (train+valid set) and test with test set
-    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=12)
     best_model.fit(np.vstack((X_train_ps, X_val_ps)), np.vstack((y_c, yv_c)),
-                                    batch_size= 64,
-                                    epochs= 60,
-                                    validation_data=(X_test_ps, yt_c),
-                                    verbose=1)
+                                    batch_size= 32, # set according to the optimal model log
+                                    epochs= 45,# set according to the optimal model log
+                                    validation_data=(X_test_ps, yt_c), 
+                                    callbacks=[EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=12)])# set according to the optimal model log
     
     # test with test set
     acc, pre, rec, mcc, auc, f1 = test_deep(best_model, X_test_ps, yt)

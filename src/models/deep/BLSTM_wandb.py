@@ -38,7 +38,7 @@ EMBEDDING_DIM= 300
 MAX_SEQUENCE_LENGTH = 500
 #########################################################################
 
-dataset_name = 'kt'
+dataset_name = 'ws'
 if dataset_name == 'ws':
     Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
     w2v = Word2Vec.load(model_path+ '/' + 'w2v_ws_thwiki300.word2vec')
@@ -56,7 +56,7 @@ elif dataset_name == 'to':
 else: 
     print("No such dataset.")
     sys.exit(-1)
-seed = 0
+seed = 9
 #########################################################################
 
 # print("Building w2v model...")
@@ -116,7 +116,7 @@ y_c = to_categorical(y)
 yv_c = to_categorical(yv)
 yt_c = to_categorical(yt)
 
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=12)
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
 
 model = Sequential()
 model.add(Input(shape=(MAX_SEQUENCE_LENGTH,)))
@@ -134,4 +134,4 @@ model.fit(X_train_ps, y_c,  validation_data=(X_val_ps, yv_c),
           epochs=config.epochs,
           batch_size=config.batch_size,
           initial_epoch=wandb.run.step,  # for resumed runs
-           callbacks=[WandbCallback(save_model=True, monitor="loss"), es])
+           callbacks=[WandbCallback(save_model=True, monitor="loss")])
