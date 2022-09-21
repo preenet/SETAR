@@ -1,29 +1,16 @@
-# Thai_SA_Journal Dev.
+# SETAR  
 =======================  
 **State of the arts in Thai Sentimental Analysis**  
 
 Several feature extraction methods were applied on text feature to all the corpuses as follows:  
 
-    * Bag of words for unigram and bigrams
-    * TF-IDF for unigram and bigrams
-    * Word2Vec with TF-IDF vector (300 dimension)
-    * POS_tagging using 17 Orchid tags
-    * Dictionary-based with list of Thai positive and negative words for unigram and bigrams
+    * Bag of words for 1 gram, 2 grams, and 1 and 2 grams.
+    * TF-IDF for 1 gram, 2 grams, and 1 and 2 grams.
+    * Word2Vec with average and TF-IDF vectors (300 dimension).  
+    * 5 schemes of POS_tagging using 17 Orchid tags.  
+    * Dictionary-based with list of Thai positive and negative words for unigram.  
     
-Total of 8 text representations were extracted for each corpus.  
-
-Output:  
-For all the feature extraction methods above, Joblib objects as sparse matrix on text feature were dumped (see data folders).  
-
-#Todo
-งาน อ.เปิ้ล  
-1. Run Wongnai  
-2. ปั้น  Wanchan Stack   (WS /  TT /  Wongnai)
-3. ปั้น Wanchan Boosting Stack Ensemble (God Mode)  (WS/ TT/ Wongnai)      เย๊อะ แฮะ ฮ่าๆๆ
-งาน อ.ปรี
-1. POSTAG (ทุก Data)
-2. KT Baseline
-3. Deep Baseline (ทุก Data)
+Total of 14 text representations were extracted for each corpus.  
 
 
 **Existing models (published)**
@@ -62,4 +49,17 @@ Information regarding the corpus can be found from https://github.com/dsmlr/40-T
 # Thai Toxic tweet corpus  
 Information regarding the corpus can be found from https://huggingface.co/datasets/thai_toxicity_tweet
 
-
+# How to run Deep learning:    
+# CNN-TX:  
+```
+SEED 0: C:\Users\Pree\Thai_SA_journal\src\models\deep\CNN_wandb.py --batch_size=128 --dropout=0.3 --epochs=60 --hidden_layer_size=64 --layer_1_size=16 --learn_rate=0.0001 --patience=30   
+SEED 1: C:\Users\pree\Thai_SA_Journal\src\models\deep\CNN_wandb.py --batch_size=128 --dropout=0.4 --epochs=60 --hidden_layer_size=32 --layer_1_size=16 --learn_rate=0.001 --patience=30  
+SEED 2: C:\Users\Pree\Thai_SA_journal\src\models\deep\CNN_wandb.py --batch_size=32 --dropout=0.3 --epochs=60 --hidden_layer_size=16 --layer_1_size=128 --learn_rate=0.0001 --patience=30
+SEED 3: C:\Users\Pree\Thai_SA_journal\src\models\deep\CNN_wandb.py --batch_size=128 --dropout=0.3 --epochs=60 --hidden_layer_size=16 --layer_1_size=128 --learn_rate=0.0001 --patience=30  
+SEED 4: C:\Users\pree\Thai_SA_Journal\src\models\deep\CNN_wandb.py --batch_size=128 --dropout=0.3 --epochs=60 --hidden_layer_size=16 --layer_1_size=64 --learn_rate=0.0001 --patience=30  
+SEED 5: C:\Users\pree\Thai_SA_Journal\src\models\deep\CNN_wandb.py --batch_size=64 --dropout=0.1 --epochs=60 --hidden_layer_size=16 --layer_1_size=64 --learn_rate=0.0001 --patience=30  
+SEED 6: C:\Users\Pree\Thai_SA_journal\src\models\deep\CNN_wandb.py --batch_size=128 --dropout=0.2 --epochs=60 --hidden_layer_size=64 --layer_1_size=128 --learn_rate=0.0001 --patience=30   
+SEED 7: C:\Users\pree\Thai_SA_Journal\src\models\deep\CNN_wandb.py --batch_size=128 --dropout=0.3 --epochs=60 --hidden_layer_size=32 --layer_1_size=128 --learn_rate=0.0001 --patience=30  
+SEED 8: C:\Users\pree\Thai_SA_Journal\src\models\deep\CNN_wandb.py --batch_size=128 --dropout=0.1 --epochs=60 --hidden_layer_size=16 --layer_1_size=128 --learn_rate=0.0001 --patience=30  
+SEED 9: C:\Users\pree\Thai_SA_Journal\src\models\deep\CNN_wandb.py --batch_size=32 --dropout=0.3 --epochs=60 --hidden_layer_size=64 --layer_1_size=16 --learn_rate=0.0001 --patience=30  
+```
