@@ -52,14 +52,7 @@ Information regarding the corpus can be found from https://huggingface.co/datase
 # How to run Deep learning:    
 # CNN-TX:  
 ```
-SEED 0: C:\Users\Pree\Thai_SA_journal\src\models\deep\CNN_wandb.py --batch_size=128 --dropout=0.3 --epochs=60 --hidden_layer_size=64 --layer_1_size=16 --learn_rate=0.0001 --patience=30   
-SEED 1: C:\Users\pree\Thai_SA_Journal\src\models\deep\CNN_wandb.py --batch_size=128 --dropout=0.4 --epochs=60 --hidden_layer_size=32 --layer_1_size=16 --learn_rate=0.001 --patience=30  
-SEED 2: C:\Users\Pree\Thai_SA_journal\src\models\deep\CNN_wandb.py --batch_size=32 --dropout=0.3 --epochs=60 --hidden_layer_size=16 --layer_1_size=128 --learn_rate=0.0001 --patience=30
-SEED 3: C:\Users\Pree\Thai_SA_journal\src\models\deep\CNN_wandb.py --batch_size=128 --dropout=0.3 --epochs=60 --hidden_layer_size=16 --layer_1_size=128 --learn_rate=0.0001 --patience=30  
-SEED 4: C:\Users\pree\Thai_SA_Journal\src\models\deep\CNN_wandb.py --batch_size=128 --dropout=0.3 --epochs=60 --hidden_layer_size=16 --layer_1_size=64 --learn_rate=0.0001 --patience=30  
-SEED 5: C:\Users\pree\Thai_SA_Journal\src\models\deep\CNN_wandb.py --batch_size=64 --dropout=0.1 --epochs=60 --hidden_layer_size=16 --layer_1_size=64 --learn_rate=0.0001 --patience=30  
-SEED 6: C:\Users\Pree\Thai_SA_journal\src\models\deep\CNN_wandb.py --batch_size=128 --dropout=0.2 --epochs=60 --hidden_layer_size=64 --layer_1_size=128 --learn_rate=0.0001 --patience=30   
-SEED 7: C:\Users\pree\Thai_SA_Journal\src\models\deep\CNN_wandb.py --batch_size=128 --dropout=0.3 --epochs=60 --hidden_layer_size=32 --layer_1_size=128 --learn_rate=0.0001 --patience=30  
-SEED 8: C:\Users\pree\Thai_SA_Journal\src\models\deep\CNN_wandb.py --batch_size=128 --dropout=0.1 --epochs=60 --hidden_layer_size=16 --layer_1_size=128 --learn_rate=0.0001 --patience=30  
-SEED 9: C:\Users\pree\Thai_SA_Journal\src\models\deep\CNN_wandb.py --batch_size=32 --dropout=0.3 --epochs=60 --hidden_layer_size=64 --layer_1_size=16 --learn_rate=0.0001 --patience=30  
+SEED 0:
+C:\Users\Pree\Thai_SA_journal\src\models\deep\CNN_wandb.py --batch_size=32 --dropout=0.5 --epochs=44 --hidden_layer_size=64 --layer_1_size=16 --learn_rate=0.0001 --patience=12 
+
 ```

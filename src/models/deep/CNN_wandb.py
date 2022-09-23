@@ -69,7 +69,7 @@ elif dataset_name == 'to':
 else: 
     print("No such dataset.")
     sys.exit(-1)
-seed = 1
+seed = 0
 #########################################################################
 
 
