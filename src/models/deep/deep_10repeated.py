@@ -63,7 +63,13 @@ init(0)
 
 
 train_acc = []
+train_pre = []
+train_rec = []
+train_f1 =[]
 test_acc = []
+test_pre = []
+test_rec =[]
+test_f1 = []
 
 for item in range(0, 10):
     file = open(configs['output_scratch'] + method + "_10repeated_" + str(dataset_name) + "_final2.csv" , "a")
@@ -102,11 +108,17 @@ for item in range(0, 10):
 
     acc, pre, rec, mcc, auc, f1 = test_deep(best_model, X_val_ps, yv, num_class)
     train_acc.append(acc)
+    train_pre.append(pre)
+    train_rec.append(rec)
+    train_f1.append(f1)
     file.write(str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1))
     
     acc, pre, rec, mcc, auc, f1 = test_deep(best_model, X_test_ps, yt, num_class)
     test_acc.append(acc)
-    file.write("," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) + "\n")
-print("train_acc: ", np.mean(train_acc), " test_acc: ", np.mean(test_acc))
+    test_pre.append(pre)
+    test_rec.append(rec)
+    test_f1.append(f1)
+    file.write("," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) + "\n") 
+print("train=acc: ", np.mean(train_acc), " pre: ", np.mean(train_pre), "rec: ", np.mean(train_rec) , " f1: ", np.mean(train_f1), "\ntest=acc : ", np.mean(test_acc), " pre: ", np.mean(test_pre), "rec: ", np.mean(test_rec) , " f1: ", np.mean(test_f1))
 
 file.close()

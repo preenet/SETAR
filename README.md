@@ -50,9 +50,10 @@ Information regarding the corpus can be found from https://github.com/dsmlr/40-T
 Information regarding the corpus can be found from https://huggingface.co/datasets/thai_toxicity_tweet
 
 # How to run Deep learning:    
-# CNN-TX:  
+# CNN-TX (Done)
+# CNN-TT (Tuning)  
+
 ```
-SEED 0:
-C:\Users\Pree\Thai_SA_journal\src\models\deep\CNN_wandb.py --batch_size=32 --dropout=0.5 --epochs=44 --hidden_layer_size=64 --layer_1_size=16 --learn_rate=0.0001 --patience=12 
+
 
 ```
