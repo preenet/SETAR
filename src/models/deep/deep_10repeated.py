@@ -16,10 +16,7 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 import yaml
 from gensim.models import Word2Vec
-from keras.callbacks import EarlyStopping
-from keras.layers import (Conv1D, Dense, Dropout, Embedding, Flatten, Input,
-                          MaxPooling1D)
-from keras.models import Sequential, load_model
+from keras.models import load_model
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
 from sklearn.model_selection import train_test_split
@@ -40,18 +37,15 @@ method = 'cnn'
 
 if dataset_name == 'ws':
     Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_ws']))
-    w2v = Word2Vec.load(model_path+ '/' + 'w2v_ws_thwiki300.word2vec')
 elif dataset_name == 'kt':
     Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_kt']))
-    w2v = Word2Vec.load(model_path+ '/' + 'w2v_kt_thwiki300_300.word2vec')
 elif dataset_name == 'tt':
     Xo, yo = joblib.load(Path.joinpath(root, configs['data']['kaggle_tt']))
-    w2v = Word2Vec.load(model_path+ '/' + 'w2v_tt_thwiki300_300.word2vec')
 elif dataset_name == 'to':
     data = joblib.load(Path.joinpath(root, configs['data']['kaggle_to']))
     Xo = data[0]
     yo = data[1]
-    w2v = Word2Vec.load(model_path+ '/' + 'to_thwiki300.word2vec')
+
 else: 
     print("No such dataset.")
     sys.exit(-1)
@@ -67,17 +61,11 @@ def init(seed):
     
 init(0)
 
-keyed_vectors = w2v.wv  
-weights = keyed_vectors.vectors  
-w2v_keras_layer = Embedding(
-    input_dim=weights.shape[0],
-    output_dim=weights.shape[1],
-    weights=[weights],
-    trainable=True
-)
 
+train_acc = []
+test_acc = []
 
-for item in range(0, 4):
+for item in range(0, 10):
     file = open(configs['output_scratch'] + method + "_10repeated_" + str(dataset_name) + "_final2.csv" , "a")
     X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
     X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
@@ -113,9 +101,12 @@ for item in range(0, 4):
     best_model = load_model(model_path + '/best_model_deep/cnn_to/' + method +'_' + str(dataset_name) + '_best_model_' +str(item)+'.h5')
 
     acc, pre, rec, mcc, auc, f1 = test_deep(best_model, X_val_ps, yv, num_class)
+    train_acc.append(acc)
     file.write(str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1))
     
     acc, pre, rec, mcc, auc, f1 = test_deep(best_model, X_test_ps, yt, num_class)
+    test_acc.append(acc)
     file.write("," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) + "\n")
+print("train_acc: ", np.mean(train_acc), " test_acc: ", np.mean(test_acc))
 
 file.close()

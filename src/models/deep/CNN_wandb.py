@@ -23,12 +23,13 @@ import tensorflow_addons as tfa
 from gensim.models import Word2Vec
 from keras.callbacks import EarlyStopping
 from keras.layers import (Conv1D, Dense, Dropout, Embedding, Flatten, Input,
-                          MaxPooling1D)
+                          MaxPooling1D, concatenate, merge)
 from keras.models import Model, Sequential, load_model
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
 from pythainlp import word_vector
 from sklearn.model_selection import train_test_split
+from src.models.metrics import test_deep
 from tensorflow.keras.utils import to_categorical
 from wandb.keras import WandbCallback
 
@@ -47,7 +48,7 @@ configs = utils.read_config()
 root = utils.get_project_root()
 model_path = str(Path.joinpath(root, configs['models']))
 
-MAX_SEQUENCE_LENGTH = 500
+
 
 #########################################################################
 
@@ -69,10 +70,14 @@ elif dataset_name == 'to':
 else: 
     print("No such dataset.")
     sys.exit(-1)
-seed = 3
+#item = 3
+method = 'cnn'
 #########################################################################
-
-
+# tokenizer = tf.keras.preprocessing.text.Tokenizer(lower=True)
+# tokenizer.fit_on_texts(Xo)
+# sequences_train_num = tokenizer.texts_to_sequences(Xo)
+# MAX_SEQUENCE_LENGTH = max([len(w) for w in sequences_train_num])
+MAX_SEQUENCE_LENGTH =500
 # print("Building w2v model...")
 # tok_train = [text.split() for text in Xo]
 # w2v = Word2Vec(vector_size=300, min_count=1, window = 5, workers=8)
@@ -97,83 +102,103 @@ w2v_keras_layer = Embedding(
     trainable=True
 )
 
-wandb.init(settings=wandb.Settings(_disable_stats=True))
-config = wandb.config
+train_acc = []
+test_acc = []
 
-init(0)
-X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=seed, stratify=yo)
-X_val, X_test, yv, _ = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=seed, stratify=y_tmp)
-num_class = np.unique(y).shape[0]
+config_d = dict(
+    dropout=0.5,
+    batch_size=32,
+    epochs = 20,
+    learn_rate=0.005,
+    )
 
-recall = tf.keras.metrics.Recall()
-precision = tf.keras.metrics.Precision()
-auc = tf.keras.metrics.AUC()
-mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=np.unique(y).shape[0])
-f1 = tfa.metrics.F1Score(num_classes=np.unique(y).shape[0], average='macro')
-adam = tf.keras.optimizers.Adam(learning_rate=0.01)
+for item in range(0, 10):
+    init(0)
+    # wandb.init(settings=wandb.Settings(_disable_stats=True))
+    # config = wandb.config
+    X_train, X_tmp, y, y_tmp = train_test_split(Xo, yo, test_size=0.4, random_state=item, stratify=yo)
+    X_val, X_test, yv, yt = train_test_split(X_tmp, y_tmp, test_size=0.5, random_state=item, stratify=y_tmp)
+    num_class = np.unique(y).shape[0]
 
-tokenizer  = Tokenizer(num_words = MAX_SEQUENCE_LENGTH)
-tokenizer.fit_on_texts(X_train)
-train_sequences =  tokenizer.texts_to_sequences(X_train)
-valid_sequences = tokenizer.texts_to_sequences(X_val)
-test_sequences = tokenizer.texts_to_sequences(X_test)
+    recall = tf.keras.metrics.Recall()
+    precision = tf.keras.metrics.Precision()
+    auc = tf.keras.metrics.AUC()
+    mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=np.unique(y).shape[0])
+    f1 = tfa.metrics.F1Score(num_classes=np.unique(y).shape[0], average='macro')
+    adam = tf.keras.optimizers.Adam(learning_rate= config_d['learn_rate'])
 
-# pad dataset to a maximum review length in words
-X_train_ps = pad_sequences(train_sequences, maxlen=MAX_SEQUENCE_LENGTH)
-X_val_ps = pad_sequences(valid_sequences, maxlen=MAX_SEQUENCE_LENGTH)
-X_test_ps = pad_sequences(test_sequences, maxlen=MAX_SEQUENCE_LENGTH)
-print(X_train_ps.shape, X_val_ps.shape, X_test_ps.shape)
+    tokenizer  = Tokenizer(num_words = MAX_SEQUENCE_LENGTH)
+    tokenizer.fit_on_texts(X_train)
+    train_sequences =  tokenizer.texts_to_sequences(X_train)
+    valid_sequences = tokenizer.texts_to_sequences(X_val)
+    test_sequences = tokenizer.texts_to_sequences(X_test)
 
-y_c = to_categorical(y)
-yv_c = to_categorical(yv)
+    # pad dataset to a maximum review length in words
+    X_train_ps = pad_sequences(train_sequences, maxlen=MAX_SEQUENCE_LENGTH)
+    X_val_ps = pad_sequences(valid_sequences, maxlen=MAX_SEQUENCE_LENGTH)
+    X_test_ps = pad_sequences(test_sequences, maxlen=MAX_SEQUENCE_LENGTH)
+    print(X_train_ps.shape, X_val_ps.shape, X_test_ps.shape)
 
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
+    y_c = to_categorical(y)
+    yv_c = to_categorical(yv)
+    yt_c = to_categorical(yt)
+    #es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
 
-# construct basic CNN arch based on the paper.
-# model = Sequential()
-# model.add(Input(shape=(MAX_SEQUENCE_LENGTH,)))
-# model.add(w2v_keras_layer)
-# model.add(Conv1D(config.layer_1_size, kernel_size=3, padding='same', activation='relu'))
-# model.add(MaxPooling1D())
-# model.add(Dropout(config.dropout))
-# model.add(Flatten()) 
-# model.add(Dense(config.hidden_layer_size, activation='relu'))
-# model.add(Dense(num_class, activation='softmax'))
+    # construct basic CNN arch based on the paper Pasupal et al.
+    # model = Sequential()
+    # model.add(Input(shape=(MAX_SEQUENCE_LENGTH,)))
+    # model.add(w2v_keras_layer)
+    # model.add(Conv1D(config.layer_1_size, kernel_size=3, padding='same', activation='relu'))
+    # model.add(MaxPooling1D())
+    # model.add(Dropout(config.dropout))
+    # model.add(Flatten()) 
+    # model.add(Dense(config.hidden_layer_size, activation='relu'))
+    # model.add(Dense(num_class, activation='softmax'))
 
-# construct parallel pooling layers
-# ONE LAYER
-from keras.layers import (AveragePooling1D, Conv1D, Dropout, Flatten, Input,
-                          MaxPooling1D, SpatialDropout1D, concatenate, merge)
+    # construct parallel pooling layers
+    num_filters=3
+    filter_sizes = [3,4,5]
 
-num_filters=5
-filter_sizes = [3,5]
+    model = Model()
+    emb = Input(shape=(MAX_SEQUENCE_LENGTH,))
+    x = (w2v_keras_layer)(emb)
 
-model = Model()
-emb = Input(shape=(MAX_SEQUENCE_LENGTH,))
-x = (w2v_keras_layer)(emb)
+    pooled_outputs = []
+    for i in range(len(filter_sizes)):
+        conv = Conv1D(num_filters, kernel_size=filter_sizes[i], padding='valid', activation='relu')(x)
+        conv = MaxPooling1D(pool_size=MAX_SEQUENCE_LENGTH-filter_sizes[i]+1, strides=1, padding = 'valid')(conv)         
+        pooled_outputs.append(conv)
+    merge = concatenate(pooled_outputs)
+    x = Flatten()(merge)
+    x = Dropout(config_d['dropout'])(x)
 
-pooled_outputs = []
-for i in range(len(filter_sizes)):
-    conv = Conv1D(num_filters, kernel_size=filter_sizes[i], padding='valid', activation='relu')(x)
-    conv = MaxPooling1D(pool_size=MAX_SEQUENCE_LENGTH-filter_sizes[i]+1, strides=1, padding = 'valid')(conv)         
-    pooled_outputs.append(conv)
-merge = concatenate(pooled_outputs)
-x = Flatten()(merge)
-x = Dropout(0.5)(x)
+    out = Dense(num_class, activation= 'softmax')(x)
+    model = Model(inputs=emb,outputs=out)
+    print(model.summary())
 
-out = Dense(num_class, activation= 'softmax')(x)
-model = Model(inputs=emb,outputs=out)
-print(model.summary())
+    model.compile(
+        loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy' , precision, recall, mcc, auc, f1])
+    es = tf.keras.callbacks.EarlyStopping(monitor='loss', mode='min', patience=3)
+    #callback= WandbCallback(save_model=True, monitor='val_loss', mode='min')
 
-from keras.utils.vis_utils import plot_model
+    model.fit(X_train_ps, y_c,  validation_data=(X_val_ps, yv_c),
+            epochs=config_d['epochs'],
+            batch_size=config_d['batch_size'], callbacks=[es])
+           #callbacks=[WandbCallback(save_model=True, monitor="loss"), es])
+           
 
-plot_model(model, to_file='shared_input_layer.png')
-model.compile(
-    loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy' , precision, recall, mcc, auc, f1])
+    file = open(method + "_10repeated_" + str(dataset_name) + "_final3.csv" , "a")
+    acc, pre, rec, mcc, auc, f1 = test_deep(model, X_val_ps, yv, num_class)
+    train_acc.append(acc)
+    file.write(str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1))
 
-model.fit(X_train_ps, y_c,  validation_data=(X_val_ps, yv_c),
-        epochs=config.epochs,
-        batch_size=config.batch_size,
-        initial_epoch=wandb.run.step,  # for resumed runs
-        callbacks=[WandbCallback(save_model=True, monitor="loss"), es])
-
+    acc, pre, rec, mcc, auc, f1 = test_deep(model, X_test_ps, yt, num_class)
+    test_acc.append(acc)
+    file.write("," + str(item) + "," +str(acc) + "," + str(pre) + "," + str(rec) + "," + str(mcc) + "," + str(auc) + "," + str(f1) + "\n")
+    
+    print("train_acc: ", np.mean(train_acc), " test_acc: ", np.mean(test_acc))
+    model.save( method +'_' + str(dataset_name) + '_best_model_' +str(item)+'.h5' )
+    from keras import backend as K
+    K.clear_session()
+    del model
+file.close()
