@@ -24,7 +24,7 @@ from gensim.models import Word2Vec
 from keras.callbacks import EarlyStopping
 from keras.layers import (Conv1D, Dense, Dropout, Embedding, Flatten, Input,
                           MaxPooling1D)
-from keras.models import Sequential, load_model
+from keras.models import Model, Sequential, load_model
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
 from pythainlp import word_vector
@@ -69,7 +69,7 @@ elif dataset_name == 'to':
 else: 
     print("No such dataset.")
     sys.exit(-1)
-seed = 0
+seed = 3
 #########################################################################
 
 
@@ -110,7 +110,7 @@ precision = tf.keras.metrics.Precision()
 auc = tf.keras.metrics.AUC()
 mcc = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=np.unique(y).shape[0])
 f1 = tfa.metrics.F1Score(num_classes=np.unique(y).shape[0], average='macro')
-adam = tf.keras.optimizers.Adam(learning_rate=config.learn_rate)
+adam = tf.keras.optimizers.Adam(learning_rate=0.01)
 
 tokenizer  = Tokenizer(num_words = MAX_SEQUENCE_LENGTH)
 tokenizer.fit_on_texts(X_train)
@@ -127,19 +127,47 @@ print(X_train_ps.shape, X_val_ps.shape, X_test_ps.shape)
 y_c = to_categorical(y)
 yv_c = to_categorical(yv)
 
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=config.patience)
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=8)
 
 # construct basic CNN arch based on the paper.
-model = Sequential()
-model.add(Input(shape=(MAX_SEQUENCE_LENGTH,)))
-model.add(w2v_keras_layer)
-model.add(Conv1D(config.layer_1_size, kernel_size=3, activation='relu'))
-model.add(MaxPooling1D())
-model.add(Dropout(config.dropout))
-model.add(Flatten()) 
-model.add(Dense(config.hidden_layer_size, activation='relu'))
-model.add(Dense(num_class, activation='softmax'))
+# model = Sequential()
+# model.add(Input(shape=(MAX_SEQUENCE_LENGTH,)))
+# model.add(w2v_keras_layer)
+# model.add(Conv1D(config.layer_1_size, kernel_size=3, padding='same', activation='relu'))
+# model.add(MaxPooling1D())
+# model.add(Dropout(config.dropout))
+# model.add(Flatten()) 
+# model.add(Dense(config.hidden_layer_size, activation='relu'))
+# model.add(Dense(num_class, activation='softmax'))
 
+# construct parallel pooling layers
+# ONE LAYER
+from keras.layers import (AveragePooling1D, Conv1D, Dropout, Flatten, Input,
+                          MaxPooling1D, SpatialDropout1D, concatenate, merge)
+
+num_filters=5
+filter_sizes = [3,5]
+
+model = Model()
+emb = Input(shape=(MAX_SEQUENCE_LENGTH,))
+x = (w2v_keras_layer)(emb)
+
+pooled_outputs = []
+for i in range(len(filter_sizes)):
+    conv = Conv1D(num_filters, kernel_size=filter_sizes[i], padding='valid', activation='relu')(x)
+    conv = MaxPooling1D(pool_size=MAX_SEQUENCE_LENGTH-filter_sizes[i]+1, strides=1, padding = 'valid')(conv)         
+    pooled_outputs.append(conv)
+merge = concatenate(pooled_outputs)
+x = Flatten()(merge)
+x = Dropout(0.5)(x)
+
+out = Dense(num_class, activation= 'softmax')(x)
+model = Model(inputs=emb,outputs=out)
+print(model.summary())
+
+from keras.utils.vis_utils import plot_model
+
+plot_model(model, to_file='shared_input_layer.png')
 model.compile(
     loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy' , precision, recall, mcc, auc, f1])
 

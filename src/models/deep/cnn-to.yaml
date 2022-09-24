@@ -1,0 +1,24 @@
+program: CNN_wandb.py
+project: cnn-to-seed3
+name: cnn-to-seed3
+entity: rapry60
+
+method: bayes
+metric:
+  goal: minimize
+  name: val_loss
+parameters:
+  dropout:
+    values: [0.5]
+  hidden_layer_size:
+    values: [64]
+  layer_1_size:
+    values: [64]
+  learn_rate:
+    values: [1e-4] 
+  batch_size:
+    values: [128]
+  epochs:
+    value: 25
+  patience:
+    value: 8
